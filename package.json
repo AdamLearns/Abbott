@@ -5,8 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"start": "tsx src/main.ts",
-		"lint": "eslint .",
-		"dev": "tsx watch tsc/main.ts"
+		"lint": "eslint --cache --max-warnings=0 .",
+		"dev": "tsx watch tsc/main.ts",
+		"prepare": "husky install"
 	},
 	"dependencies": {
 		"@tsconfig/node18": "^18.2.2",
@@ -21,6 +22,8 @@
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^6.13.2",
 		"@typescript-eslint/parser": "^6.13.2",
-		"eslint": "^8.55.0"
+		"eslint": "^8.55.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^15.2.0"
 	}
 }
