@@ -14,8 +14,7 @@ export async function init() {
     throw new Error('Missing environment variables. Make sure to copy .env.example to .env and fill out the values.');
   }
 
-  let authProvider: RefreshingAuthProvider;
-  authProvider = new RefreshingAuthProvider({
+  const authProvider = new RefreshingAuthProvider({
     clientId,
     clientSecret
   });
