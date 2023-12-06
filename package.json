@@ -1,0 +1,18 @@
+{
+	"name": "abbott",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"start": "tsx src/main.ts",
+		"dev": "tsx watch tsc/main.ts"
+	},
+	"dependencies": {
+		"@twurple/auth": "^7.0.6",
+		"@twurple/chat": "^7.0.6",
+		"@twurple/easy-bot": "^7.0.6",
+		"dotenv-flow": "^4.0.1",
+		"tsx": "^4.6.2",
+		"typescript": "^5.3.2"
+	}
+}
