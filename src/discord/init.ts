@@ -13,7 +13,7 @@ import { commandsAndResponses } from "../commands"
 
 export async function init() {
   console.info("Starting the Discord bot")
-  const clientId = "b7knlmqszef0wdilae5vu3qr8qpw0q"
+  const clientId = process.env.CLIENT_ID
   const clientSecret = process.env.CLIENT_SECRET
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -21,7 +21,7 @@ export async function init() {
     await fs.readFile("./tokens.102460608.json", "utf8"),
   )
 
-  if (clientSecret === undefined) {
+  if (clientSecret === undefined || clientId === undefined) {
     throw new Error(
       "Missing environment variables. Make sure to copy .env.example to .env and fill out the values.",
     )
