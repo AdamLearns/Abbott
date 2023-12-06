@@ -1,9 +1,10 @@
 import dotenvFlow from "dotenv-flow"
+
 import { init } from "./discord/init"
 dotenvFlow.config()
 
-function main() {
-  init()
+async function main() {
+  await init()
 }
 
-main()
+await main()
