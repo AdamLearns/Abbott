@@ -1,4 +1,4 @@
-import { RefreshingAuthProvider } from '@twurple/auth';
+import { AccessToken, RefreshingAuthProvider } from '@twurple/auth';
 import { Bot, BotCommand, createBotCommand } from '@twurple/easy-bot';
 import { promises as fs } from 'node:fs';
 import { commandsAndResponses } from '../commands';
@@ -8,7 +8,7 @@ export async function init() {
   const clientId = "b7knlmqszef0wdilae5vu3qr8qpw0q";
   const clientSecret = process.env.CLIENT_SECRET;
 
-  const tokenData = JSON.parse(await fs.readFile('./tokens.102460608.json', 'utf8'));
+  const tokenData: AccessToken = JSON.parse(await fs.readFile('./tokens.102460608.json', 'utf8'));
 
   if (clientSecret === undefined) {
     throw new Error('Missing environment variables. Make sure to copy .env.example to .env and fill out the values.');
