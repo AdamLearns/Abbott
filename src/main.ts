@@ -1,9 +1,9 @@
-import dotenvFlow from 'dotenv-flow';
-import { init } from './discord/init';
-dotenvFlow.config();
+import dotenvFlow from "dotenv-flow"
+import { init } from "./discord/init"
+dotenvFlow.config()
 
 function main() {
-	init()
+  init()
 }
 
 main()
