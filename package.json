@@ -8,9 +8,11 @@
 		"dev": "tsx watch tsc/main.ts"
 	},
 	"dependencies": {
+		"@tsconfig/node18": "^18.2.2",
 		"@twurple/auth": "^7.0.6",
 		"@twurple/chat": "^7.0.6",
 		"@twurple/easy-bot": "^7.0.6",
+		"@types/node": "^18",
 		"dotenv-flow": "^4.0.1",
 		"tsx": "^4.6.2",
 		"typescript": "^5.3.2"

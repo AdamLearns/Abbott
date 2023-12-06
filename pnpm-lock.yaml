@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@tsconfig/node18':
+    specifier: ^18.2.2
+    version: 18.2.2
   '@twurple/auth':
     specifier: ^7.0.6
     version: 7.0.6
@@ -14,6 +17,9 @@ dependencies:
   '@twurple/easy-bot':
     specifier: ^7.0.6
     version: 7.0.6
+  '@types/node':
+    specifier: ^18
+    version: 18.19.2
   dotenv-flow:
     specifier: ^4.0.1
     version: 4.0.1
@@ -321,6 +327,10 @@ packages:
     dev: false
     optional: true
 
+  /@tsconfig/node18@18.2.2:
+    resolution: {integrity: sha512-d6McJeGsuoRlwWZmVIeE8CUA27lu6jLjvv1JzqmpsytOYYbVi1tHZEnwCNVOXnj4pyLvneZlFlpXUK+X9wBWyw==}
+    dev: false
+
   /@twurple/api-call@7.0.6:
     resolution: {integrity: sha512-3E9IAJRyRLji9bjmZzicWv/wP9aGVdIDkzaX4WaK3sTRC9EkZ3nWIxSj0WmJ977O2lDsUkpgxzwmskuDqdaTrQ==}
     dependencies:
@@ -412,8 +422,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@types/node@20.10.3:
-    resolution: {integrity: sha512-XJavIpZqiXID5Yxnxv3RUDKTN5b81ddNC3ecsA0SoFXz/QU8OGBwZGMomiq0zw+uuqbL/krztv/DINAQ/EV4gg==}
+  /@types/node@18.19.2:
+    resolution: {integrity: sha512-6wzfBdbWpe8QykUkXBjtmO3zITA0A3FIjoy+in0Y2K4KrCiRhNYJIdwAPDffZ3G6GnaKaSLSEa9ZuORLfEoiwg==}
     dependencies:
       undici-types: 5.26.5
     dev: false
@@ -421,7 +431,7 @@ packages:
   /@types/ws@8.5.10:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
-      '@types/node': 20.10.3
+      '@types/node': 18.19.2
     dev: false
 
   /array-buffer-byte-length@1.0.0:
