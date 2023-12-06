@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs"
+import fs from "node:fs"
 
 import { type AccessToken, RefreshingAuthProvider } from "@twurple/auth"
 import {
@@ -11,15 +11,9 @@ import {
 
 import { commandsAndResponses } from "../commands"
 
-export async function init() {
-  console.info("Starting the Discord bot")
+async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   const clientId = process.env.CLIENT_ID
   const clientSecret = process.env.CLIENT_SECRET
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const tokenData: AccessToken = JSON.parse(
-    await fs.readFile("./tokens.102460608.json", "utf8"),
-  )
 
   if (clientSecret === undefined || clientId === undefined) {
     throw new Error(
@@ -32,13 +26,10 @@ export async function init() {
     clientSecret,
   })
 
-  authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
-    await fs.writeFile(
-      `./tokens.${userId}.json`,
-      JSON.stringify(newTokenData, null, 4),
-      { encoding: "utf8" },
-    )
-  })
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const tokenData: AccessToken = JSON.parse(
+    fs.readFileSync("./tokens.102460608.json", "utf8"),
+  )
 
   try {
     await authProvider.addUserForToken(tokenData, ["chat"])
@@ -49,6 +40,18 @@ export async function init() {
     )
   }
 
+  authProvider.onRefresh((userId: string, newTokenData: AccessToken) => {
+    fs.writeFileSync(
+      `./tokens.${userId}.json`,
+      JSON.stringify(newTokenData, null, 4),
+      { encoding: "utf8" },
+    )
+  })
+
+  return authProvider
+}
+
+function createBot(authProvider: RefreshingAuthProvider): Bot {
   const commands: BotCommand[] = []
 
   for (const [command, response] of Object.entries(commandsAndResponses)) {
@@ -62,20 +65,7 @@ export async function init() {
   const bot = new Bot({
     authProvider,
     channels: ["AdamLearnsLive"],
-    commands: [
-      createBotCommand("dice", async (_params, { reply }) => {
-        const diceRoll = Math.floor(Math.random() * 6) + 1
-        await reply(`You rolled a ${diceRoll}`)
-      }),
-      createBotCommand("slap", async (params, { userName, say }) => {
-        await say(
-          `${userName} slaps ${params.join(
-            " ",
-          )} around a bit with a large trout`,
-        )
-      }),
-      ...commands,
-    ],
+    commands,
   })
 
   bot.onSub(async ({ broadcasterName, userName }: SubEvent) => {
@@ -100,4 +90,15 @@ export async function init() {
       )
     },
   )
+
+  return bot
+}
+
+export async function init() {
+  console.info("Starting the Twitch bot")
+
+  const authProvider = await createAuthProvider()
+  createBot(authProvider)
+
+  console.info("Successfully created the Twitch bot")
 }
