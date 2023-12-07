@@ -44,12 +44,17 @@ export class Bot {
     const command = new BotCommand(
       name,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      (_params: string[], _context: BotCommandContext) => {
+      async (_params: string[], context: BotCommandContext) => {
         console.info(`You typed ${name}. The response is: ${response}`)
+        await context.say(response)
       },
     )
 
     this.commands.set(name, command)
+  }
+
+  async say(channel: string, message: string) {
+    await this.chat.say(channel, message)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
