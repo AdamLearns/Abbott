@@ -6,7 +6,7 @@ export const commandsAndResponses = {
   journal:
     "Adam's stream journal is publicly available here: https://docs.google.com/spreadsheets/d/1Y8jvKBKp8dqdRACwqUqfdJQgRA3H795jQEEpDyq1qLU/edit#gid=0 (it just tracks the high-level tasks that I worked on)",
   today:
-    "Wednesday - Adam is continuing to work on Abbott (!bot). Commands of interest: !google, !focusmode",
+    "Thursday - Adam is continuing to work on Abbott (!bot). Commands of interest: !google",
   colemak:
     "Adam switched from QWERTY to Colemak-DH on 6/2/23. You can find out more about how that process went here: https://www.youtube.com/watch?v=woUSTbo2gMc . You can see his Colemak stats here: https://docs.google.com/spreadsheets/d/1NWMD0dgN4Z7g4tRJJSxYmnFZY_PtNodWRk5tEUobuKs/edit#gid=0",
   focusmode:
@@ -363,7 +363,7 @@ export const commandsAndResponses = {
   oldfaq: "https://github.com/Adam13531/BotLand/wiki/FAQ",
   site: "The official site for Adam Learns is https://adamlearns.com/",
   commands:
-    "Most commands are very situation-specific, and chat will be sure to use them when the time comes. Kappa You may want to try !today out though.",
+    "Most commands are very situation-specific, and chat will be sure to use them when the time comes. Kappa You may want to try !today out though. For reference, the full list is here: https://github.com/AdamLearns/Abbott/blob/main/src/commands.ts",
   facebook:
     "https://facebook.com/AdamLearns (note that I never really used Facebook and don't plan on it)",
   reddit: "https://reddit.com/r/AdamLearns/",
@@ -450,6 +450,14 @@ export const commandsAndResponses = {
     "Adam highly suggests this essay on negotiating salaries: https://www.kalzumeus.com/2012/01/23/salary-negotiation/ (it's very long)",
   mario: "https://youtu.be/yqKcCB8snzc",
   something: "Well this is something I guess MrDestructoid",
+  copilot:
+    "Adam uses GitHub Copilot (https://github.com/features/copilot), which is an AI to help with coding. He also sometimes speaks into VSCode using this extension: https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-speech .",
+  espanso:
+    'Adam uses Espanso for text expansions (e.g. typing "\'flower" and having it change to "(◕‿◕✿)"). His configuration is located here: https://github.com/Adam13531/AdamsApple/tree/main/espanso/match',
+  prime:
+    "Subscribe for free through Amazon Prime and help support Adam's life as a sell-out!",
+  stack:
+    "Abbott is written in TypeScript, runs on Node.js, and mainly uses a library called Twurple for the Twitch API.",
   proxmox:
     "Find out more about Proxmox here: https://www.proxmox.com/en/ It's what Adam plans on using for his bot.",
   rustlings:
