@@ -62,11 +62,17 @@ export class Bot {
       throw new Error("Alias name is already taken by a command")
     }
 
-    if (this.aliases.has(alias)) {
-      if (this.aliases.get(alias) === targetCommandName) {
-        return
-      }
-      throw new Error("Alias name is already taken by another alias")
+    // If you try specifying an alias to another alias, we'll follow it
+    // for you here and point it to the command instead. For example, if
+    // "lang" is an alias for "language" and you try adding "l" and an
+    // alias for "lang", it will instead point directly to the
+    // "language" command.
+    if (this.aliases.has(targetCommandName)) {
+      targetCommandName = this.aliases.get(targetCommandName) as string
+    }
+
+    if (!this.commands.has(targetCommandName)) {
+      throw new Error("There is no command by that name")
     }
 
     this.aliases.set(alias, targetCommandName)
