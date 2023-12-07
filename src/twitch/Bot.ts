@@ -9,6 +9,9 @@ import type { CommandData } from "./CommandData"
 
 const prefix = "!"
 
+// (in milliseconds)
+const GLOBAL_COMMAND_COOLDOWN = 4000
+
 export class Bot {
   private readonly authProvider: RefreshingAuthProvider
   private readonly api: ApiClient
@@ -102,8 +105,19 @@ export class Bot {
       return
     }
 
+    if (!this.canExecuteCommand(command)) {
+      return
+    }
+
     const context = new BotCommandContext(this, msg)
+    command.lastExecutionTimeOnTwitch = Date.now()
     await command.execute(commandData.params, context)
+  }
+
+  private canExecuteCommand(command: BotCommand): boolean {
+    const lastExecutionTimeOnTwitch = command.lastExecutionTimeOnTwitch
+    const now = Date.now()
+    return now - lastExecutionTimeOnTwitch > GLOBAL_COMMAND_COOLDOWN
   }
 
   private onMessage = async (
