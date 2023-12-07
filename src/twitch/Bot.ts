@@ -89,6 +89,16 @@ export class Bot {
     }
   }
 
+  private getCommandFromName(commandName: string): BotCommand | undefined {
+    // Check to see if the command is actually an alias
+    const commandNameFromAlias = this.aliases.get(commandName)
+    if (commandNameFromAlias !== undefined) {
+      commandName = commandNameFromAlias
+    }
+
+    return this.commands.get(commandName)
+  }
+
   private processPotentialCommand = async (
     channel: string,
     user: string,
@@ -101,13 +111,7 @@ export class Bot {
       return
     }
 
-    let commandName = commandData.name
-    const commandNameFromAlias = this.aliases.get(commandData.name)
-    if (commandNameFromAlias !== undefined) {
-      commandName = commandNameFromAlias
-    }
-
-    const command = this.commands.get(commandName)
+    const command = this.getCommandFromName(commandData.name)
     if (command === undefined) {
       return
     }
