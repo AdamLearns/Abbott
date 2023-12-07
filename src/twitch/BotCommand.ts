@@ -6,16 +6,10 @@ export type BotCommandHandler = (
 ) => void | Promise<void>
 
 export class BotCommand {
-  #name: string
   #handler: BotCommandHandler
 
-  constructor(name: string, handler: BotCommandHandler) {
-    this.#name = name
+  constructor(handler: BotCommandHandler) {
     this.#handler = handler
-  }
-
-  get name(): string {
-    return this.#name
   }
 
   execute(params: string[], context: BotCommandContext): void | Promise<void> {
