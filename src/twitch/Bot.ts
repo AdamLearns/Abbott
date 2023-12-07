@@ -48,9 +48,13 @@ export class Bot {
   addTextCommand(name: string, response: string) {
     const command = new BotCommand(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async (_params: string[], context: BotCommandContext) => {
-        console.info(`You typed ${name}. The response is: ${response}`)
-        await context.say(response)
+      async (params: string[], context: BotCommandContext) => {
+        let nameTag = ""
+        if (params[0]?.startsWith("@")) {
+          nameTag = `${params[0]} `
+        }
+
+        await context.say(nameTag + response)
       },
     )
 
