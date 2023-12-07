@@ -1,9 +1,10 @@
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
-import { ChatClient, type ChatMessage, LogLevel } from "@twurple/chat"
+import { ChatClient, LogLevel } from "@twurple/chat"
 
 import { BotCommand } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
+import type { ChatMessage } from "./ChatMessage"
 import type { CommandData } from "./CommandData"
 
 const prefix = "!"
@@ -15,6 +16,9 @@ export class Bot {
 
   // Keys: the canonical command name (so no aliases go here)
   private readonly commands = new Map<string, BotCommand>()
+
+  // Keys: alias name, values: canonical command name
+  private readonly aliases = new Map<string, string>()
 
   constructor({ authProvider }: { authProvider: RefreshingAuthProvider }) {
     this.authProvider = authProvider
@@ -53,6 +57,21 @@ export class Bot {
     this.commands.set(name, command)
   }
 
+  addAlias(alias: string, targetCommandName: string) {
+    if (this.commands.has(alias)) {
+      throw new Error("Alias name is already taken by a command")
+    }
+
+    if (this.aliases.has(alias)) {
+      if (this.aliases.get(alias) === targetCommandName) {
+        return
+      }
+      throw new Error("Alias name is already taken by another alias")
+    }
+
+    this.aliases.set(alias, targetCommandName)
+  }
+
   async say(channel: string, message: string) {
     await this.chat.say(channel, message)
   }
@@ -82,7 +101,13 @@ export class Bot {
       return
     }
 
-    const command = this.commands.get(commandData.name)
+    let commandName = commandData.name
+    const commandNameFromAlias = this.aliases.get(commandData.name)
+    if (commandNameFromAlias !== undefined) {
+      commandName = commandNameFromAlias
+    }
+
+    const command = this.commands.get(commandName)
     if (command === undefined) {
       return
     }
