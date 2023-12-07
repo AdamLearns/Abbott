@@ -1,15 +1,10 @@
 import fs from "node:fs"
 
 import { type AccessToken, RefreshingAuthProvider } from "@twurple/auth"
-import {
-  Bot,
-  type BotCommand,
-  createBotCommand,
-  type SubEvent,
-  type SubGiftEvent,
-} from "@twurple/easy-bot"
 
 import { commandsAndResponses } from "../commands"
+
+import { Bot } from "./Bot"
 
 async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   const clientId = process.env.CLIENT_ID
@@ -52,46 +47,19 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
 }
 
 function createBot(authProvider: RefreshingAuthProvider): Bot {
-  const commands: BotCommand[] = []
+  const bot = new Bot({ authProvider })
 
-  for (const [command, response] of Object.entries(commandsAndResponses)) {
-    commands.push(
-      createBotCommand(command, async (_params, { say }) => {
-        await say(response)
-      }),
-    )
-  }
-
-  const bot = new Bot({
-    authProvider,
-    channels: ["AdamLearnsLive"],
-    commands,
-  })
-
-  bot.onSub(async ({ broadcasterName, userName }: SubEvent) => {
-    await bot.say(
-      broadcasterName,
-      `Thanks to @${userName} for subscribing to the channel!`,
-    )
-  })
-
-  bot.onResub(async ({ broadcasterName, userName, months }: SubEvent) => {
-    await bot.say(
-      broadcasterName,
-      `Thanks to @${userName} for subscribing to the channel for a total of ${months} months!`,
-    )
-  })
-
-  bot.onSubGift(
-    async ({ broadcasterName, gifterName, userName }: SubGiftEvent) => {
-      await bot.say(
-        broadcasterName,
-        `Thanks to @${gifterName} for gifting a subscription to @${userName}!`,
-      )
-    },
-  )
+  addTestCommands(bot)
 
   return bot
+}
+
+function addTestCommands(bot: Bot) {
+  for (const [command, response] of Object.entries(commandsAndResponses)) {
+    bot.addTextCommand(command, response)
+  }
+
+  bot.addTextCommand("test", "Adam is testing something")
 }
 
 export async function init() {
