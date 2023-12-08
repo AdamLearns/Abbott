@@ -52,6 +52,37 @@ export class Bot {
    */
   addBuiltinCommands() {
     this.addAddComCommand()
+    this.addAliasComCommand()
+  }
+
+  addAliasComCommand() {
+    this.addCommand(
+      "aliascom",
+      async (params: string[], context: BotCommandContext) => {
+        if (params.length < 2) {
+          await context.reply(
+            `Usage: ${prefix}aliascom COMMAND_ALIAS COMMAND_TARGET (e.g. "${prefix}aliascom lang language", "lang" will point to the "language" command)`,
+          )
+          return
+        }
+
+        const alias = params[0] as string
+        const targetCommandName = params[1] as string
+        try {
+          this.addAlias(alias, targetCommandName)
+          await context.reply(
+            `Alias '${alias}' → '${targetCommandName}' successfully added!`,
+          )
+        } catch (error) {
+          let reason = "unknown error"
+          if (error instanceof Error) {
+            reason = error.message
+          }
+          return context.reply(`Couldn't add alias: ${reason}`)
+        }
+      },
+      true,
+    )
   }
 
   addAddComCommand() {
