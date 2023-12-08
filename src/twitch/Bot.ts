@@ -131,6 +131,10 @@ export class Bot {
     }
   }
 
+  private isPrivilegedUser(user: ChatUser): boolean {
+    return user.isMod || user.isBroadcaster
+  }
+
   private processPotentialCommand = async (
     channel: string,
     user: string,
@@ -148,7 +152,8 @@ export class Bot {
       return
     }
 
-    if (!this.isCommandReady(command)) {
+    // Allow privileged users to bypass the cooldown
+    if (!this.isCommandReady(command) && !this.isPrivilegedUser(msg.userInfo)) {
       return
     }
 
@@ -164,7 +169,7 @@ export class Bot {
 
   private canUserExecuteCommand(user: ChatUser, command: BotCommand): boolean {
     if (command.isPrivileged) {
-      return user.isMod || user.isBroadcaster
+      return this.isPrivilegedUser(user)
     }
 
     return true
