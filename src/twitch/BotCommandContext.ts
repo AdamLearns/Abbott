@@ -25,4 +25,7 @@ export class BotCommandContext {
   say = async (text: string): Promise<void> => {
     await this.#bot.say(this.broadcasterName, text)
   }
+  reply = async (text: string) => {
+    await this.#bot.reply(this.broadcasterName, text, this.msg)
+  }
 }

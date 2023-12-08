@@ -59,14 +59,14 @@ export class Bot {
       "addcom",
       async (params: string[], context: BotCommandContext) => {
         if (params.length < 2) {
-          await context.say(`Usage: ${prefix}addcom COMMAND_NAME RESPONSE`)
+          await context.reply(`Usage: ${prefix}addcom COMMAND_NAME RESPONSE`)
           return
         }
 
         const commandName = params[0] as string
 
         if (this.commands.has(commandName)) {
-          return context.say(`Command '${commandName}' already exists!`)
+          return context.reply(`Command '${commandName}' already exists!`)
         }
 
         // Combine all the params after the command name into one string
@@ -74,7 +74,7 @@ export class Bot {
 
         context.bot.addTextCommand(commandName, response)
 
-        await context.say(`Command '${commandName}' successfully added!`)
+        await context.reply(`Command '${commandName}' successfully added!`)
       },
       true,
     )
@@ -116,6 +116,18 @@ export class Bot {
 
   async say(channel: string, message: string) {
     await this.chat.say(channel, message)
+  }
+
+  /**
+   * @param replyToMessage This can be a message ID (a UUID) or the
+   * message object itself.
+   */
+  async reply(
+    channel: string,
+    text: string,
+    replyToMessage: string | ChatMessage,
+  ): Promise<void> {
+    await this.chat.say(channel, text, { replyTo: replyToMessage })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -160,7 +172,7 @@ export class Bot {
     const context = new BotCommandContext(this, msg)
 
     if (!this.canUserExecuteCommand(msg.userInfo, command)) {
-      return context.say("You don't have permission to do that!")
+      return this.reply(channel, "You don't have permission to do that!", msg)
     }
 
     command.lastExecutionTimeOnTwitch = Date.now()
