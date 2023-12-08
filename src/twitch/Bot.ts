@@ -2,7 +2,7 @@ import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, LogLevel } from "@twurple/chat"
 
-import { BotCommand } from "./BotCommand"
+import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
 import type { ChatMessage } from "./ChatMessage"
 import type { CommandData } from "./CommandData"
@@ -23,7 +23,8 @@ export class Bot {
 
   constructor({ authProvider }: { authProvider: RefreshingAuthProvider }) {
     this.authProvider = authProvider
-    console.info("Created the bot, but it's not doing anything yet")
+
+    this.addBuiltinCommands()
 
     const logLevel = LogLevel.ERROR
     this.api = new ApiClient({
@@ -45,24 +46,61 @@ export class Bot {
     this.chat.connect()
   }
 
-  addTextCommand(name: string, response: string) {
-    const command = new BotCommand(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  /**
+   * These should be added before we load any user-defined commands,
+   * that way the user-defined ones can't squat on the names.
+   */
+  addBuiltinCommands() {
+    this.addAddComCommand()
+  }
+
+  addAddComCommand() {
+    this.addCommand(
+      "addcom",
       async (params: string[], context: BotCommandContext) => {
-        let nameTag = ""
-        if (params[0]?.startsWith("@")) {
-          nameTag = `${params[0]} `
+        if (params.length < 2) {
+          await context.say("Usage: !addcom COMMAND_NAME RESPONSE")
+          return
         }
 
-        await context.say(nameTag + response)
+        const commandName = params[0] as string
+
+        if (this.commands.has(commandName)) {
+          return context.say(`Command '${commandName}' already exists!`)
+        }
+
+        // Combine all the params after the command name into one string
+        const response = params.slice(1).join(" ")
+
+        context.bot.addTextCommand(commandName, response)
+
+        await context.say(`Command '${commandName}' successfully added!`)
       },
     )
+  }
+
+  addTextCommand(name: string, response: string) {
+    const handler = async (params: string[], context: BotCommandContext) => {
+      let nameTag = ""
+      if (params[0]?.startsWith("@")) {
+        nameTag = `${params[0]} `
+      }
+
+      await context.say(nameTag + response)
+    }
+    this.addCommand(name, handler)
+  }
+
+  addCommand(name: string, handler: BotCommandHandler) {
+    if (this.commands.has(name)) {
+      throw new Error("Command is already defined")
+    }
+
+    const command = new BotCommand(handler)
 
     this.commands.set(name, command)
   }
 
-  // alias: "lang"
-  // targetCommandName: "language"
   addAlias(alias: string, targetCommandName: string) {
     if (!this.commands.has(targetCommandName)) {
       throw new Error("There is no command by that name")
