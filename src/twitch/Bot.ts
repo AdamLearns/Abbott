@@ -59,7 +59,7 @@ export class Bot {
       "addcom",
       async (params: string[], context: BotCommandContext) => {
         if (params.length < 2) {
-          await context.say("Usage: !addcom COMMAND_NAME RESPONSE")
+          await context.say(`Usage: ${prefix}addcom COMMAND_NAME RESPONSE`)
           return
         }
 
