@@ -53,6 +53,42 @@ export class Bot {
   addBuiltinCommands() {
     this.addAddComCommand()
     this.addAliasComCommand()
+    this.addUnaliasComCommand()
+  }
+
+  addUnaliasComCommand() {
+    this.addCommand(
+      "unaliascom",
+      async (params: string[], context: BotCommandContext) => {
+        if (params.length === 0) {
+          await context.reply(
+            `Usage: ${prefix}unaliascom COMMAND_ALIAS. Note that this can only remove a NAME of a command, not the command itself.`,
+          )
+          return
+        }
+
+        const alias = params[0] as string
+        const allCommandNames = this.getAllNamesOfCommand(alias)
+        if (allCommandNames.length === 0) {
+          await context.reply(`There is no command by the name '${alias}'`)
+          return
+        }
+        if (allCommandNames.length === 1) {
+          await context.reply(
+            `You cannot use this command to delete a command, only remove a name, and ${alias} is the only remaining name. Try "${prefix}delcom ${alias}".`,
+          )
+          return
+        }
+        this.commands.delete(alias)
+        allCommandNames.splice(allCommandNames.indexOf(alias), 1)
+        await context.reply(
+          `Alias '${alias}' removed. Remaining names for the command: ${allCommandNames.join(
+            ", ",
+          )}`,
+        )
+      },
+      true,
+    )
   }
 
   addAliasComCommand() {
@@ -143,6 +179,18 @@ export class Bot {
     }
 
     this.commands.set(alias, this.commands.get(targetCommandName) as BotCommand)
+  }
+
+  getAllNamesOfCommand(commandName: string): string[] {
+    const names = []
+
+    for (const [name, command] of this.commands.entries()) {
+      if (command === this.commands.get(commandName)) {
+        names.push(name)
+      }
+    }
+
+    return names
   }
 
   async say(channel: string, message: string) {
