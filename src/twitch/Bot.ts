@@ -1,6 +1,6 @@
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
-import { ChatClient, LogLevel } from "@twurple/chat"
+import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
@@ -76,6 +76,7 @@ export class Bot {
 
         await context.say(`Command '${commandName}' successfully added!`)
       },
+      true,
     )
   }
 
@@ -91,12 +92,12 @@ export class Bot {
     this.addCommand(name, handler)
   }
 
-  addCommand(name: string, handler: BotCommandHandler) {
+  addCommand(name: string, handler: BotCommandHandler, isPrivileged = false) {
     if (this.commands.has(name)) {
       throw new Error("Command is already defined")
     }
 
-    const command = new BotCommand(handler)
+    const command = new BotCommand({ handler, isPrivileged })
 
     this.commands.set(name, command)
   }
@@ -147,16 +148,32 @@ export class Bot {
       return
     }
 
-    if (!this.canExecuteCommand(command)) {
+    if (!this.isCommandReady(command)) {
       return
     }
 
     const context = new BotCommandContext(this, msg)
+
+    if (!this.canUserExecuteCommand(msg.userInfo, command)) {
+      return context.say("You don't have permission to do that!")
+    }
+
     command.lastExecutionTimeOnTwitch = Date.now()
     await command.execute(commandData.params, context)
   }
 
-  private canExecuteCommand(command: BotCommand): boolean {
+  private canUserExecuteCommand(user: ChatUser, command: BotCommand): boolean {
+    if (command.isPrivileged) {
+      return user.isMod || user.isBroadcaster
+    }
+
+    return true
+  }
+
+  /**
+   * Checks to see if the command is on cooldown.
+   */
+  private isCommandReady(command: BotCommand): boolean {
     const lastExecutionTimeOnTwitch = command.lastExecutionTimeOnTwitch
     const now = Date.now()
     return now - lastExecutionTimeOnTwitch > GLOBAL_COMMAND_COOLDOWN

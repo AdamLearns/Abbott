@@ -8,9 +8,17 @@ export type BotCommandHandler = (
 export class BotCommand {
   #lastExecutionTimeOnTwitch = 0
   #handler: BotCommandHandler
+  #isPrivileged: boolean
 
-  constructor(handler: BotCommandHandler) {
+  constructor({
+    handler,
+    isPrivileged = false,
+  }: {
+    handler: BotCommandHandler
+    isPrivileged: boolean
+  }) {
     this.#handler = handler
+    this.#isPrivileged = isPrivileged
   }
 
   get lastExecutionTimeOnTwitch(): number {
@@ -19,6 +27,10 @@ export class BotCommand {
 
   set lastExecutionTimeOnTwitch(value: number) {
     this.#lastExecutionTimeOnTwitch = value
+  }
+
+  get isPrivileged(): boolean {
+    return this.#isPrivileged
   }
 
   execute(params: string[], context: BotCommandContext): void | Promise<void> {
