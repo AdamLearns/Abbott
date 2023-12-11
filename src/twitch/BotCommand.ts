@@ -11,18 +11,26 @@ export class BotCommand {
   #isPrivileged: boolean
   #canBeDeleted: boolean
 
+  // If this is true, then the only meaningful thing that the command
+  // does is output text. This is as opposed to a command that may
+  // download a video, change lights, etc.
+  #isTextCommand: boolean
+
   constructor({
     handler,
     isPrivileged = false,
     canBeDeleted = true,
+    isTextCommand = true,
   }: {
     handler: BotCommandHandler
     isPrivileged: boolean
     canBeDeleted: boolean
+    isTextCommand: boolean
   }) {
     this.#handler = handler
     this.#isPrivileged = isPrivileged
     this.#canBeDeleted = canBeDeleted
+    this.#isTextCommand = isTextCommand
   }
 
   set handler(value: BotCommandHandler) {
@@ -43,6 +51,10 @@ export class BotCommand {
 
   get canBeDeleted(): boolean {
     return this.#canBeDeleted
+  }
+
+  get isTextCommand(): boolean {
+    return this.#isTextCommand
   }
 
   execute(params: string[], context: BotCommandContext): void | Promise<void> {

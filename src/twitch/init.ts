@@ -59,7 +59,13 @@ function addTestCommands(bot: Bot) {
     bot.addTextCommand(command, response)
   }
 
-  bot.addTextCommand("test", "Adam is testing something")
+  bot.addCommand({
+    name: "test",
+    handler: () => {
+      console.log("This is a fake command.")
+    },
+    isTextCommand: false,
+  })
 }
 
 export async function init() {

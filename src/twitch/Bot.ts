@@ -120,11 +120,17 @@ export class Bot {
       return context.reply(`Command "${commandName}" doesn't exist!`)
     }
 
+    const command = this.commands.get(commandName) as BotCommand
+    if (!command.isTextCommand) {
+      return context.reply(
+        `Command "${commandName}" cannot be edited because it is not a text command.`,
+      )
+    }
+
     const response = params.slice(1).join(" ")
 
     const handler = this.makeTextCommandHandler(response)
 
-    const command = this.commands.get(commandName) as BotCommand
     command.handler = handler
 
     await context.reply(`Command "${commandName}" successfully edited!`)
@@ -260,17 +266,24 @@ export class Bot {
     handler,
     isPrivileged = false,
     canBeDeleted = true,
+    isTextCommand = true,
   }: {
     name: string
     handler: BotCommandHandler
     isPrivileged?: boolean
     canBeDeleted?: boolean
+    isTextCommand?: boolean
   }) {
     if (this.commands.has(name)) {
       throw new Error("Command is already defined")
     }
 
-    const command = new BotCommand({ handler, isPrivileged, canBeDeleted })
+    const command = new BotCommand({
+      handler,
+      isPrivileged,
+      canBeDeleted,
+      isTextCommand,
+    })
 
     this.commands.set(name, command)
   }
