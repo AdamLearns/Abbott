@@ -60,7 +60,6 @@ function addTestCommands(bot: Bot) {
   }
 
   bot.addTextCommand("test", "Adam is testing something")
-  bot.addAlias("alias", "test")
 }
 
 export async function init() {

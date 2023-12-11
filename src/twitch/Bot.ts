@@ -55,6 +55,10 @@ export class Bot {
     this.addDelComCommand()
     this.addAliasComCommand()
     this.addUnaliasComCommand()
+    this.addAlias("alias", "aliascom")
+    this.addAlias("unalias", "unaliascom")
+    this.addAlias("acom", "addcom")
+    this.addAlias("dcom", "delcom")
   }
 
   userDeleteCommand = async (params: string[], context: BotCommandContext) => {
