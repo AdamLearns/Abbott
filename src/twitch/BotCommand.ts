@@ -25,6 +25,10 @@ export class BotCommand {
     this.#canBeDeleted = canBeDeleted
   }
 
+  set handler(value: BotCommandHandler) {
+    this.#handler = value
+  }
+
   get lastExecutionTimeOnTwitch(): number {
     return this.#lastExecutionTimeOnTwitch
   }

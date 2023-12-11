@@ -52,13 +52,15 @@ export class Bot {
    */
   addBuiltinCommands() {
     this.addAddComCommand()
+    this.addEditComCommand()
     this.addDelComCommand()
     this.addAliasComCommand()
     this.addUnaliasComCommand()
-    this.addAlias("alias", "aliascom")
-    this.addAlias("unalias", "unaliascom")
     this.addAlias("acom", "addcom")
     this.addAlias("dcom", "delcom")
+    this.addAlias("ecom", "editcom")
+    this.addAlias("alias", "aliascom")
+    this.addAlias("unalias", "unaliascom")
   }
 
   userDeleteCommand = async (params: string[], context: BotCommandContext) => {
@@ -101,6 +103,37 @@ export class Bot {
     this.addCommand({
       name: "delcom",
       handler: this.userDeleteCommand,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
+  }
+
+  userEditCommand = async (params: string[], context: BotCommandContext) => {
+    if (params.length < 2) {
+      await context.reply(`Usage: ${prefix}editcom COMMAND_NAME RESPONSE`)
+      return
+    }
+
+    const commandName = params[0] as string
+
+    if (!this.commands.has(commandName)) {
+      return context.reply(`Command "${commandName}" doesn't exist!`)
+    }
+
+    const response = params.slice(1).join(" ")
+
+    const handler = this.makeTextCommandHandler(response)
+
+    const command = this.commands.get(commandName) as BotCommand
+    command.handler = handler
+
+    await context.reply(`Command "${commandName}" successfully edited!`)
+  }
+
+  addEditComCommand() {
+    this.addCommand({
+      name: "editcom",
+      handler: this.userEditCommand,
       isPrivileged: true,
       canBeDeleted: false,
     })
@@ -206,8 +239,8 @@ export class Bot {
     })
   }
 
-  addTextCommand(name: string, response: string) {
-    const handler = async (params: string[], context: BotCommandContext) => {
+  private makeTextCommandHandler(response: string): BotCommandHandler {
+    return async (params: string[], context: BotCommandContext) => {
       let nameTag = ""
       if (params[0]?.startsWith("@")) {
         nameTag = `${params[0]} `
@@ -215,6 +248,10 @@ export class Bot {
 
       await context.say(nameTag + response)
     }
+  }
+
+  addTextCommand(name: string, response: string) {
+    const handler = this.makeTextCommandHandler(response)
     this.addCommand({ name, handler })
   }
 
