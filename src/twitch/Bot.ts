@@ -119,12 +119,7 @@ export class Bot {
   }
 
   addDelComCommand() {
-    this.addCommand({
-      name: "delcom",
-      handler: this.userDeleteCommand,
-      isPrivileged: true,
-      canBeDeleted: false,
-    })
+    this.addBuiltInCommand("delcom", this.userDeleteCommand)
   }
 
   userEditCommand = async (params: string[], context: BotCommandContext) => {
@@ -156,12 +151,7 @@ export class Bot {
   }
 
   addEditComCommand() {
-    this.addCommand({
-      name: "editcom",
-      handler: this.userEditCommand,
-      isPrivileged: true,
-      canBeDeleted: false,
-    })
+    this.addBuiltInCommand("editcom", this.userEditCommand)
   }
 
   userUnaliasCommand = async (params: string[], context: BotCommandContext) => {
@@ -194,12 +184,7 @@ export class Bot {
   }
 
   addUnaliasComCommand() {
-    this.addCommand({
-      name: "unaliascom",
-      handler: this.userUnaliasCommand,
-      isPrivileged: true,
-      canBeDeleted: false,
-    })
+    this.addBuiltInCommand("unaliascom", this.userUnaliasCommand)
   }
 
   userAliasCommand = async (params: string[], context: BotCommandContext) => {
@@ -227,12 +212,7 @@ export class Bot {
   }
 
   addAliasComCommand() {
-    this.addCommand({
-      name: "aliascom",
-      handler: this.userAliasCommand,
-      isPrivileged: true,
-      canBeDeleted: false,
-    })
+    this.addBuiltInCommand("aliascom", this.userAliasCommand)
   }
 
   userAddCommand = async (params: string[], context: BotCommandContext) => {
@@ -256,12 +236,7 @@ export class Bot {
   }
 
   addAddComCommand() {
-    this.addCommand({
-      name: "addcom",
-      handler: this.userAddCommand,
-      isPrivileged: true,
-      canBeDeleted: false,
-    })
+    this.addBuiltInCommand("addcom", this.userAddCommand)
   }
 
   private makeTextCommandHandler(response: string): BotCommandHandler {
@@ -278,6 +253,20 @@ export class Bot {
   addTextCommand(name: string, response: string) {
     const handler = this.makeTextCommandHandler(response)
     this.addCommand({ name, handler })
+  }
+
+  /**
+   * Adds a built-in command, which is just a command that is considered
+   * privileged, non-text, and can't be deleted.
+   */
+  addBuiltInCommand(name: string, handler: BotCommandHandler) {
+    this.addCommand({
+      name,
+      handler,
+      isPrivileged: true,
+      canBeDeleted: false,
+      isTextCommand: false,
+    })
   }
 
   addCommand({
