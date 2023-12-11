@@ -69,7 +69,7 @@ export class Bot {
         const commandName = params[0] as string
 
         if (!this.commands.has(commandName)) {
-          return context.reply(`Command '${commandName}' doesn't exist!`)
+          return context.reply(`Command "${commandName}" doesn't exist!`)
         }
 
         const allCommandNames = this.getAllNamesOfCommand(commandName)
@@ -87,7 +87,7 @@ export class Bot {
             : ""
 
         await context.reply(
-          `Command '${commandName}' successfully deleted!${aliasMessage}`,
+          `Command "${commandName}" successfully deleted!${aliasMessage}`,
         )
       },
       true,
@@ -108,19 +108,19 @@ export class Bot {
         const alias = params[0] as string
         const allCommandNames = this.getAllNamesOfCommand(alias)
         if (allCommandNames.length === 0) {
-          await context.reply(`There is no command by the name '${alias}'`)
+          await context.reply(`There is no command by the name "${alias}"`)
           return
         }
         if (allCommandNames.length === 1) {
           await context.reply(
-            `You cannot use this command to delete a command, only remove a name, and ${alias} is the only remaining name. Try "${prefix}delcom ${alias}".`,
+            `You cannot use this command to delete a command, only remove a name, and "${alias}" is the only remaining name. Try "${prefix}delcom ${alias}".`,
           )
           return
         }
         this.commands.delete(alias)
         allCommandNames.splice(allCommandNames.indexOf(alias), 1)
         await context.reply(
-          `Alias '${alias}' removed. Remaining names for the command: ${allCommandNames.join(
+          `Alias "${alias}" removed. Remaining names for the command: ${allCommandNames.join(
             ", ",
           )}`,
         )
@@ -145,7 +145,7 @@ export class Bot {
         try {
           this.addAlias(alias, targetCommandName)
           await context.reply(
-            `Alias '${alias}' → '${targetCommandName}' successfully added!`,
+            `Alias "${alias}" → "${targetCommandName}" successfully added!`,
           )
         } catch (error) {
           let reason = "unknown error"
@@ -171,7 +171,7 @@ export class Bot {
         const commandName = params[0] as string
 
         if (this.commands.has(commandName)) {
-          return context.reply(`Command '${commandName}' already exists!`)
+          return context.reply(`Command "${commandName}" already exists!`)
         }
 
         // Combine all the params after the command name into one string
@@ -179,7 +179,7 @@ export class Bot {
 
         context.bot.addTextCommand(commandName, response)
 
-        await context.reply(`Command '${commandName}' successfully added!`)
+        await context.reply(`Command "${commandName}" successfully added!`)
       },
       true,
     )
