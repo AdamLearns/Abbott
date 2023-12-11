@@ -12,6 +12,9 @@ const prefix = "!"
 // (in milliseconds)
 const GLOBAL_COMMAND_COOLDOWN = 4000
 
+type MakeApiClient = (authProvider: RefreshingAuthProvider) => ApiClient
+type MakeChatClient = (authProvider: RefreshingAuthProvider) => ChatClient
+
 export class Bot {
   private readonly authProvider: RefreshingAuthProvider
   private readonly api: ApiClient
@@ -21,25 +24,41 @@ export class Bot {
   // "language" may both point to references to the same BotCommand.
   private readonly commands = new Map<string, BotCommand>()
 
-  constructor({ authProvider }: { authProvider: RefreshingAuthProvider }) {
+  constructor({
+    authProvider,
+    makeApiClient,
+    makeChatClient,
+  }: {
+    authProvider: RefreshingAuthProvider
+    makeApiClient?: MakeApiClient | undefined
+    makeChatClient?: MakeChatClient | undefined
+  }) {
     this.authProvider = authProvider
 
     this.addBuiltinCommands()
 
     const logLevel = LogLevel.ERROR
-    this.api = new ApiClient({
-      authProvider,
-      logger: { minLevel: logLevel },
-    })
-    this.chat = new ChatClient({
-      logger: { minLevel: logLevel },
-      authProvider,
 
-      // This prevents us from having user-level rate limits
-      isAlwaysMod: true,
-      // TODO: stop hard-coding this
-      channels: ["AdamLearnsLive"],
-    })
+    this.api =
+      makeApiClient === undefined
+        ? new ApiClient({
+            authProvider,
+            logger: { minLevel: logLevel },
+          })
+        : makeApiClient(authProvider)
+
+    this.chat =
+      makeChatClient === undefined
+        ? new ChatClient({
+            logger: { minLevel: logLevel },
+            authProvider,
+
+            // This prevents us from having user-level rate limits
+            isAlwaysMod: true,
+            // TODO: stop hard-coding this
+            channels: ["AdamLearnsLive"],
+          })
+        : makeChatClient(authProvider)
 
     // We need to process msg because it has all of the information and we may need that to determine whether someone typed a command
     this.chat.onMessage(this.onMessage)
