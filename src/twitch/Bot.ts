@@ -52,8 +52,46 @@ export class Bot {
    */
   addBuiltinCommands() {
     this.addAddComCommand()
+    this.addDelComCommand()
     this.addAliasComCommand()
     this.addUnaliasComCommand()
+  }
+
+  addDelComCommand() {
+    this.addCommand(
+      "delcom",
+      async (params: string[], context: BotCommandContext) => {
+        if (params.length === 0) {
+          await context.reply(`Usage: ${prefix}delcom COMMAND_NAME`)
+          return
+        }
+
+        const commandName = params[0] as string
+
+        if (!this.commands.has(commandName)) {
+          return context.reply(`Command '${commandName}' doesn't exist!`)
+        }
+
+        const allCommandNames = this.getAllNamesOfCommand(commandName)
+        for (const name of allCommandNames) {
+          this.commands.delete(name)
+        }
+
+        allCommandNames.splice(allCommandNames.indexOf(commandName), 1)
+
+        const aliasMessage =
+          allCommandNames.length > 0
+            ? ` Aliases which will no longer work: ${allCommandNames.join(
+                ", ",
+              )}`
+            : ""
+
+        await context.reply(
+          `Command '${commandName}' successfully deleted!${aliasMessage}`,
+        )
+      },
+      true,
+    )
   }
 
   addUnaliasComCommand() {
