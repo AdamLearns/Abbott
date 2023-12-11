@@ -57,132 +57,149 @@ export class Bot {
     this.addUnaliasComCommand()
   }
 
+  userDeleteCommand = async (params: string[], context: BotCommandContext) => {
+    if (params.length === 0) {
+      await context.reply(`Usage: ${prefix}delcom COMMAND_NAME`)
+      return
+    }
+
+    const commandName = params[0] as string
+
+    if (!this.commands.has(commandName)) {
+      return context.reply(`Command "${commandName}" doesn't exist!`)
+    }
+
+    const canBeDeleted = this.commands.get(commandName)?.canBeDeleted
+    if (!canBeDeleted) {
+      return context.reply(
+        `No no no! Command "${commandName}" is marked such that it cannot be deleted!`,
+      )
+    }
+
+    const allCommandNames = this.getAllNamesOfCommand(commandName)
+    for (const name of allCommandNames) {
+      this.commands.delete(name)
+    }
+
+    allCommandNames.splice(allCommandNames.indexOf(commandName), 1)
+
+    const aliasMessage =
+      allCommandNames.length > 0
+        ? ` Aliases which will no longer work: ${allCommandNames.join(", ")}`
+        : ""
+
+    await context.reply(
+      `Command "${commandName}" successfully deleted!${aliasMessage}`,
+    )
+  }
+
   addDelComCommand() {
-    this.addCommand(
-      "delcom",
-      async (params: string[], context: BotCommandContext) => {
-        if (params.length === 0) {
-          await context.reply(`Usage: ${prefix}delcom COMMAND_NAME`)
-          return
-        }
+    this.addCommand({
+      name: "delcom",
+      handler: this.userDeleteCommand,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
+  }
 
-        const commandName = params[0] as string
+  userUnaliasCommand = async (params: string[], context: BotCommandContext) => {
+    if (params.length === 0) {
+      await context.reply(
+        `Usage: ${prefix}unaliascom COMMAND_ALIAS. Note that this can only remove a NAME of a command, not the command itself.`,
+      )
+      return
+    }
 
-        if (!this.commands.has(commandName)) {
-          return context.reply(`Command "${commandName}" doesn't exist!`)
-        }
-
-        const allCommandNames = this.getAllNamesOfCommand(commandName)
-        for (const name of allCommandNames) {
-          this.commands.delete(name)
-        }
-
-        allCommandNames.splice(allCommandNames.indexOf(commandName), 1)
-
-        const aliasMessage =
-          allCommandNames.length > 0
-            ? ` Aliases which will no longer work: ${allCommandNames.join(
-                ", ",
-              )}`
-            : ""
-
-        await context.reply(
-          `Command "${commandName}" successfully deleted!${aliasMessage}`,
-        )
-      },
-      true,
+    const alias = params[0] as string
+    const allCommandNames = this.getAllNamesOfCommand(alias)
+    if (allCommandNames.length === 0) {
+      await context.reply(`There is no command by the name "${alias}"`)
+      return
+    }
+    if (allCommandNames.length === 1) {
+      await context.reply(
+        `You cannot use this command to delete a command, only remove a name, and "${alias}" is the only remaining name. Try "${prefix}delcom ${alias}".`,
+      )
+      return
+    }
+    this.commands.delete(alias)
+    allCommandNames.splice(allCommandNames.indexOf(alias), 1)
+    await context.reply(
+      `Alias "${alias}" removed. Remaining names for the command: ${allCommandNames.join(
+        ", ",
+      )}`,
     )
   }
 
   addUnaliasComCommand() {
-    this.addCommand(
-      "unaliascom",
-      async (params: string[], context: BotCommandContext) => {
-        if (params.length === 0) {
-          await context.reply(
-            `Usage: ${prefix}unaliascom COMMAND_ALIAS. Note that this can only remove a NAME of a command, not the command itself.`,
-          )
-          return
-        }
+    this.addCommand({
+      name: "unaliascom",
+      handler: this.userUnaliasCommand,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
+  }
 
-        const alias = params[0] as string
-        const allCommandNames = this.getAllNamesOfCommand(alias)
-        if (allCommandNames.length === 0) {
-          await context.reply(`There is no command by the name "${alias}"`)
-          return
-        }
-        if (allCommandNames.length === 1) {
-          await context.reply(
-            `You cannot use this command to delete a command, only remove a name, and "${alias}" is the only remaining name. Try "${prefix}delcom ${alias}".`,
-          )
-          return
-        }
-        this.commands.delete(alias)
-        allCommandNames.splice(allCommandNames.indexOf(alias), 1)
-        await context.reply(
-          `Alias "${alias}" removed. Remaining names for the command: ${allCommandNames.join(
-            ", ",
-          )}`,
-        )
-      },
-      true,
-    )
+  userAliasCommand = async (params: string[], context: BotCommandContext) => {
+    if (params.length < 2) {
+      await context.reply(
+        `Usage: ${prefix}aliascom COMMAND_ALIAS COMMAND_TARGET (e.g. "${prefix}aliascom lang language", "lang" will point to the "language" command)`,
+      )
+      return
+    }
+
+    const alias = params[0] as string
+    const targetCommandName = params[1] as string
+    try {
+      this.addAlias(alias, targetCommandName)
+      await context.reply(
+        `Alias "${alias}" → "${targetCommandName}" successfully added!`,
+      )
+    } catch (error) {
+      let reason = "unknown error"
+      if (error instanceof Error) {
+        reason = error.message
+      }
+      return context.reply(`Couldn't add alias: ${reason}`)
+    }
   }
 
   addAliasComCommand() {
-    this.addCommand(
-      "aliascom",
-      async (params: string[], context: BotCommandContext) => {
-        if (params.length < 2) {
-          await context.reply(
-            `Usage: ${prefix}aliascom COMMAND_ALIAS COMMAND_TARGET (e.g. "${prefix}aliascom lang language", "lang" will point to the "language" command)`,
-          )
-          return
-        }
+    this.addCommand({
+      name: "aliascom",
+      handler: this.userAliasCommand,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
+  }
 
-        const alias = params[0] as string
-        const targetCommandName = params[1] as string
-        try {
-          this.addAlias(alias, targetCommandName)
-          await context.reply(
-            `Alias "${alias}" → "${targetCommandName}" successfully added!`,
-          )
-        } catch (error) {
-          let reason = "unknown error"
-          if (error instanceof Error) {
-            reason = error.message
-          }
-          return context.reply(`Couldn't add alias: ${reason}`)
-        }
-      },
-      true,
-    )
+  userAddCommand = async (params: string[], context: BotCommandContext) => {
+    if (params.length < 2) {
+      await context.reply(`Usage: ${prefix}addcom COMMAND_NAME RESPONSE`)
+      return
+    }
+
+    const commandName = params[0] as string
+
+    if (this.commands.has(commandName)) {
+      return context.reply(`Command "${commandName}" already exists!`)
+    }
+
+    // Combine all the params after the command name into one string
+    const response = params.slice(1).join(" ")
+
+    context.bot.addTextCommand(commandName, response)
+
+    await context.reply(`Command "${commandName}" successfully added!`)
   }
 
   addAddComCommand() {
-    this.addCommand(
-      "addcom",
-      async (params: string[], context: BotCommandContext) => {
-        if (params.length < 2) {
-          await context.reply(`Usage: ${prefix}addcom COMMAND_NAME RESPONSE`)
-          return
-        }
-
-        const commandName = params[0] as string
-
-        if (this.commands.has(commandName)) {
-          return context.reply(`Command "${commandName}" already exists!`)
-        }
-
-        // Combine all the params after the command name into one string
-        const response = params.slice(1).join(" ")
-
-        context.bot.addTextCommand(commandName, response)
-
-        await context.reply(`Command "${commandName}" successfully added!`)
-      },
-      true,
-    )
+    this.addCommand({
+      name: "addcom",
+      handler: this.userAddCommand,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
   }
 
   addTextCommand(name: string, response: string) {
@@ -194,15 +211,25 @@ export class Bot {
 
       await context.say(nameTag + response)
     }
-    this.addCommand(name, handler)
+    this.addCommand({ name, handler })
   }
 
-  addCommand(name: string, handler: BotCommandHandler, isPrivileged = false) {
+  addCommand({
+    name,
+    handler,
+    isPrivileged = false,
+    canBeDeleted = true,
+  }: {
+    name: string
+    handler: BotCommandHandler
+    isPrivileged?: boolean
+    canBeDeleted?: boolean
+  }) {
     if (this.commands.has(name)) {
       throw new Error("Command is already defined")
     }
 
-    const command = new BotCommand({ handler, isPrivileged })
+    const command = new BotCommand({ handler, isPrivileged, canBeDeleted })
 
     this.commands.set(name, command)
   }
