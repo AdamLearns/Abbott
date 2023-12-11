@@ -66,6 +66,8 @@ function addTestCommands(bot: Bot) {
     },
     isTextCommand: false,
   })
+
+  bot.addAlias("whoops", "oops")
 }
 
 export async function init() {
