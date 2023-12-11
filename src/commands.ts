@@ -6,7 +6,7 @@ export const commandsAndResponses = {
   journal:
     "Adam's stream journal is publicly available here: https://docs.google.com/spreadsheets/d/1Y8jvKBKp8dqdRACwqUqfdJQgRA3H795jQEEpDyq1qLU/edit#gid=0 (it just tracks the high-level tasks that I worked on)",
   today:
-    "Thursday - Adam is continuing to work on Abbott (!bot). Commands of interest: !google",
+    "Monday - Adam is going to work on Abbott (!bot). His plans for today are to add unit tests and hopefully a database layer (so that changes to commands are actually saved). Commands of interest: !google",
   colemak:
     "Adam switched from QWERTY to Colemak-DH on 6/2/23. You can find out more about how that process went here: https://www.youtube.com/watch?v=woUSTbo2gMc . You can see his Colemak stats here: https://docs.google.com/spreadsheets/d/1NWMD0dgN4Z7g4tRJJSxYmnFZY_PtNodWRk5tEUobuKs/edit#gid=0",
   focusmode:
@@ -48,6 +48,9 @@ export const commandsAndResponses = {
   ophog: `The last game that Adam publicly released before Bot Land is http://github.com/Adam13531/OpHog It is playable here: https://ophog.bot.land/ The game took about two years to make with two people working on the project. It's how Adam "learned" JavaScript.`,
   chair: "Adam is using a Herman Miller Aeron that he got on 3/7/2022.",
   adamart: "https://www.twitch.tv/videos/62661220",
+  adamtime: "Adam is in the Pacific time zone (UTC-8).",
+  shottr:
+    "Adam uses Shottr ( https://shottr.cc/ ) for capturing and editing screenshots. It is only available on macOS. Adam paid for a license. On Windows, Adam recommends ShareX ( https://getsharex.com/ ).",
   console:
     "Adam uses iTerm 2, a terminal emulator freely available here: https://iterm2.com/",
   font: "Adam is using the Hack font (size 22) in Visual Studio Code: http://sourcefoundry.org/hack/",
@@ -124,6 +127,8 @@ export const commandsAndResponses = {
   novation:
     "The MIDI controller Adam uses is a Novation Impulse 49: https://www.amazon.com/Novation-Impulse-49-Controller-Keyboard/dp/B005M02VNW",
   headphones: "Adam uses Bose QC 35s (https://amzn.to/2TrEu8W)",
+  minipc:
+    "The mini PC that Adam bought is this: https://amzn.to/4a6Mm6i (that is an !amazonaffiliate link). It's what's going to host the !bot that Adam is making. It'll be subject to outages of Adam's electricity and internet, but that's okay; the bot isn't mission-critical and just needs ~95% uptime.",
   everything: "Yes, there's a command for that too, silly human. MrDestructoid",
   flstudio:
     "The DAW that Adam uses is Fruity Loops Studio: http://www.image-line.com/flstudio/",
@@ -343,6 +348,8 @@ export const commandsAndResponses = {
     "The community made a video for Adam that was INCREDIBLY TOUCHING: https://www.twitch.tv/videos/486320333",
   jesse:
     "Jesse, everyone: https://twitch.tv/JesseSkinner (JesseSkinner: who wouldn't want a command?! :D)",
+  retro:
+    "Adam's retrospective process is something that he likes to do on Mondays. He goes over his tenets ( https://docs.google.com/document/d/1jwhwMt6bxpuHGxNikRtsKTmkwyFVJsDqvgO3k_-1YLA/edit ), then asks himself what went well and what could go better.",
   postmortem:
     "Adam wrote a retrospective on October 8th, 2019 about the Bot Land journey and its launch here: https://blog.bot.land/2019/10/launch-the-universe-and-everything/",
   firstbadge:
@@ -387,7 +394,7 @@ export const commandsAndResponses = {
     "Zorchenhimer is a software developer and gamer who helped Adam learn how to make NES ROMs! Check out his stream: https://www.twitch.tv/Zorchenhimer",
   github: "https://github.com/Adam13531 or https://github.com/AdamLearns",
   mentoring:
-    "Adam is going to start mentoring people hopefully this month (December, 2023). Sessions will be about an hour long. He is not taking on new mentees right now, nor is there a waitlist. Read about the mentoring contract here: https://docs.google.com/document/d/1YuCYgxGOm8VVVFq-Tbq9q-SRkp6qbZr_ElGMpPmJLt4/edit",
+    "Adam is going to start one-on-one mentoring hopefully this month (December, 2023). Sessions will be about an hour long. It is regular mentoring except HYPER PUBLIC! He is not taking on new mentees right now, nor is there a waitlist. Read about the mentoring contract here: https://docs.google.com/document/d/1YuCYgxGOm8VVVFq-Tbq9q-SRkp6qbZr_ElGMpPmJLt4/edit",
   nahamsec:
     "NahamSec is a hacker, mentor, security trainer at nights and the head of hacker education at HackerOne by day. https://twitch.tv/nahamsec https://twitter.com/nahamsec . He is helping guide Adam through project #6 about hacking!",
   wife: "Adam is married. That's about all you'll find out about his wife (well, that and she found !towing endlessly laughable).",
@@ -442,6 +449,7 @@ export const commandsAndResponses = {
   anything: "Yes, anything can be a command",
   kubernetes:
     "Kubernetes is container orchestration software. Learn more here: https://en.wikipedia.org/wiki/Kubernetes",
+  back: "Adam is 'BACK BACK' to streaming! I.e. this is not just a one-off stream. He was working at !google from 10/26/20 to 10/27/23.",
   google:
     'Read more about Adam, streaming, and Google (e.g. "why did you leave Google?"): https://docs.google.com/document/d/1sFyGS-TvPYZtVQyVKMfjn5wjXYe9hL_sccjoL-79VdY/edit',
   impostor:
