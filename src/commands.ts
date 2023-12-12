@@ -6,7 +6,9 @@ export const commandsAndResponses = {
   journal:
     "Adam's stream journal is publicly available here: https://docs.google.com/spreadsheets/d/1Y8jvKBKp8dqdRACwqUqfdJQgRA3H795jQEEpDyq1qLU/edit#gid=0 (it just tracks the high-level tasks that I worked on)",
   today:
-    "Monday - Adam is going to work on Abbott (!bot). His plans for today are to add unit tests and hopefully a database layer (so that changes to commands are actually saved). Commands of interest: !google",
+    "Tuesday - Adam is going to add a database to his bot (!bot) so that commands are actually saved. He'll probably try out https://github.com/kysely-org/kysely , which he will be pronouncing 'ku-ze-lu' unless someone records themselves saying it better. 😡",
+  kirby:
+    "Did somebody say KIRBY AIR RIDE?! It's Adam's keyboard stand because it's the right shape/height, but also, it's a great game (mainly City Trial mode).",
   colemak:
     "Adam switched from QWERTY to Colemak-DH on 6/2/23. You can find out more about how that process went here: https://www.youtube.com/watch?v=woUSTbo2gMc . You can see his Colemak stats here: https://docs.google.com/spreadsheets/d/1NWMD0dgN4Z7g4tRJJSxYmnFZY_PtNodWRk5tEUobuKs/edit#gid=0",
   focusmode:
@@ -320,7 +322,7 @@ export const commandsAndResponses = {
     "If you'd like to help make Adam Learns successful, check out https://adamlearns.com/faq#how-can-i-help",
   ost: "Adam uploadded the OST of Bot Land here: https://www.youtube.com/watch?v=8rq2fewvHpU",
   yesterday:
-    "Yesterday is history. Tomorrow is a mystery. Today is a gift. That is why it is called the present.",
+    "Yesterday is history. Tomorrow is a mystery. Today is a gift. That is why it is called the present. Note: if you're actually expecting to see what Adam did in the past from this command, then check !journal.",
   duns: "The Data Universal Numbering System, abbreviated as DUNS or D-U-N-S, is a proprietary system developed and regulated by Dun & Bradstreet. This number is required in order to put an app in the App Store.",
   first: "Adam + FIRST: https://bit.ly/2VTVMvP",
   width: "Adam is one Adam wide. MrDestructoid",
@@ -449,7 +451,7 @@ export const commandsAndResponses = {
   anything: "Yes, anything can be a command",
   kubernetes:
     "Kubernetes is container orchestration software. Learn more here: https://en.wikipedia.org/wiki/Kubernetes",
-  back: "Adam is 'BACK BACK' to streaming! I.e. this is not just a one-off stream. He was working at !google from 10/26/20 to 10/27/23.",
+  back: "Adam is 'BACK BACK' to streaming as of December 4th, 2023! I.e. this is not just a one-off stream. He was working at !google from 10/26/20 to 10/27/23.",
   google:
     'Read more about Adam, streaming, and Google (e.g. "why did you leave Google?"): https://docs.google.com/document/d/1sFyGS-TvPYZtVQyVKMfjn5wjXYe9hL_sccjoL-79VdY/edit',
   impostor:
