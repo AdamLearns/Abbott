@@ -2,10 +2,11 @@ import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
 
+import type { CommandData } from "../commands/CommandData"
+
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
 import type { ChatMessage } from "./ChatMessage"
-import type { CommandData } from "./CommandData"
 
 const prefix = "!"
 
