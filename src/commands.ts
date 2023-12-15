@@ -2,11 +2,17 @@ export const commandsAndResponses = {
   "42": "There was already a command for everything, silly human. MrDestructoid",
   "13531":
     "Adam's old Twitch name (Adam13531) was changed on 2/15/22. As for the 13531 itself—he just liked those numbers and they form a palindrome.",
+  leetcode:
+    "To see the technical interview prep that Adam did for Google, check out this playlist: https://www.youtube.com/watch?v=pMli-zc70Cw&list=PL4Ayjzb5Bhmd1sof3Ri5yoRlUDvfnmpQ8",
   oops: 'ABuffSeagull suggested that Adam replace the macOS alert sound with a recording of Adam saying "oops", so he did that. admLUL',
+  obsidian:
+    "Adam ended up trying Obsidian for about an hour on December 12th. He thinks it's a great program, but he doesn't want to figure out the sync/publish stuff, and he doesn't want to pay for that for the rest of his life. He still needs to look into other programs that he could use instead.",
   journal:
     "Adam's stream journal is publicly available here: https://docs.google.com/spreadsheets/d/1Y8jvKBKp8dqdRACwqUqfdJQgRA3H795jQEEpDyq1qLU/edit#gid=0 (it just tracks the high-level tasks that I worked on)",
   today:
-    "Tuesday - Adam is going to add a database to his bot (!bot) so that commands are actually saved. He'll probably try out https://github.com/kysely-org/kysely , which he will be pronouncing 'ku-ze-lu' unless someone records themselves saying it better. 😡",
+    "Friday - Adam is still adding PostgreSQL + !kysely to Abbott (!bot). Soon enough, commands will PERSIST ⚡️. Hope you're having a great Friday. (◕‿◕✿)",
+  kysely:
+    "Kysely (pronounced 'ku-ze-lu', or at least close enough!), is a type-safe SQL query builder: https://github.com/kysely-org/kysely Adam is using it for his !bot.",
   kirby:
     "Did somebody say KIRBY AIR RIDE?! It's Adam's keyboard stand because it's the right shape/height, but also, it's a great game (mainly City Trial mode).",
   colemak:
@@ -73,6 +79,7 @@ export const commandsAndResponses = {
   learn:
     "Adam's advice for how to learn programming: https://adamlearns.com/blog/learn-programming",
   piano: "Adam uses a Yamaha P-155",
+  "#": "The pound/hash sign in JavaScript (or TypeScript) represents private at run-time. Read more here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_properties",
   blog: "New blog: https://adamlearns.com/blog Old blog: https://blog.bot.land/",
   ccd: "To use Adam's partial-matching CCD function, check out these links: Windows: https://github.com/Adam13531/ccd Unix/Linux (although ideally you should find a better tool!): https://gist.github.com/Adam13531/d069bbe475e3bae42a00d3dfc59f4955",
   emotes:
@@ -80,7 +87,7 @@ export const commandsAndResponses = {
   es6functions:
     'Adam explains ES6 "arrow" functions briefly here: https://www.twitch.tv/adamlearnslive/v/95652827',
   schedule:
-    "For the schedule, there's a Google Calendar that you can view or subscribe to: https://adamlearns.com/faq#what-is-the-schedule",
+    "Adam's general schedule is weekdays at 9-12 and 1-4 Pacific time (UTC-8). He does not plan to stream on Tuesdays. Also, he doesn't stick strictly to this schedule (he tends to start early). To see this information more visually, click here: https://www.twitch.tv/adamlearnslive/schedule",
   no: "No.",
   tenets:
     "Adam's tenets are here: https://docs.google.com/document/d/1jwhwMt6bxpuHGxNikRtsKTmkwyFVJsDqvgO3k_-1YLA/edit . He wants to abide by these and will try to review them every week.",
@@ -145,6 +152,7 @@ export const commandsAndResponses = {
   thisisnotfine: "(╯ admTroll ）╯︵ ┻━┻",
   notes:
     "Adam's notes are freely available here: https://notes.adamlearns.com/ Make sure to read the very first page (About this notebook).",
+  pnpm: 'pnpm is a "fast, disk-space-efficient package manager" that is meant to be a drop-in replacement for npm. Read more here: https://pnpm.io/',
   lerna: "Instead of LernaJS, use pnpm workspaces",
   dontevertalktomeormysonseveragain: "admBoat admDuck admDuck admDuck admDuck",
   problema:
@@ -213,7 +221,9 @@ export const commandsAndResponses = {
   blub: "http://share.bot.land/blub.png (why did BlubQ and wtfblub get their own command?)",
   testeroni: `"testeroni" is a magical programming word that Adam invokes anywhere that he plans on changing later. Its lighthearted nature has brought a smile to Adam's face for many years.`,
   foo: "bar",
-  bot: "The bot that Adam is making (named Abbott) is going to be the stream companion. It will respond to Twitch commands (like !today), Discord commands, and it will have a web interface for viewing and editing those commands. It will also do some misc. activities like download Twitch streams or edit videos (not totally settled on this yet). Here's the TODO list: https://github.com/users/AdamLearns/projects/3",
+  bot: 'Abbott ("a bot") is the bot that Adam made as a stream companion. It responds to commands like this one ("!bot"). It will eventually also respond on Discord and have a web interface for viewing and editing those commands. It might also do some misc. activities like download Twitch streams or edit videos (not totally settled on this yet). Here\'s the TODO list: https://github.com/users/AdamLearns/projects/3 Here\'s the code: https://github.com/AdamLearns/Abbott',
+  podcast:
+    "Adam was on Lana Lux's podcast on December 12th, 2023. The video hasn't been released yet (but it was very fun!). Check out her channel here: https://twitch.tv/Lana_Lux",
   robot:
     "Not A Human... Robot confirmed https://clips.twitch.tv/VenomousCorrectYakinikuPoooound",
   keyiano:
@@ -229,7 +239,7 @@ export const commandsAndResponses = {
   tpyo: "Yuo mead à taypo!",
   old: "There's no old command (well, there is thanks to a paradox). Maybe you meant !today? MrDestructoid",
   siliconvalley:
-    "Adam doesn't really like Silicon Valley. He got about halfway through the first episode before turning it off, then gave it another shot on a plane by watching a whole episode from a later season. He didn't really find it funny. Regardless, he likes the tabs-vs.-spaces clip on YouTube: https://youtu.be/SsoOG6ZeyUI",
+    "Adam doesn't really like Silicon Valley. He got about halfway through the first episode before turning it off, then gave it another shot on a plane by watchi∫ng a whole episode from a later season. He didn't really find it funny. Regardless, he likes the tabs-vs.-spaces clip on YouTube: https://youtu.be/SsoOG6ZeyUI",
   yata: "HiDeoo made an open-source Twitch chat website for himself that he's kindly shared with all of us: https://yata.vercel.app Feel free to provide feedback at his GitHub: https://github.com/HiDeoo/yata",
   turbodave:
     "TurboDave is the #1 billboard for Bot Land: https://twitter.com/Xtonomous/status/1021924788363702272 https://i.imgur.com/afMvKYv.png",
@@ -403,7 +413,7 @@ export const commandsAndResponses = {
   acadamy:
     "The AcAdamy is what Adam's calling the part of the site where projects/courses will be sold.",
   udemy:
-    "Have you considered putting your content on a site like Udemy: https://adamlearns.com/faq#have-you-considered-putting-your-content-on-a-site-like-udemy TL;DR: it's ON Udemy already ( https://www.udemy.com/course/firebase-fundamentals/ ), but Adam wants to promote his own site.",
+    "Have you considered putting your content on a site like Udemy? TL;DR: it's ON Udemy already ( https://www.udemy.com/course/firebase-fundamentals/ ), but Adam wants to promote his own site.",
   mvp: "MVP stands for Minimum Viable Product. It generally indicates only what's absolutely necessary from a product in order to satisfy a customer's requirements. E.g. on Twitter, it would be logging in and tweeting, but not something like sharing videos.",
   designer:
     "Adam hired the_fnkymnky ( https://stevenmccurrach.com/ https://twitter.com/WebBooooy ) as the designer for The AcAdamy and Homepagerizer.",
@@ -467,7 +477,7 @@ export const commandsAndResponses = {
   prime:
     "Subscribe for free through Amazon Prime and help support Adam's life as a sell-out!",
   stack:
-    "Abbott is written in TypeScript, runs on Node.js, and mainly uses a library called Twurple for the Twitch API.",
+    "Abbott is written in TypeScript, runs on Node.js, and mainly uses a library called Twurple for the Twitch and chat APIs. It uses PostgreSQL for the database and !kysely for the query builder.",
   proxmox:
     "Find out more about Proxmox here: https://www.proxmox.com/en/ It's what Adam plans on using for his bot.",
   rustlings:
