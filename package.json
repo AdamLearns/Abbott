@@ -9,20 +9,25 @@
 		"dev": "tsx watch tsc/main.ts",
 		"test": "vitest",
 		"coverage": "vitest run --coverage",
+		"kysely-codegen": "kysely-codegen",
+		"kysely-migration-cli": "tsx src/database/migrate.ts",
 		"prepare": "husky install"
 	},
 	"dependencies": {
 		"@tsconfig/node18": "^18.2.2",
 		"@twurple/auth": "^7.0.6",
 		"@twurple/chat": "^7.0.6",
-		"@types/node": "^18",
 		"dotenv-flow": "^4.0.1",
+		"kysely": "^0.26.3",
+		"pg": "^8.11.3",
 		"tsx": "^4.6.2",
 		"typescript": "^5.3.2"
 	},
 	"devDependencies": {
 		"@hideoo/eslint-config": "^2.0.2",
 		"@twurple/api": "^7.0.6",
+		"@types/node": "^18",
+		"@types/pg": "^8.10.9",
 		"@typescript-eslint/eslint-plugin": "^6.13.2",
 		"@typescript-eslint/parser": "^6.13.2",
 		"@vitest/coverage-istanbul": "^1.0.4",
@@ -30,8 +35,11 @@
 		"eslint": "^8.55.0",
 		"eslint-config-prettier": "^9.1.0",
 		"husky": "^8.0.3",
+		"kysely-codegen": "^0.11.0",
+		"kysely-migration-cli": "^0.2.3",
 		"lint-staged": "^15.2.0",
 		"prettier": "3.1.0",
+		"uuidv7": "^0.6.3",
 		"vitest": "^1.0.4"
 	}
 }

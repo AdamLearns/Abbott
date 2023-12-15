@@ -1,3 +1,5 @@
+import type { UUID } from "uuidv7"
+
 import type { BotCommandContext } from "./BotCommandContext"
 
 export type BotCommandHandler = (
@@ -6,6 +8,7 @@ export type BotCommandHandler = (
 ) => void | Promise<void>
 
 export class BotCommand {
+  #id: UUID
   #lastExecutionTimeOnTwitch = 0
   #handler: BotCommandHandler
   #isPrivileged: boolean
@@ -18,16 +21,19 @@ export class BotCommand {
 
   constructor({
     handler,
+    id,
     isPrivileged = false,
     canBeDeleted = true,
     isTextCommand = true,
   }: {
     handler: BotCommandHandler
-    isPrivileged: boolean
-    canBeDeleted: boolean
-    isTextCommand: boolean
+    id: UUID
+    isPrivileged?: boolean
+    canBeDeleted?: boolean
+    isTextCommand?: boolean
   }) {
     this.#handler = handler
+    this.#id = id
     this.#isPrivileged = isPrivileged
     this.#canBeDeleted = canBeDeleted
     this.#isTextCommand = isTextCommand
@@ -55,6 +61,10 @@ export class BotCommand {
 
   get isTextCommand(): boolean {
     return this.#isTextCommand
+  }
+
+  get id(): UUID {
+    return this.#id
   }
 
   execute(params: string[], context: BotCommandContext): void | Promise<void> {

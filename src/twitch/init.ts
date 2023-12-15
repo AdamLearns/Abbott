@@ -2,8 +2,6 @@ import fs from "node:fs"
 
 import { type AccessToken, RefreshingAuthProvider } from "@twurple/auth"
 
-import { commandsAndResponses } from "../commands"
-
 import { Bot } from "./Bot"
 
 async function createAuthProvider(): Promise<RefreshingAuthProvider> {
@@ -46,36 +44,19 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   return authProvider
 }
 
-function createBot(authProvider: RefreshingAuthProvider): Bot {
+async function createBot(authProvider: RefreshingAuthProvider): Promise<Bot> {
   const bot = new Bot({ authProvider })
 
-  addTestCommands(bot)
+  await bot.init()
 
   return bot
-}
-
-function addTestCommands(bot: Bot) {
-  for (const [command, response] of Object.entries(commandsAndResponses)) {
-    bot.addTextCommand(command, response)
-  }
-
-  bot.addCommand({
-    name: "test",
-    handler: () => {
-      console.log("This is a fake command.")
-    },
-    isTextCommand: false,
-  })
-
-  bot.addAlias("whoops", "oops")
-  bot.addAlias("mac", "whymac")
 }
 
 export async function init() {
   console.info("Starting the Twitch bot")
 
   const authProvider = await createAuthProvider()
-  createBot(authProvider)
+  await createBot(authProvider)
 
   console.info("Successfully created the Twitch bot")
 }

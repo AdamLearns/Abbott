@@ -10,11 +10,11 @@ import type { ChatMessage } from "../twitch/ChatMessage"
 
 let bot: Bot
 
-beforeEach(() => {
-  bot = createBot()
+beforeEach(async () => {
+  bot = await createBot()
 })
 
-function createBot() {
+async function createBot() {
   const authProvider = new RefreshingAuthProvider({
     clientId: "clientId",
     clientSecret: "clientSecret",
@@ -28,6 +28,7 @@ function createBot() {
       return new ChatClient({ authProvider })
     },
   })
+  await bot.init()
   return bot
 }
 
@@ -88,10 +89,9 @@ describe("Edit tests", () => {
       .spyOn(context, "reply")
       .mockImplementation(async () => {})
 
-    bot.addCommand({
+    await bot.addCommand({
       name: "nontextcommand",
       handler: () => {},
-      isTextCommand: false,
     })
 
     await bot.userEditCommand(["nontextcommand", "new", "response"], context)
@@ -132,7 +132,7 @@ describe("Edit tests", () => {
       .spyOn(context, "reply")
       .mockImplementation(async () => {})
 
-    bot.addTextCommand("testcommand", "Hello world")
+    await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
 
     await bot.userEditCommand(["testcommand", "new", "response"], context)
 
@@ -176,7 +176,7 @@ describe("Unalias tests", () => {
       .spyOn(context, "reply")
       .mockImplementation(async () => {})
 
-    bot.addTextCommand("testcommand", "Hello world")
+    await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
     await bot.userUnaliasCommand(["testcommand"], context)
 
     expect(replySpy).toHaveBeenCalledOnce()
@@ -189,8 +189,8 @@ describe("Unalias tests", () => {
     const context = createMockContext()
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
-    bot.addTextCommand("testcommand", "Hello world")
-    bot.addAlias("testcommandalias", "testcommand")
+    await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
+    await bot.addAlias("testcommandalias", "testcommand")
     expect(bot.getAllNamesOfCommand("testcommandalias")).toHaveLength(2)
     expect(bot.getAllNamesOfCommand("testcommandalias").sort()).toEqual(
       ["testcommand", "testcommandalias"].sort(),
@@ -280,8 +280,8 @@ describe("Addition tests", () => {
     const context = createMockContext()
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
-    expect(() => {
-      bot.addCommand({ name: "delcom", handler: () => {} })
+    expect(async () => {
+      await bot.addCommand({ name: "delcom", handler: () => {} })
     }).toThrowError("already")
   })
 
@@ -338,7 +338,7 @@ describe("Deletion tests", () => {
     const context = createMockContext()
     context.reply = vi.fn().mockImplementation(async () => {})
 
-    bot.addTextCommand("aaa", "bbb")
+    await bot.addCommand({ name: "aaa", textResponse: "bbb" })
     expect(bot.getAllNamesOfCommand("aaa")).toHaveLength(1)
     await bot.userDeleteCommand(["aaa"], context)
     expect(bot.getAllNamesOfCommand("aaa")).toHaveLength(0)
@@ -348,9 +348,9 @@ describe("Deletion tests", () => {
     const context = createMockContext()
     context.reply = vi.fn().mockImplementation(async () => {})
 
-    bot.addTextCommand("food", "Apple")
-    bot.addAlias("fruit", "food")
-    bot.addAlias("redstuff", "fruit")
+    await bot.addCommand({ name: "food", textResponse: "Apple" })
+    await bot.addAlias("fruit", "food")
+    await bot.addAlias("redstuff", "fruit")
     expect(bot.getAllNamesOfCommand("food")).toHaveLength(3)
     expect(bot.getAllNamesOfCommand("fruit")).toHaveLength(3)
     await bot.userDeleteCommand(["food"], context)

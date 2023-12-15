@@ -1,8 +1,11 @@
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
+import { sql } from "kysely"
+import { UUID, uuidv7 } from "uuidv7"
 
 import type { CommandData } from "../commands/CommandData"
+import { db } from "../database/database"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
@@ -36,8 +39,6 @@ export class Bot {
   }) {
     this.authProvider = authProvider
 
-    this.addBuiltinCommands()
-
     const logLevel = LogLevel.ERROR
 
     this.api =
@@ -66,21 +67,26 @@ export class Bot {
     this.chat.connect()
   }
 
+  async init() {
+    await this.addBuiltinCommands()
+    await this.loadTextCommandsFromDatabase()
+  }
+
   /**
    * These should be added before we load any user-defined commands,
    * that way the user-defined ones can't squat on the names.
    */
-  addBuiltinCommands() {
-    this.addAddComCommand()
-    this.addEditComCommand()
-    this.addDelComCommand()
-    this.addAliasComCommand()
-    this.addUnaliasComCommand()
-    this.addAlias("acom", "addcom")
-    this.addAlias("dcom", "delcom")
-    this.addAlias("ecom", "editcom")
-    this.addAlias("alias", "aliascom")
-    this.addAlias("unalias", "unaliascom")
+  async addBuiltinCommands() {
+    await this.addAddComCommand()
+    await this.addEditComCommand()
+    await this.addDelComCommand()
+    await this.addAliasComCommand()
+    await this.addUnaliasComCommand()
+    await this.addAlias("acom", "addcom")
+    await this.addAlias("dcom", "delcom")
+    await this.addAlias("ecom", "editcom")
+    await this.addAlias("alias", "aliascom")
+    await this.addAlias("unalias", "unaliascom")
   }
 
   userDeleteCommand = async (params: string[], context: BotCommandContext) => {
@@ -102,6 +108,13 @@ export class Bot {
       )
     }
 
+    const command = this.commands.get(commandName) as BotCommand
+
+    await db
+      .deleteFrom("commands")
+      .where("id", "=", command.id.toString())
+      .execute()
+
     const allCommandNames = this.getAllNamesOfCommand(commandName)
     for (const name of allCommandNames) {
       this.commands.delete(name)
@@ -119,8 +132,8 @@ export class Bot {
     )
   }
 
-  addDelComCommand() {
-    this.addBuiltInCommand("delcom", this.userDeleteCommand)
+  async addDelComCommand() {
+    return this.addBuiltInCommand("delcom", this.userDeleteCommand)
   }
 
   userEditCommand = async (params: string[], context: BotCommandContext) => {
@@ -144,6 +157,15 @@ export class Bot {
 
     const response = params.slice(1).join(" ")
 
+    await db
+      .updateTable("text_command_responses")
+      .set({
+        response,
+        updated_at: sql`now()`,
+      })
+      .where("id", "=", command.id.toString())
+      .execute()
+
     const handler = this.makeTextCommandHandler(response)
 
     command.handler = handler
@@ -151,8 +173,8 @@ export class Bot {
     await context.reply(`Command "${commandName}" successfully edited!`)
   }
 
-  addEditComCommand() {
-    this.addBuiltInCommand("editcom", this.userEditCommand)
+  async addEditComCommand() {
+    return this.addBuiltInCommand("editcom", this.userEditCommand)
   }
 
   userUnaliasCommand = async (params: string[], context: BotCommandContext) => {
@@ -175,6 +197,15 @@ export class Bot {
       )
       return
     }
+
+    const command = this.commands.get(alias) as BotCommand
+
+    await db
+      .deleteFrom("command_names")
+      .where("id", "=", command.id.toString())
+      .where("name", "=", alias)
+      .execute()
+
     this.commands.delete(alias)
     allCommandNames.splice(allCommandNames.indexOf(alias), 1)
     await context.reply(
@@ -184,8 +215,8 @@ export class Bot {
     )
   }
 
-  addUnaliasComCommand() {
-    this.addBuiltInCommand("unaliascom", this.userUnaliasCommand)
+  async addUnaliasComCommand() {
+    return this.addBuiltInCommand("unaliascom", this.userUnaliasCommand)
   }
 
   userAliasCommand = async (params: string[], context: BotCommandContext) => {
@@ -199,7 +230,8 @@ export class Bot {
     const alias = params[0] as string
     const targetCommandName = params[1] as string
     try {
-      this.addAlias(alias, targetCommandName)
+      await this.addAlias(alias, targetCommandName)
+
       await context.reply(
         `Alias "${alias}" → "${targetCommandName}" successfully added!`,
       )
@@ -212,8 +244,8 @@ export class Bot {
     }
   }
 
-  addAliasComCommand() {
-    this.addBuiltInCommand("aliascom", this.userAliasCommand)
+  async addAliasComCommand() {
+    return this.addBuiltInCommand("aliascom", this.userAliasCommand)
   }
 
   userAddCommand = async (params: string[], context: BotCommandContext) => {
@@ -231,13 +263,13 @@ export class Bot {
     // Combine all the params after the command name into one string
     const response = params.slice(1).join(" ")
 
-    context.bot.addTextCommand(commandName, response)
+    await context.bot.addCommand({ name: commandName, textResponse: response })
 
     await context.reply(`Command "${commandName}" successfully added!`)
   }
 
-  addAddComCommand() {
-    this.addBuiltInCommand("addcom", this.userAddCommand)
+  async addAddComCommand() {
+    return this.addBuiltInCommand("addcom", this.userAddCommand)
   }
 
   private makeTextCommandHandler(response: string): BotCommandHandler {
@@ -251,53 +283,97 @@ export class Bot {
     }
   }
 
-  addTextCommand(name: string, response: string) {
-    const handler = this.makeTextCommandHandler(response)
-    this.addCommand({ name, handler })
-  }
-
   /**
    * Adds a built-in command, which is just a command that is considered
    * privileged, non-text, and can't be deleted.
    */
-  addBuiltInCommand(name: string, handler: BotCommandHandler) {
-    this.addCommand({
+  addBuiltInCommand = async (name: string, handler: BotCommandHandler) => {
+    return this.addCommand({
       name,
       handler,
       isPrivileged: true,
       canBeDeleted: false,
-      isTextCommand: false,
     })
   }
 
-  addCommand({
+  async addCommand({
     name,
     handler,
+    textResponse,
     isPrivileged = false,
     canBeDeleted = true,
-    isTextCommand = true,
   }: {
     name: string
-    handler: BotCommandHandler
+    handler?: BotCommandHandler | undefined
+    textResponse?: string | undefined
     isPrivileged?: boolean
     canBeDeleted?: boolean
-    isTextCommand?: boolean
   }) {
     if (this.commands.has(name)) {
       throw new Error("Command is already defined")
     }
 
+    if (handler === undefined) {
+      if (textResponse === undefined) {
+        throw new Error("Must provide either a handler or a text response")
+      }
+      handler = this.makeTextCommandHandler(textResponse)
+    }
+
+    const response = await db
+      .selectFrom("commands")
+      .innerJoin("command_names", "commands.id", "command_names.id")
+      .where("command_names.name", "=", name)
+      .select(["commands.id"])
+      .executeTakeFirst()
+
+    let id = response?.id
+
+    if (!id) {
+      id = uuidv7()
+
+      await db.transaction().execute(async (trx) => {
+        await trx
+          .insertInto("commands")
+          .values({
+            id: id as string,
+            is_privileged: isPrivileged,
+            can_be_deleted: canBeDeleted,
+          })
+          .execute()
+
+        await trx
+          .insertInto("command_names")
+          .values({
+            id: id as string,
+            name,
+          })
+          .execute()
+
+        if (textResponse) {
+          await trx
+            .insertInto("text_command_responses")
+            .values({
+              id: id as string,
+              response: textResponse,
+            })
+            .execute()
+        }
+      })
+    }
+
     const command = new BotCommand({
       handler,
+      id: UUID.parse(id),
       isPrivileged,
       canBeDeleted,
-      isTextCommand,
+      isTextCommand: textResponse !== undefined,
     })
 
     this.commands.set(name, command)
   }
 
-  addAlias(alias: string, targetCommandName: string) {
+  async addAlias(alias: string, targetCommandName: string) {
     if (!this.commands.has(targetCommandName)) {
       throw new Error("There is no command by that name")
     }
@@ -306,7 +382,77 @@ export class Bot {
       throw new Error("Alias is already defined")
     }
 
+    const command = this.commands.get(targetCommandName) as BotCommand
+
+    await db.transaction().execute(async (trx) => {
+      // If the alias already exists and points to the correct command in the
+      // database, then don't do anything. This is so that we don't get errors
+      // trying to add the built-in aliases every time the bot starts up.
+      const response = await trx
+        .selectFrom("commands")
+        .innerJoin("command_names", "commands.id", "command_names.id")
+        .where("commands.id", "=", command.id.toString())
+        .where("command_names.name", "in", [alias, targetCommandName])
+        .select(["command_names.name"])
+        .execute()
+
+      if (response.length !== 2) {
+        await trx
+          .insertInto("command_names")
+          .values({
+            id: command.id.toString(),
+            name: alias,
+          })
+          .execute()
+      }
+    })
+
     this.commands.set(alias, this.commands.get(targetCommandName) as BotCommand)
+  }
+
+  loadTextCommandsFromDatabase = async () => {
+    await db.transaction().execute(async (trx) => {
+      const response = await trx
+        .selectFrom("commands")
+        .innerJoin("command_names", "commands.id", "command_names.id")
+        .innerJoin(
+          "text_command_responses",
+          "commands.id",
+          "text_command_responses.id",
+        )
+        .select([
+          "commands.id",
+          "command_names.name",
+          "commands.is_privileged",
+          "commands.can_be_deleted",
+          "text_command_responses.response",
+        ])
+        .execute()
+      for (const row of response) {
+        const id = UUID.parse(row.id)
+        const name = row.name
+        const isPrivileged = row.is_privileged
+        const canBeDeleted = row.can_be_deleted
+        const textResponse = row.response
+        const handler = this.makeTextCommandHandler(textResponse)
+
+        const commandWithId = [...this.commands.values()].find((command) =>
+          command.id.equals(id),
+        )
+
+        if (commandWithId === undefined) {
+          const command = new BotCommand({
+            id,
+            handler,
+            isPrivileged,
+            canBeDeleted,
+          })
+          this.commands.set(name, command)
+        } else {
+          this.commands.set(name, commandWithId)
+        }
+      }
+    })
   }
 
   getAllNamesOfCommand(commandName: string): string[] {
