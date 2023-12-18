@@ -1,3 +1,5 @@
+import { exec } from "node:child_process"
+
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
@@ -87,6 +89,7 @@ export class Bot {
     await this.addDelComCommand()
     await this.addAliasComCommand()
     await this.addUnaliasComCommand()
+    await this.addAlertCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
@@ -204,6 +207,23 @@ export class Bot {
         ", ",
       )}`,
     )
+  }
+
+  private playAlertSound = () => {
+    exec("afplay ./alert.wav", (error, _stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error.message}`)
+        return
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`)
+        return
+      }
+    })
+  }
+
+  async addAlertCommand() {
+    return this.addBuiltInCommand("alert", this.playAlertSound)
   }
 
   async addUnaliasComCommand() {
