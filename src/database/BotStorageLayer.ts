@@ -14,4 +14,5 @@ export interface BotStorageLayer {
   editCommand(id: string, response: string): Promise<void>
   deleteCommand(id: string): Promise<void>
   loadTextCommands(): Promise<DatabaseTextCommand[]>
+  fuzzyFindCommands(searchString: string): Promise<string[]>
 }

@@ -90,6 +90,7 @@ export class Bot {
     await this.addAliasComCommand()
     await this.addUnaliasComCommand()
     await this.addAlertCommand()
+    await this.addFuzzyFindCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
@@ -224,6 +225,36 @@ export class Bot {
 
   async addAlertCommand() {
     return this.addBuiltInCommand("alert", this.playAlertSound)
+  }
+
+  private fuzzyFindCommands = async (
+    params: string[],
+    context: BotCommandContext,
+  ) => {
+    if (params.length === 0) {
+      await context.reply(
+        `Usage: ${prefix}ff COMMAND_NAME - this searches all text command responses for the string that you provide, that way, you can search for a command whose name you don't remember.`,
+      )
+      return
+    }
+
+    const searchString = params[0] as string
+
+    const commandNames = await this.storageLayer.fuzzyFindCommands(searchString)
+    const commandString = commandNames.join(", ").slice(0, 350)
+
+    await context.reply(
+      `Commands found matching "${searchString}": ${commandString}`,
+    )
+  }
+
+  async addFuzzyFindCommand() {
+    return this.addCommand({
+      name: "ff",
+      handler: this.fuzzyFindCommands,
+      isPrivileged: false, // one of the few built-in commands that isn't privileged
+      canBeDeleted: false,
+    })
   }
 
   async addUnaliasComCommand() {

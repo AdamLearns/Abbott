@@ -15,4 +15,7 @@ export class BotFakeStorageLayer implements BotStorageLayer {
   async loadTextCommands(): Promise<DatabaseTextCommand[]> {
     return []
   }
+  async fuzzyFindCommands(): Promise<string[]> {
+    return []
+  }
 }

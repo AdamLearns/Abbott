@@ -128,4 +128,20 @@ export class BotDatabase implements BotStorageLayer {
         .execute()
     }
   }
+
+  async fuzzyFindCommands(searchString: string): Promise<string[]> {
+    const response = await db
+      .selectFrom("commands")
+      .innerJoin("command_names", "commands.id", "command_names.id")
+      .innerJoin(
+        "text_command_responses",
+        "commands.id",
+        "text_command_responses.id",
+      )
+      .where("text_command_responses.response", "ilike", `%${searchString}%`)
+      .select(["command_names.name"])
+      .execute()
+
+    return response.map((row) => row.name)
+  }
 }
