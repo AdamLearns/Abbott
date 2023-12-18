@@ -1,15 +1,17 @@
+import dotenvFlow from "dotenv-flow"
 import { Kysely, PostgresDialect } from "kysely"
 import pg from "pg"
 
 import type { DB } from "./types/db.d.ts"
+
 const { Pool } = pg
 
+// The database initialization happens outside of a function, so we need to make
+// sure that we can pull environment variables here.
+dotenvFlow.config()
+
 const pool = new Pool({
-  database: "foo",
-  host: "localhost",
-  user: "postgres",
-  password: "bar",
-  port: 5432,
+  connectionString: process.env.DATABASE_CONNECTION_STRING,
   max: 10,
 })
 
