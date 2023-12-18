@@ -424,6 +424,26 @@ export class Bot {
       isTextCommand: textResponse !== undefined,
     })
 
+    this.setCommand(name, command)
+  }
+
+  /**
+   * Wraps setting a command in the map to ensure that all values with the same
+   * ID are actually the same exact object instance. This is needed for editing
+   * commands and also for built-in commands so that we can load from the
+   * database and point to the right handler in memory.
+   */
+  private setCommand(name: string, command: BotCommand) {
+    for (const existingCommand of this.commands.values()) {
+      if (
+        existingCommand.id.equals(command.id) &&
+        command !== existingCommand
+      ) {
+        throw new Error(
+          `Any commands with the same ID must be the same object. Command name: ${name}. Command ID: ${command.id.toString()}`,
+        )
+      }
+    }
     this.commands.set(name, command)
   }
 
@@ -449,7 +469,7 @@ export class Bot {
       throw new Error("There was a database error aliasing that command.")
     }
 
-    this.commands.set(alias, this.commands.get(targetCommandName) as BotCommand)
+    this.setCommand(alias, this.commands.get(targetCommandName) as BotCommand)
   }
 
   async loadTextCommands() {
@@ -479,9 +499,9 @@ export class Bot {
           isPrivileged,
           canBeDeleted,
         })
-        this.commands.set(name, command)
+        this.setCommand(name, command)
       } else {
-        this.commands.set(name, commandWithId)
+        this.setCommand(name, commandWithId)
       }
     }
   }
