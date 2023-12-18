@@ -1,11 +1,11 @@
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
-import { sql } from "kysely"
 import { UUID, uuidv7 } from "uuidv7"
 
 import type { CommandData } from "../commands/CommandData"
-import { db } from "../database/database"
+import { BotDatabase } from "../database/BotDatabase"
+import type { BotStorageLayer } from "../database/BotStorageLayer"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
@@ -22,6 +22,7 @@ type MakeChatClient = (authProvider: RefreshingAuthProvider) => ChatClient
 export class Bot {
   private readonly authProvider: RefreshingAuthProvider
   private readonly api: ApiClient
+  private readonly storageLayer: BotStorageLayer
   private readonly chat: ChatClient
 
   // Keys: any known command name, including an alias. This means that "lang" and
@@ -30,10 +31,12 @@ export class Bot {
 
   constructor({
     authProvider,
+    storageLayer,
     makeApiClient,
     makeChatClient,
   }: {
     authProvider: RefreshingAuthProvider
+    storageLayer?: BotStorageLayer | undefined
     makeApiClient?: MakeApiClient | undefined
     makeChatClient?: MakeChatClient | undefined
   }) {
@@ -48,6 +51,8 @@ export class Bot {
             logger: { minLevel: logLevel },
           })
         : makeApiClient(authProvider)
+
+    this.storageLayer = storageLayer ?? new BotDatabase()
 
     this.chat =
       makeChatClient === undefined
@@ -69,7 +74,7 @@ export class Bot {
 
   async init() {
     await this.addBuiltinCommands()
-    await this.loadTextCommandsFromDatabase()
+    await this.loadTextCommands()
   }
 
   /**
@@ -110,10 +115,7 @@ export class Bot {
 
     const command = this.commands.get(commandName) as BotCommand
 
-    await db
-      .deleteFrom("commands")
-      .where("id", "=", command.id.toString())
-      .execute()
+    await this.storageLayer.deleteCommand(command.id.toString())
 
     const allCommandNames = this.getAllNamesOfCommand(commandName)
     for (const name of allCommandNames) {
@@ -157,14 +159,7 @@ export class Bot {
 
     const response = params.slice(1).join(" ")
 
-    await db
-      .updateTable("text_command_responses")
-      .set({
-        response,
-        updated_at: sql`now()`,
-      })
-      .where("id", "=", command.id.toString())
-      .execute()
+    await this.storageLayer.editCommand(command.id.toString(), response)
 
     const handler = this.makeTextCommandHandler(response)
 
@@ -200,11 +195,7 @@ export class Bot {
 
     const command = this.commands.get(alias) as BotCommand
 
-    await db
-      .deleteFrom("command_names")
-      .where("id", "=", command.id.toString())
-      .where("name", "=", alias)
-      .execute()
+    await this.storageLayer.deleteAliasOfCommand(command.id.toString(), alias)
 
     this.commands.delete(alias)
     allCommandNames.splice(allCommandNames.indexOf(alias), 1)
@@ -320,45 +311,17 @@ export class Bot {
       handler = this.makeTextCommandHandler(textResponse)
     }
 
-    const response = await db
-      .selectFrom("commands")
-      .innerJoin("command_names", "commands.id", "command_names.id")
-      .where("command_names.name", "=", name)
-      .select(["commands.id"])
-      .executeTakeFirst()
-
-    let id = response?.id
+    let id = await this.storageLayer.findCommandByName(name)
 
     if (!id) {
       id = uuidv7()
 
-      await db.transaction().execute(async (trx) => {
-        await trx
-          .insertInto("commands")
-          .values({
-            id: id as string,
-            is_privileged: isPrivileged,
-            can_be_deleted: canBeDeleted,
-          })
-          .execute()
-
-        await trx
-          .insertInto("command_names")
-          .values({
-            id: id as string,
-            name,
-          })
-          .execute()
-
-        if (textResponse) {
-          await trx
-            .insertInto("text_command_responses")
-            .values({
-              id: id as string,
-              response: textResponse,
-            })
-            .execute()
-        }
+      await this.storageLayer.addCommand({
+        id,
+        isPrivileged,
+        canBeDeleted,
+        name,
+        textResponse,
       })
     }
 
@@ -384,75 +347,41 @@ export class Bot {
 
     const command = this.commands.get(targetCommandName) as BotCommand
 
-    await db.transaction().execute(async (trx) => {
-      // If the alias already exists and points to the correct command in the
-      // database, then don't do anything. This is so that we don't get errors
-      // trying to add the built-in aliases every time the bot starts up.
-      const response = await trx
-        .selectFrom("commands")
-        .innerJoin("command_names", "commands.id", "command_names.id")
-        .where("commands.id", "=", command.id.toString())
-        .where("command_names.name", "in", [alias, targetCommandName])
-        .select(["command_names.name"])
-        .execute()
-
-      if (response.length !== 2) {
-        await trx
-          .insertInto("command_names")
-          .values({
-            id: command.id.toString(),
-            name: alias,
-          })
-          .execute()
-      }
-    })
+    await this.storageLayer.addAlias(
+      command.id.toString(),
+      alias,
+      targetCommandName,
+    )
 
     this.commands.set(alias, this.commands.get(targetCommandName) as BotCommand)
   }
 
-  loadTextCommandsFromDatabase = async () => {
-    await db.transaction().execute(async (trx) => {
-      const response = await trx
-        .selectFrom("commands")
-        .innerJoin("command_names", "commands.id", "command_names.id")
-        .innerJoin(
-          "text_command_responses",
-          "commands.id",
-          "text_command_responses.id",
-        )
-        .select([
-          "commands.id",
-          "command_names.name",
-          "commands.is_privileged",
-          "commands.can_be_deleted",
-          "text_command_responses.response",
-        ])
-        .execute()
-      for (const row of response) {
-        const id = UUID.parse(row.id)
-        const name = row.name
-        const isPrivileged = row.is_privileged
-        const canBeDeleted = row.can_be_deleted
-        const textResponse = row.response
-        const handler = this.makeTextCommandHandler(textResponse)
+  async loadTextCommands() {
+    const response = await this.storageLayer.loadTextCommands()
+    for (const row of response) {
+      const id = UUID.parse(row.id)
+      const name = row.name
+      const isPrivileged = row.is_privileged
+      const canBeDeleted = row.can_be_deleted
+      const textResponse = row.response
+      const handler = this.makeTextCommandHandler(textResponse)
 
-        const commandWithId = [...this.commands.values()].find((command) =>
-          command.id.equals(id),
-        )
+      const commandWithId = [...this.commands.values()].find((command) =>
+        command.id.equals(id),
+      )
 
-        if (commandWithId === undefined) {
-          const command = new BotCommand({
-            id,
-            handler,
-            isPrivileged,
-            canBeDeleted,
-          })
-          this.commands.set(name, command)
-        } else {
-          this.commands.set(name, commandWithId)
-        }
+      if (commandWithId === undefined) {
+        const command = new BotCommand({
+          id,
+          handler,
+          isPrivileged,
+          canBeDeleted,
+        })
+        this.commands.set(name, command)
+      } else {
+        this.commands.set(name, commandWithId)
       }
-    })
+    }
   }
 
   getAllNamesOfCommand(commandName: string): string[] {

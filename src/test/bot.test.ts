@@ -4,6 +4,7 @@ import { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient } from "@twurple/chat"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
+import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer"
 import { Bot } from "../twitch/Bot"
 import { BotCommandContext } from "../twitch/BotCommandContext"
 import type { ChatMessage } from "../twitch/ChatMessage"
@@ -21,6 +22,7 @@ async function createBot() {
   })
   const bot = new Bot({
     authProvider,
+    storageLayer: new BotFakeStorageLayer(),
     makeApiClient: () => {
       return new ApiClient({ authProvider })
     },
@@ -276,13 +278,13 @@ describe("Addition tests", () => {
     expect((replySpy.mock.lastCall as string[])[0]).toContain("already exists")
   })
 
-  test("cannot add a command through the API that already exists", () => {
+  test("cannot add a command through the API that already exists", async () => {
     const context = createMockContext()
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
-    expect(async () => {
+    await expect(async () => {
       await bot.addCommand({ name: "delcom", handler: () => {} })
-    }).toThrowError("already")
+    }).rejects.toThrowError("already")
   })
 
   test("can add a command", async () => {
@@ -364,7 +366,7 @@ describe("Deletion tests", () => {
     msg: ChatMessage,
   ) => void
 
-  test("non-mod user cannot delete commands", () => {
+  test("non-mod user cannot delete commands", async () => {
     const authProvider = new RefreshingAuthProvider({
       clientId: "clientId",
       clientSecret: "clientSecret",
@@ -384,8 +386,9 @@ describe("Deletion tests", () => {
       },
     )
 
-    new Bot({
+    const bot = new Bot({
       authProvider,
+      storageLayer: new BotFakeStorageLayer(),
       makeApiClient: () => {
         return new ApiClient({ authProvider })
       },
@@ -393,6 +396,10 @@ describe("Deletion tests", () => {
         return mockChatClient
       },
     })
+
+    await bot.init()
+
+    await bot.addCommand({ name: "today", textResponse: "Today is a good day" })
 
     if (fn !== undefined) {
       fn("channel", "user", "!delcom today", {
