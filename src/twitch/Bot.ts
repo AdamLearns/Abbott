@@ -8,6 +8,7 @@ import { UUID, uuidv7 } from "uuidv7"
 import type { CommandData } from "../commands/CommandData"
 import { BotDatabase } from "../database/BotDatabase"
 import type { BotStorageLayer } from "../database/BotStorageLayer"
+import type { DatabaseTextCommand } from "../database/DatabaseTextCommand"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
@@ -119,7 +120,12 @@ export class Bot {
 
     const command = this.commands.get(commandName) as BotCommand
 
-    await this.storageLayer.deleteCommand(command.id.toString())
+    try {
+      await this.storageLayer.deleteCommand(command.id.toString())
+    } catch (error) {
+      console.error(`Error deleting ${commandName}:`, error)
+      return context.reply("There was a database error deleting that command.")
+    }
 
     const allCommandNames = this.getAllNamesOfCommand(commandName)
     for (const name of allCommandNames) {
@@ -163,7 +169,12 @@ export class Bot {
 
     const response = params.slice(1).join(" ")
 
-    await this.storageLayer.editCommand(command.id.toString(), response)
+    try {
+      await this.storageLayer.editCommand(command.id.toString(), response)
+    } catch (error) {
+      console.error(`Error editing ${commandName}:`, error)
+      return context.reply("There was a database error editing that command.")
+    }
 
     const handler = this.makeTextCommandHandler(response)
 
@@ -199,7 +210,14 @@ export class Bot {
 
     const command = this.commands.get(alias) as BotCommand
 
-    await this.storageLayer.deleteAliasOfCommand(command.id.toString(), alias)
+    try {
+      await this.storageLayer.deleteAliasOfCommand(command.id.toString(), alias)
+    } catch (error) {
+      console.error(`Error unaliasing ${alias}:`, error)
+      return context.reply(
+        "There was a database error unaliasing that command.",
+      )
+    }
 
     this.commands.delete(alias)
     allCommandNames.splice(allCommandNames.indexOf(alias), 1)
@@ -240,7 +258,16 @@ export class Bot {
 
     const searchString = params[0] as string
 
-    const commandNames = await this.storageLayer.fuzzyFindCommands(searchString)
+    let commandNames: string[]
+    try {
+      commandNames = await this.storageLayer.fuzzyFindCommands(searchString)
+    } catch (error) {
+      console.error(`Error fuzzy-finding ${searchString}:`, error)
+      return context.reply(
+        "There was a database error while trying to fuzzy-find.",
+      )
+    }
+
     const commandString = commandNames.join(", ").slice(0, 350)
 
     await context.reply(
@@ -305,7 +332,14 @@ export class Bot {
     // Combine all the params after the command name into one string
     const response = params.slice(1).join(" ")
 
-    await context.bot.addCommand({ name: commandName, textResponse: response })
+    try {
+      await context.bot.addCommand({
+        name: commandName,
+        textResponse: response,
+      })
+    } catch {
+      return context.reply("There was a database error adding that command")
+    }
 
     await context.reply(`Command "${commandName}" successfully added!`)
   }
@@ -362,18 +396,24 @@ export class Bot {
       handler = this.makeTextCommandHandler(textResponse)
     }
 
-    let id = await this.storageLayer.findCommandByName(name)
+    let id: string | undefined
 
-    if (!id) {
-      id = uuidv7()
+    try {
+      id = await this.storageLayer.findCommandByName(name)
+      if (!id) {
+        id = uuidv7()
 
-      await this.storageLayer.addCommand({
-        id,
-        isPrivileged,
-        canBeDeleted,
-        name,
-        textResponse,
-      })
+        await this.storageLayer.addCommand({
+          id,
+          isPrivileged,
+          canBeDeleted,
+          name,
+          textResponse,
+        })
+      }
+    } catch (error) {
+      console.error(`Error adding command "${name}":`, error)
+      throw error
     }
 
     const command = new BotCommand({
@@ -398,17 +438,28 @@ export class Bot {
 
     const command = this.commands.get(targetCommandName) as BotCommand
 
-    await this.storageLayer.addAlias(
-      command.id.toString(),
-      alias,
-      targetCommandName,
-    )
+    try {
+      await this.storageLayer.addAlias(
+        command.id.toString(),
+        alias,
+        targetCommandName,
+      )
+    } catch (error) {
+      console.error(`Error aliasing ${alias}:`, error)
+      throw new Error("There was a database error aliasing that command.")
+    }
 
     this.commands.set(alias, this.commands.get(targetCommandName) as BotCommand)
   }
 
   async loadTextCommands() {
-    const response = await this.storageLayer.loadTextCommands()
+    let response: DatabaseTextCommand[] = []
+    try {
+      response = await this.storageLayer.loadTextCommands()
+    } catch (error) {
+      console.error("Error loading text commands from database:", error)
+      throw error
+    }
     for (const row of response) {
       const id = UUID.parse(row.id)
       const name = row.name
