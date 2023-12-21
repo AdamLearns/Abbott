@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import dotenvFlow from "dotenv-flow"
 import {
   Kysely,
   Migrator,
@@ -12,16 +13,14 @@ import { run } from "kysely-migration-cli"
 import pg from "pg"
 const { Pool } = pg
 
+dotenvFlow.config()
+
 // The very nature of migrations is that we are about to change the
 // types of the database, so we intentionally use `unknown` here.
 const db = new Kysely<unknown>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      database: "foo",
-      host: "localhost",
-      user: "postgres",
-      password: "bar",
-      port: 5432,
+      connectionString: process.env.DATABASE_CONNECTION_STRING,
       max: 10,
     }),
   }),
