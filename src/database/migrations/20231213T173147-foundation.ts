@@ -1,7 +1,5 @@
 import { type Kysely, sql } from "kysely"
 
-import { db } from "../database"
-
 export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .createTable("users")
@@ -87,7 +85,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .execute()
 }
 
-export async function down() {
+export async function down(db: Kysely<unknown>) {
   await db.schema.dropTable("text_command_responses").execute()
   await db.schema.dropTable("command_names").execute()
   await db.schema.dropTable("commands").execute()
