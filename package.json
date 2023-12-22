@@ -7,6 +7,7 @@
 		"start": "tsx src/main.ts",
 		"lint": "eslint --cache --max-warnings=0 .",
 		"dev": "tsx watch tsc/main.ts",
+		"type-check": "tsc --noEmit",
 		"test": "vitest",
 		"coverage": "vitest run --coverage",
 		"kysely-codegen": "kysely-codegen",
