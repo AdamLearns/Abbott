@@ -48,10 +48,10 @@ export class BotDatabase implements BotStorageLayer {
     textResponse,
   }: {
     id: string
-    isPrivileged: boolean
-    canBeDeleted: boolean
+    isPrivileged?: boolean | undefined
+    canBeDeleted?: boolean | undefined
     name: string
-    textResponse: string | undefined
+    textResponse?: string | undefined
   }) {
     await db.transaction().execute(async (trx) => {
       await trx

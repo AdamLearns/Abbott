@@ -9,6 +9,12 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - I don't plan on making the bot be generally available or usable (e.g. I probably won't add features that people ask about).
 - I probably won't do anything explicit to maintain this repo unless it's something I need for myself.
 
+## Testing
+
+- Start the test database in a Docker image: `docker compose -f ./src/database/test_compose.yml up`
+- Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./src/test/database.test.ts`.
+- When running `pnpm coverage`, open the results with `open coverage/index.html`.
+
 ## Migrations
 
 - Creating: `pnpm run kysely-migration-cli create <migration_name>`

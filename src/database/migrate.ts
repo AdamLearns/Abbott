@@ -1,47 +1,8 @@
-import fs from "node:fs/promises"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
+// Note: the only point of this file is to automatically run migrations just by
+// importing this file (as opposed to importing a function and then having to
+// call the function). At the time of writing, the caller that needs this is the
+// "kysely-migration-cli" script in package.json.
 
-import dotenvFlow from "dotenv-flow"
-import {
-  Kysely,
-  Migrator,
-  PostgresDialect,
-  FileMigrationProvider,
-} from "kysely"
-import { run } from "kysely-migration-cli"
-import pg from "pg"
-const { Pool } = pg
+import { migrate } from "./migrate-fn"
 
-dotenvFlow.config()
-
-// The very nature of migrations is that we are about to change the
-// types of the database, so we intentionally use `unknown` here.
-const db = new Kysely<unknown>({
-  dialect: new PostgresDialect({
-    pool: new Pool({
-      connectionString: process.env.DATABASE_CONNECTION_STRING,
-      max: 10,
-    }),
-  }),
-})
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const migrationFolder = path.join(__dirname, "migrations")
-
-const migrator = new Migrator({
-  db,
-  provider: new FileMigrationProvider({
-    fs,
-    migrationFolder,
-    path,
-  }),
-})
-
-run(db, migrator, migrationFolder)
-
-console.log(
-  "Don't forget to regenerate types with something like this: DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen",
-)
+migrate()

@@ -1,0 +1,12 @@
+# This entire file is just for the sake of running database tests.
+version: '3.8'
+services:
+  test_db:
+    image: postgres:16.1
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bar
+      POSTGRES_DB: foo_test
+    ports:
+      - 5433:5432
