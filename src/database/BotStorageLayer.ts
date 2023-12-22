@@ -1,11 +1,13 @@
 import type { DatabaseTextCommand } from "./DatabaseTextCommand"
+import type { NewCommand, NewCommandName } from "./types/kysely-wrappers"
 
 export interface BotStorageLayer {
-  addAlias(id: string, alias: string, targetCommandName: string): Promise<void>
+  addAlias(
+    newCommandName: NewCommandName,
+    targetCommandName: string,
+  ): Promise<void>
   addCommand(params: {
-    id: string
-    isPrivileged: boolean
-    canBeDeleted: boolean
+    newCommand: NewCommand
     name: string
     textResponse: string | undefined
   }): Promise<void>

@@ -4,6 +4,7 @@ import { db } from "../database/database"
 
 import type { BotStorageLayer } from "./BotStorageLayer"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand"
+import type { NewCommand, NewCommandName } from "./types/kysely-wrappers"
 
 export class BotDatabase implements BotStorageLayer {
   async deleteCommand(id: string) {
@@ -41,32 +42,21 @@ export class BotDatabase implements BotStorageLayer {
   }
 
   async addCommand({
-    id,
-    isPrivileged,
-    canBeDeleted,
+    newCommand,
     name,
     textResponse,
   }: {
-    id: string
-    isPrivileged?: boolean | undefined
-    canBeDeleted?: boolean | undefined
+    newCommand: NewCommand
     name: string
     textResponse?: string | undefined
   }) {
     await db.transaction().execute(async (trx) => {
-      await trx
-        .insertInto("commands")
-        .values({
-          id,
-          is_privileged: isPrivileged,
-          can_be_deleted: canBeDeleted,
-        })
-        .execute()
+      await trx.insertInto("commands").values(newCommand).execute()
 
       await trx
         .insertInto("command_names")
         .values({
-          id,
+          id: newCommand.id,
           name,
         })
         .execute()
@@ -75,7 +65,7 @@ export class BotDatabase implements BotStorageLayer {
         await trx
           .insertInto("text_command_responses")
           .values({
-            id,
+            id: newCommand.id,
             response: textResponse,
           })
           .execute()
@@ -83,7 +73,7 @@ export class BotDatabase implements BotStorageLayer {
     })
   }
 
-  async addAlias(id: string, alias: string, targetCommandName: string) {
+  async addAlias(newCommandName: NewCommandName, targetCommandName: string) {
     await db.transaction().execute(async (trx) => {
       // If the alias already exists and points to the correct command in the
       // database, then don't do anything. This is so that we don't get errors
@@ -91,19 +81,16 @@ export class BotDatabase implements BotStorageLayer {
       const response = await trx
         .selectFrom("commands")
         .innerJoin("command_names", "commands.id", "command_names.id")
-        .where("commands.id", "=", id)
-        .where("command_names.name", "in", [alias, targetCommandName])
+        .where("commands.id", "=", newCommandName.id)
+        .where("command_names.name", "in", [
+          newCommandName.name,
+          targetCommandName,
+        ])
         .select(["command_names.name"])
         .execute()
 
       if (response.length !== 2) {
-        await trx
-          .insertInto("command_names")
-          .values({
-            id,
-            name: alias,
-          })
-          .execute()
+        await trx.insertInto("command_names").values(newCommandName).execute()
       }
     })
   }

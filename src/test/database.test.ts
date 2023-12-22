@@ -67,7 +67,7 @@ describe("Database tests", () => {
     const origResponse = "bar"
     const newResponse = "newbar"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name: "foo",
       textResponse: origResponse,
     })
@@ -100,7 +100,7 @@ describe("Database tests", () => {
     const name1 = "foo"
     const name2 = "foo2"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name: name1,
     })
 
@@ -109,7 +109,7 @@ describe("Database tests", () => {
     foundId = await botDatabase.findCommandByName(name2)
     expect(foundId).toBeUndefined()
 
-    await botDatabase.addAlias(id, name2, name1)
+    await botDatabase.addAlias({ id, name: name2 }, name1)
 
     foundId = await botDatabase.findCommandByName(name2)
     expect(foundId).toBeDefined()
@@ -125,7 +125,7 @@ describe("Database tests", () => {
     const id = uuidv7()
     const name = "foo"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name,
     })
 
@@ -145,7 +145,7 @@ describe("Database tests", () => {
     const id = uuidv7()
     const name = "foo"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name,
     })
 
@@ -163,14 +163,14 @@ describe("Database tests", () => {
     const name1 = "foo"
     const name2 = "foo2"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name: name1,
     })
 
     response = await db.selectFrom("command_names").execute()
     expect(response).toHaveLength(1)
 
-    await botDatabase.addAlias(id, name2, name1)
+    await botDatabase.addAlias({ id, name: name2 }, name1)
 
     response = await db.selectFrom("command_names").execute()
     expect(response).toHaveLength(2)
@@ -185,22 +185,22 @@ describe("Database tests", () => {
     const name2 = "foo2"
     const name3 = "foo3"
     await botDatabase.addCommand({
-      id,
+      newCommand: { id },
       name: name1,
     })
 
-    await botDatabase.addAlias(id, name2, name1)
+    await botDatabase.addAlias({ id, name: name2 }, name1)
 
     let response = await db.selectFrom("command_names").execute()
     expect(response).toHaveLength(2)
 
     // Making the same call we already did should have no effect
-    await botDatabase.addAlias(id, name2, name1)
+    await botDatabase.addAlias({ id, name: name2 }, name1)
     response = await db.selectFrom("command_names").execute()
     expect(response).toHaveLength(2)
 
     // Adding a NEW alias should have an effect
-    await botDatabase.addAlias(id, name3, name1)
+    await botDatabase.addAlias({ id, name: name3 }, name1)
     response = await db.selectFrom("command_names").execute()
     expect(response).toHaveLength(3)
   })
@@ -213,7 +213,7 @@ describe("Database tests", () => {
     let count = 0
     for (const name of names) {
       await botDatabase.addCommand({
-        id: uuidv7(),
+        newCommand: { id: uuidv7() },
         name,
         textResponse: "response",
       })

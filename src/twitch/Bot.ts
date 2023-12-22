@@ -404,9 +404,11 @@ export class Bot {
         id = uuidv7()
 
         await this.storageLayer.addCommand({
-          id,
-          isPrivileged,
-          canBeDeleted,
+          newCommand: {
+            id,
+            is_privileged: isPrivileged,
+            can_be_deleted: canBeDeleted,
+          },
           name,
           textResponse,
         })
@@ -460,8 +462,7 @@ export class Bot {
 
     try {
       await this.storageLayer.addAlias(
-        command.id.toString(),
-        alias,
+        { id: command.id.toString(), name: alias },
         targetCommandName,
       )
     } catch (error) {
