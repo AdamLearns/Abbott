@@ -378,9 +378,11 @@ describe("Deletion tests", () => {
       .spyOn(mockChatClient, "say")
       .mockImplementation(async () => {})
 
-    // TODO: I can't figure out how you're SUPPOSED to write this line... 😢
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     vi.spyOn(mockChatClient, "onMessage").mockImplementation(
+      // TODO: I can't figure out how you're SUPPOSED to write this line... 😢
+      // @ts-expect-error: This is necessary to suppress the TypeScript error
+      // because the implementation of the onMessage function requires the
+      // fnToCall parameter. In other words, I'm being lazy for now.
       (fnToCall: OnMessageFunction) => {
         fn = fnToCall
       },

@@ -31,6 +31,9 @@ dependencies:
     version: 5.3.2
 
 devDependencies:
+  '@d-fischer/typed-event-emitter':
+    specifier: ^3.3.3
+    version: 3.3.3
   '@hideoo/eslint-config':
     specifier: ^2.0.2
     version: 2.0.2(eslint@8.55.0)(typescript@5.3.2)
@@ -324,7 +327,7 @@ packages:
       '@d-fischer/isomorphic-ws': 7.0.0(ws@8.14.2)
       '@d-fischer/logger': 4.2.3
       '@d-fischer/shared-utils': 3.6.3
-      '@d-fischer/typed-event-emitter': 3.3.2
+      '@d-fischer/typed-event-emitter': 3.3.3
       '@types/ws': 8.5.10
       tslib: 2.6.2
       ws: 8.14.2
@@ -395,8 +398,8 @@ packages:
     dependencies:
       tslib: 2.6.2
 
-  /@d-fischer/typed-event-emitter@3.3.2:
-    resolution: {integrity: sha512-M+fZQxiAA6UTwaTNeDhNoQcQG+eg9B85cNTw4FwwmN0ZEi6IfvXS0cnLFW1Ec86TdnFkoQ1VHxGx4pTtKPVe1Q==}
+  /@d-fischer/typed-event-emitter@3.3.3:
+    resolution: {integrity: sha512-OvSEOa8icfdWDqcRtjSEZtgJTFOFNgTjje7zaL0+nAtu2/kZtRCSK5wUMrI/aXtCH8o0Qz2vA8UqkhWUTARFQQ==}
     dependencies:
       tslib: 2.6.2
 
@@ -1147,7 +1150,7 @@ packages:
       '@d-fischer/logger': 4.2.3
       '@d-fischer/rate-limiter': 0.7.5
       '@d-fischer/shared-utils': 3.6.3
-      '@d-fischer/typed-event-emitter': 3.3.2
+      '@d-fischer/typed-event-emitter': 3.3.3
       '@twurple/api-call': 7.0.6
       '@twurple/auth': 7.0.6
       '@twurple/common': 7.0.6
@@ -1162,7 +1165,7 @@ packages:
     dependencies:
       '@d-fischer/logger': 4.2.3
       '@d-fischer/shared-utils': 3.6.3
-      '@d-fischer/typed-event-emitter': 3.3.2
+      '@d-fischer/typed-event-emitter': 3.3.3
       '@twurple/api-call': 7.0.6
       '@twurple/common': 7.0.6
       tslib: 2.6.2
@@ -1179,7 +1182,7 @@ packages:
       '@d-fischer/logger': 4.2.3
       '@d-fischer/rate-limiter': 0.7.5
       '@d-fischer/shared-utils': 3.6.3
-      '@d-fischer/typed-event-emitter': 3.3.2
+      '@d-fischer/typed-event-emitter': 3.3.3
       '@twurple/auth': 7.0.6
       '@twurple/common': 7.0.6
       ircv3: 0.32.3
@@ -3132,7 +3135,7 @@ packages:
       '@d-fischer/escape-string-regexp': 5.0.0
       '@d-fischer/logger': 4.2.3
       '@d-fischer/shared-utils': 3.6.3
-      '@d-fischer/typed-event-emitter': 3.3.2
+      '@d-fischer/typed-event-emitter': 3.3.3
       klona: 2.0.6
       tslib: 2.6.2
     transitivePeerDependencies:
