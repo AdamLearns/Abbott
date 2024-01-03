@@ -18,8 +18,10 @@
 		"@tsconfig/node18": "^18.2.2",
 		"@twurple/auth": "^7.0.6",
 		"@twurple/chat": "^7.0.6",
+		"@types/lodash": "^4.14.202",
 		"dotenv-flow": "^4.0.1",
 		"kysely": "^0.26.3",
+		"lodash": "^4.17.21",
 		"pg": "^8.11.3",
 		"tsx": "^4.6.2",
 		"typescript": "^5.3.2"

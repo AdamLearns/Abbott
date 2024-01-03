@@ -1,4 +1,5 @@
 import { sql } from "kysely"
+import sample from "lodash/sample"
 
 import { db } from "../database/database"
 
@@ -163,7 +164,7 @@ export class BotDatabase implements BotStorageLayer {
       .select(["id", "author", "quote", "quoted_at"])
       .execute()
 
-    return response[Math.floor(Math.random() * response.length)]
+    return sample(response)
   }
 
   async deleteQuote(id: number): Promise<GetQuote | undefined> {
