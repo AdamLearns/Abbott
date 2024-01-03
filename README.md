@@ -23,6 +23,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 ## Migrations
 
 - Creating: `pnpm run kysely-migration-cli create <migration_name>`
-- Migrating: `pnpm run kysely-migration-cli latest`
+- Back up: `backUpDatabase` in my shell (this is important as of Fri 12/22/2023 when I only have one database 👀)
+- Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
 - Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./src/database/types/db.d.ts`
