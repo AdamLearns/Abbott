@@ -1,5 +1,9 @@
 import type { DatabaseTextCommand } from "./DatabaseTextCommand"
-import type { NewCommand, NewCommandName } from "./types/kysely-wrappers"
+import type {
+  GetQuote,
+  NewCommand,
+  NewCommandName,
+} from "./types/kysely-wrappers"
 
 export interface BotStorageLayer {
   addAlias(
@@ -17,4 +21,8 @@ export interface BotStorageLayer {
   deleteCommand(id: string): Promise<void>
   loadTextCommands(): Promise<DatabaseTextCommand[]>
   fuzzyFindCommands(searchString: string): Promise<string[]>
+  addQuote(author: string, quote: string): Promise<number>
+  getQuote(id: number): Promise<GetQuote | undefined>
+  getRandomQuote(): Promise<GetQuote | undefined>
+  deleteQuote(id: number): Promise<GetQuote | undefined>
 }

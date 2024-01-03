@@ -27,6 +27,14 @@ export interface CommandUsage {
   user_id: string
 }
 
+export interface Quotes {
+  author: string
+  created_at: Generated<Timestamp>
+  id: Generated<number>
+  quote: string
+  quoted_at: Generated<Timestamp>
+}
+
 export interface TextCommandResponses {
   created_at: Generated<Timestamp>
   id: string
@@ -50,6 +58,7 @@ export interface DB {
   command_names: CommandNames
   command_usage: CommandUsage
   commands: Commands
+  quotes: Quotes
   text_command_responses: TextCommandResponses
   user_correlation: UserCorrelation
   users: Users

@@ -6,7 +6,7 @@ import type { DatabaseTextCommand } from "./DatabaseTextCommand"
 export class BotFakeStorageLayer implements BotStorageLayer {
   async addAlias() {}
   async addCommand() {}
-  async findCommandByName(): Promise<string | undefined> {
+  async findCommandByName(): Promise<undefined> {
     return undefined
   }
   async deleteAliasOfCommand() {}
@@ -17,5 +17,17 @@ export class BotFakeStorageLayer implements BotStorageLayer {
   }
   async fuzzyFindCommands(): Promise<string[]> {
     return []
+  }
+  async addQuote(): Promise<number> {
+    return 0
+  }
+  async getQuote(): Promise<undefined> {
+    return undefined
+  }
+  async getRandomQuote(): Promise<undefined> {
+    return undefined
+  }
+  async deleteQuote(): Promise<undefined> {
+    return undefined
   }
 }

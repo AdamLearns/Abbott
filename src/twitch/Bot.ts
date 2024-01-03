@@ -9,6 +9,7 @@ import type { CommandData } from "../commands/CommandData"
 import { BotDatabase } from "../database/BotDatabase"
 import type { BotStorageLayer } from "../database/BotStorageLayer"
 import type { DatabaseTextCommand } from "../database/DatabaseTextCommand"
+import type { GetQuote } from "../database/types/kysely-wrappers"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
@@ -92,11 +93,21 @@ export class Bot {
     await this.addUnaliasComCommand()
     await this.addAlertCommand()
     await this.addFuzzyFindCommand()
+    await this.addAddQuoteCommand()
+    await this.addGetQuoteCommand()
+    await this.addDelQuoteCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
     await this.addAlias("alias", "aliascom")
     await this.addAlias("unalias", "unaliascom")
+    await this.addAlias("aq", "addquote")
+    await this.addAlias("quoteadd", "addquote")
+    await this.addAlias("quote", "getquote")
+    await this.addAlias("gq", "getquote")
+    await this.addAlias("quoteget", "getquote")
+    await this.addAlias("deletequote", "delquote")
+    await this.addAlias("quotedelete", "delquote")
   }
 
   userDeleteCommand = async (params: string[], context: BotCommandContext) => {
@@ -346,6 +357,100 @@ export class Bot {
 
   async addAddComCommand() {
     return this.addBuiltInCommand("addcom", this.userAddCommand)
+  }
+
+  userAddQuote = async (params: string[], context: BotCommandContext) => {
+    if (params.length < 2) {
+      await context.reply(
+        `Usage: ${prefix}addquote AUTHOR QUOTE - the author cannot have spaces and the quote does not need quotation marks`,
+      )
+      return
+    }
+
+    const author = params[0] as string
+    const quote = params.slice(1).join(" ")
+
+    try {
+      const quoteId = await context.bot.storageLayer.addQuote(author, quote)
+      await context.reply(`Quote #"${quoteId}" successfully added!`)
+    } catch {
+      return context.reply("There was a database error adding that quote")
+    }
+  }
+
+  async addAddQuoteCommand() {
+    return this.addBuiltInCommand("addquote", this.userAddQuote)
+  }
+
+  userDelQuote = async (params: string[], context: BotCommandContext) => {
+    if (params.length === 0) {
+      await context.reply(`Usage: ${prefix}delquote ID`)
+      return
+    }
+
+    const idString = params[0] as string
+    const id = Number.parseInt(idString, 10)
+    if (Number.isNaN(id)) {
+      return context.reply(`"${idString}" is not a valid quote ID! 😡`)
+    }
+
+    try {
+      const deletedQuote = await context.bot.storageLayer.deleteQuote(id)
+      if (deletedQuote === undefined) {
+        return context.reply(`Quote #${id} didn't exist!`)
+      }
+      await context.reply(
+        `Deleted quote #${id}. Old contents: "${deletedQuote.quote}" - ${
+          deletedQuote.author
+        }, ${deletedQuote.quoted_at.toString()}`,
+      )
+    } catch {
+      return context.reply("There was a database error deleting that quote")
+    }
+  }
+
+  async addDelQuoteCommand() {
+    return this.addBuiltInCommand("delquote", this.userDelQuote)
+  }
+
+  userGetQuote = async (params: string[], context: BotCommandContext) => {
+    const id = params.length > 0 ? (params[0] as string) : undefined
+
+    let quote: GetQuote | undefined
+    try {
+      if (id === undefined) {
+        quote = await context.bot.storageLayer.getRandomQuote()
+        if (quote === undefined) {
+          return context.reply(`There are no quotes in the database.`)
+        }
+      } else {
+        const quoteId = Number.parseInt(id, 10)
+        if (Number.isNaN(quoteId)) {
+          return context.reply(`"${id}" is not a valid quote ID! 😡`)
+        }
+        quote = await context.bot.storageLayer.getQuote(quoteId)
+        if (quote === undefined) {
+          return context.reply(`There is no quote #${quoteId}`)
+        }
+      }
+    } catch {
+      return context.reply("There was a database error getting a quote")
+    }
+
+    return context.reply(
+      `Quote #${quote.id}: "${quote.quote}" - ${
+        quote.author
+      }, ${quote.quoted_at.toString()}`,
+    )
+  }
+
+  async addGetQuoteCommand() {
+    return this.addCommand({
+      name: "getquote",
+      handler: this.userGetQuote,
+      isPrivileged: false, // one of the few built-in commands that isn't privileged
+      canBeDeleted: false,
+    })
   }
 
   private makeTextCommandHandler(response: string): BotCommandHandler {

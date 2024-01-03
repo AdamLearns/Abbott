@@ -227,4 +227,50 @@ describe("Database tests", () => {
       )
     }
   })
+
+  test("can add a quote", async () => {
+    const response = await db.selectFrom("quotes").select(["id"]).execute()
+    const numQuotes = response.length
+
+    await botDatabase.addQuote("Author", "Hello world")
+
+    const quotesCount = await db
+      .selectFrom("quotes")
+      .select(db.fn.countAll().as("count"))
+      .executeTakeFirstOrThrow()
+
+    const newNumQuotes = Number.parseInt(quotesCount.count as string, 10)
+    expect(numQuotes + 1).toBe(newNumQuotes)
+  })
+
+  test("can delete a quote", async () => {
+    const uniqueAuthor = uuidv7().toString()
+    await botDatabase.addQuote(uniqueAuthor, "Hello world")
+
+    const { id } = await db
+      .selectFrom("quotes")
+      .select("id")
+      .where("author", "=", uniqueAuthor)
+      .executeTakeFirstOrThrow()
+
+    await botDatabase.deleteQuote(id)
+
+    const response = await botDatabase.getQuote(id)
+    expect(response).toBeUndefined()
+  })
+
+  test("can get a specific quote", async () => {
+    // The reason this will actually work is because the migration sets quotes
+    // up for us
+    const id = 1
+    const response = await botDatabase.getQuote(id)
+    expect(response?.id).toBe(id)
+  })
+
+  test("can get a random quote", async () => {
+    // The reason this will actually work is because the migration sets quotes
+    // up for us
+    const response = await botDatabase.getRandomQuote()
+    expect(response).toBeDefined()
+  })
 })

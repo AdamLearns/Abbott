@@ -1,6 +1,8 @@
-import type { Insertable } from "kysely"
+import type { Insertable, Selectable } from "kysely"
 
-import type { Commands, CommandNames } from "./db"
+import type { Commands, CommandNames, Quotes } from "./db"
 
 export type NewCommand = Insertable<Commands>
 export type NewCommandName = Insertable<CommandNames>
+export type Quote = Selectable<Quotes>
+export type GetQuote = Pick<Quote, "id" | "quote" | "author" | "quoted_at">

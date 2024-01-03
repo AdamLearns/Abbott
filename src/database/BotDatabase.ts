@@ -4,7 +4,11 @@ import { db } from "../database/database"
 
 import type { BotStorageLayer } from "./BotStorageLayer"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand"
-import type { NewCommand, NewCommandName } from "./types/kysely-wrappers"
+import type {
+  GetQuote,
+  NewCommand,
+  NewCommandName,
+} from "./types/kysely-wrappers"
 
 export class BotDatabase implements BotStorageLayer {
   async deleteCommand(id: string) {
@@ -130,5 +134,43 @@ export class BotDatabase implements BotStorageLayer {
       .execute()
 
     return response.map((row) => row.name)
+  }
+
+  async addQuote(author: string, quote: string): Promise<number> {
+    const response = await db
+      .insertInto("quotes")
+      .values({
+        author,
+        quote,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow()
+
+    return response.id
+  }
+
+  async getQuote(id: number): Promise<GetQuote | undefined> {
+    return db
+      .selectFrom("quotes")
+      .where("id", "=", id)
+      .select(["id", "author", "quote", "quoted_at"])
+      .executeTakeFirst()
+  }
+
+  async getRandomQuote(): Promise<GetQuote | undefined> {
+    const response = await db
+      .selectFrom("quotes")
+      .select(["id", "author", "quote", "quoted_at"])
+      .execute()
+
+    return response[Math.floor(Math.random() * response.length)]
+  }
+
+  async deleteQuote(id: number): Promise<GetQuote | undefined> {
+    return db
+      .deleteFrom("quotes")
+      .where("id", "=", id)
+      .returning(["id", "author", "quote", "quoted_at"])
+      .executeTakeFirst()
   }
 }
