@@ -372,7 +372,7 @@ export class Bot {
 
     try {
       const quoteId = await context.bot.storageLayer.addQuote(author, quote)
-      await context.reply(`Quote #"${quoteId}" successfully added!`)
+      await context.reply(`Quote #${quoteId} successfully added!`)
     } catch {
       return context.reply("There was a database error adding that quote")
     }
