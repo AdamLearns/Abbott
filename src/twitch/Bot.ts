@@ -96,6 +96,7 @@ export class Bot {
     await this.addAddQuoteCommand()
     await this.addGetQuoteCommand()
     await this.addDelQuoteCommand()
+    await this.addNumQuotesCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
@@ -448,6 +449,28 @@ export class Bot {
     return this.addCommand({
       name: "getquote",
       handler: this.userGetQuote,
+      isPrivileged: false, // one of the few built-in commands that isn't privileged
+      canBeDeleted: false,
+    })
+  }
+
+  userGetNumQuotes = async (params: string[], context: BotCommandContext) => {
+    try {
+      const numQuotes = await context.bot.storageLayer.getNumQuotes()
+      return context.reply(
+        `There is a total of ${numQuotes} quote(s). Note that not all IDs up to that number may exist if quotes were deleted.`,
+      )
+    } catch {
+      return context.reply(
+        "There was a database error getting the number of quotes.",
+      )
+    }
+  }
+
+  async addNumQuotesCommand() {
+    return this.addCommand({
+      name: "numquotes",
+      handler: this.userGetNumQuotes,
       isPrivileged: false, // one of the few built-in commands that isn't privileged
       canBeDeleted: false,
     })

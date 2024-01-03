@@ -174,4 +174,13 @@ export class BotDatabase implements BotStorageLayer {
       .returning(["id", "author", "quote", "quoted_at"])
       .executeTakeFirst()
   }
+
+  async getNumQuotes(): Promise<number> {
+    const response = await db
+      .selectFrom("quotes")
+      .select(db.fn.countAll().as("count"))
+      .executeTakeFirstOrThrow()
+
+    return Number.parseInt(response.count as string, 10)
+  }
 }

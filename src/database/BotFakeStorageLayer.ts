@@ -30,4 +30,7 @@ export class BotFakeStorageLayer implements BotStorageLayer {
   async deleteQuote(): Promise<undefined> {
     return undefined
   }
+  async getNumQuotes() {
+    return 0
+  }
 }
