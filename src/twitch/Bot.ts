@@ -3,6 +3,7 @@ import { exec } from "node:child_process"
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
+import { formatISO } from "date-fns"
 import { UUID, uuidv7 } from "uuidv7"
 
 import type { CommandData } from "../commands/CommandData"
@@ -438,10 +439,9 @@ export class Bot {
       return context.reply("There was a database error getting a quote")
     }
 
+    const date = formatISO(quote.quoted_at, { representation: "date" })
     return context.reply(
-      `Quote #${quote.id}: "${quote.quote}" - ${
-        quote.author
-      }, ${quote.quoted_at.toString()}`,
+      `Quote #${quote.id}: "${quote.quote}" - ${quote.author}, ${date}`,
     )
   }
 
