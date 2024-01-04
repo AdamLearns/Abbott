@@ -353,23 +353,13 @@ describe("Delete-command tests", () => {
       clientId: "clientId",
       clientSecret: "clientSecret",
     })
+
+    // The first parameter to onMessage is the listener
     let fn: Parameters<ChatClient["onMessage"]>[0] | undefined
 
     const mockChatClient = new ChatClient({ authProvider })
-
-    // Instead of this, that would potentially be repeated in a lot of tests, I would add a new test to test that
-    // `Bot.reply` actually always calls `ChatClient.say` with the right parameters.
-    // This would mean that after that, you can use `vi.spyOn(bot, "reply")` which ease the test readability and is
-    // easier to write.
-    // This would also means that if you change the library you use to send messages, you only have to change 1 test
-    // instead of all of them.
     const saySpy = vi.spyOn(mockChatClient, "say")
 
-    // I think instead of doing this (which would also be potentially repeated in a lot of tests), I would create a
-    // `TestChatClient` class that would extends `ChatClient` and only add a `sendTestMessage` method to easily send a
-    // message in tests.
-    // As this class would extends `ChatClient` and thus `EventEmitter`, you would be able to
-    // `this.emit(this.onMessage, ...)` like the original implementation does.
     vi.spyOn(mockChatClient, "onMessage").mockImplementation((fnToCall) => {
       fn = fnToCall
       // Return a fake listener as expected by the implementation.
@@ -389,18 +379,39 @@ describe("Delete-command tests", () => {
 
     await bot.init()
 
-    await bot.addCommand({ name: "today", textResponse: "Today is a good day" })
+    const commandName = "today"
+    const response = "Today is a good day"
+    await bot.addCommand({ name: commandName, textResponse: response })
 
-    // I prefer `assert` over the `if` and conditionnaly calling a part of the test, even if in this case the test would
-    // fail if not called, I prefer to avoid this pattern in tests as it can be confusing and error prone.
-    // Note that `assert` is imported from Vitest.
     assert(fn)
 
-    fn("channel", "user", "!delcom today", {
+    // I'm disabling the linter here because I couldn't figure out the right
+    // types of the fn to save and then call asynchronously later.
+    //
+    // eslint-disable-next-line @typescript-eslint/await-thenable, @typescript-eslint/no-confusing-void-expression
+    await fn("channel", "user", "!delcom today", {
       userInfo: { isMod: false, isBroadcaster: false },
     } as ChatMessage)
     expect(saySpy).toHaveBeenCalledOnce()
     expect(saySpy.mock.lastCall?.[1]).toContain("You don't have permission")
+
+    // Iterate over all mock calls and ensure that we didn't actually delete the command
+    for (const mockCall of saySpy.mock.calls) {
+      expect(mockCall[1]).not.toContain("success")
+    }
+
+    // Make sure the command still works (because we didn't have permission to delete it)
+    // eslint-disable-next-line @typescript-eslint/await-thenable, @typescript-eslint/no-confusing-void-expression
+    await fn("channel", "user", `!${commandName}`, {
+      userInfo: { isMod: false, isBroadcaster: false },
+    } as ChatMessage)
+    let foundCommand = false
+    for (const mockCall of saySpy.mock.calls) {
+      if (mockCall[1].includes(response)) {
+        foundCommand = true
+      }
+    }
+    expect(foundCommand).toBe(true)
   })
 })
 
