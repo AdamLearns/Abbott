@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { Listener } from "@d-fischer/typed-event-emitter"
 import { ApiClient } from "@twurple/api"
 import { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient } from "@twurple/chat"
@@ -9,6 +10,7 @@ import {
   test,
   vi,
   type MockInstance,
+  assert,
 } from "vitest"
 
 import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer"
@@ -347,34 +349,33 @@ describe("Delete-command tests", () => {
     expect(bot.getAllNamesOfCommand("food")).toHaveLength(0)
   })
 
-  type OnMessageFunction = (
-    channel: string,
-    user: string,
-    text: string,
-    msg: ChatMessage,
-  ) => void
-
   test("non-mod user cannot delete commands", async () => {
     const authProvider = new RefreshingAuthProvider({
       clientId: "clientId",
       clientSecret: "clientSecret",
     })
-    let fn: undefined | OnMessageFunction
+    let fn: Parameters<ChatClient["onMessage"]>[0] | undefined
+
     const mockChatClient = new ChatClient({ authProvider })
 
-    const saySpy = vi
-      .spyOn(mockChatClient, "say")
-      .mockImplementation(async () => {})
+    // Instead of this, that would potentially be repeated in a lot of tests, I would add a new test to test that
+    // `Bot.reply` actually always calls `ChatClient.say` with the right parameters.
+    // This would mean that after that, you can use `vi.spyOn(bot, "reply")` which ease the test readability and is
+    // easier to write.
+    // This would also means that if you change the library you use to send messages, you only have to change 1 test
+    // instead of all of them.
+    const saySpy = vi.spyOn(mockChatClient, "say")
 
-    vi.spyOn(mockChatClient, "onMessage").mockImplementation(
-      // TODO: I can't figure out how you're SUPPOSED to write this line... 😢
-      // @ts-expect-error: This is necessary to suppress the TypeScript error
-      // because the implementation of the onMessage function requires the
-      // fnToCall parameter. In other words, I'm being lazy for now.
-      (fnToCall: OnMessageFunction) => {
-        fn = fnToCall
-      },
-    )
+    // I think instead of doing this (which would also be potentially repeated in a lot of tests), I would create a
+    // `TestChatClient` class that would extends `ChatClient` and only add a `sendTestMessage` method to easily send a
+    // message in tests.
+    // As this class would extends `ChatClient` and thus `EventEmitter`, you would be able to
+    // `this.emit(this.onMessage, ...)` like the original implementation does.
+    vi.spyOn(mockChatClient, "onMessage").mockImplementation((fnToCall) => {
+      fn = fnToCall
+      // Return a fake listener as expected by the implementation.
+      return new Listener(mockChatClient, vi.fn(), vi.fn())
+    })
 
     const bot = new Bot({
       authProvider,
@@ -391,11 +392,14 @@ describe("Delete-command tests", () => {
 
     await bot.addCommand({ name: "today", textResponse: "Today is a good day" })
 
-    if (fn !== undefined) {
-      fn("channel", "user", "!delcom today", {
-        userInfo: { isMod: false, isBroadcaster: false },
-      } as ChatMessage)
-    }
+    // I prefer `assert` over the `if` and conditionnaly calling a part of the test, even if in this case the test would
+    // fail if not called, I prefer to avoid this pattern in tests as it can be confusing and error prone.
+    // Note that `assert` is imported from Vitest.
+    assert(fn)
+
+    fn("channel", "user", "!delcom today", {
+      userInfo: { isMod: false, isBroadcaster: false },
+    } as ChatMessage)
     expect(saySpy).toHaveBeenCalledOnce()
     expect(saySpy.mock.lastCall?.[1]).toContain("You don't have permission")
   })
