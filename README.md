@@ -1,4 +1,5 @@
 # Abbott
+
 A bot specifically for the Adam Learns show (Twitch, Discord, etc.).
 
 ## Expectations
@@ -27,3 +28,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
 - Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./src/database/types/db.d.ts`
+
+## `ircv3`
+
+I had to install the `ircv3` package specifically for one issue: `ChatMessage` has a `target` that is only provided as a result of [`ircv3`'s `PrivateMessage` class](https://github.com/d-fischer/ircv3/blob/483f330f52ea533b567c118ada37d30c54ac80e9/src/Message/MessageTypes/Commands/PrivateMessage.ts#L4), so [this line of code](https://github.com/AdamLearns/Abbott/blob/86815e2ec20e62c89ab753e07ea065d2f75d1227/src/twitch/BotCommandContext.ts#L18) would have a TypeScript error without installing `ircv3`. This is partially because `@types/ircv3` does not exist.

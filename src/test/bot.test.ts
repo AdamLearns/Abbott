@@ -2,7 +2,7 @@
 import { Listener } from "@d-fischer/typed-event-emitter"
 import { ApiClient } from "@twurple/api"
 import { RefreshingAuthProvider } from "@twurple/auth"
-import { ChatClient } from "@twurple/chat"
+import { ChatClient, type ChatMessage } from "@twurple/chat"
 import {
   beforeEach,
   describe,
@@ -17,7 +17,6 @@ import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer"
 import type { BotStorageLayer } from "../database/BotStorageLayer"
 import { Bot } from "../twitch/Bot"
 import { BotCommandContext } from "../twitch/BotCommandContext"
-import type { ChatMessage } from "../twitch/ChatMessage"
 
 let bot: Bot
 let storageLayer: BotStorageLayer

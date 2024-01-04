@@ -76,6 +76,9 @@ devDependencies:
   husky:
     specifier: ^8.0.3
     version: 8.0.3
+  ircv3:
+    specifier: ^0.32.4
+    version: 0.32.4
   kysely-codegen:
     specifier: ^0.11.0
     version: 0.11.0(kysely@0.26.3)(pg@8.11.3)
@@ -343,7 +346,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-    dev: false
 
   /@d-fischer/cross-fetch@5.0.3:
     resolution: {integrity: sha512-PAxxY2MJff3DUZP6uYWAo0gvp7lGry8SjZ07H661RBnJviy91o+NWR5C7E67dMvrSGvfA1kZC0xrwk+v4eTcMA==}
@@ -362,7 +364,6 @@ packages:
   /@d-fischer/escape-string-regexp@5.0.0:
     resolution: {integrity: sha512-7eoxnxcto5eVPW5h1T+ePnVFukmI9f/ZR9nlBLh1t3kyzJDUNor2C+YW9H/Terw3YnbZSDgDYrpCJCHtOtAQHw==}
     engines: {node: '>=10'}
-    dev: false
 
   /@d-fischer/isomorphic-ws@7.0.0(ws@8.14.2):
     resolution: {integrity: sha512-bydCy1tKvPKvyF0KeDvN1aiAZA4CzQVa2gHifNQczW9Czl89vZ4QHnJMjUcTboWKecbnz5mGiM9PjKA1Xx2Dyg==}
@@ -370,7 +371,6 @@ packages:
       ws: ^8.2.0
     dependencies:
       ws: 8.14.2
-    dev: false
 
   /@d-fischer/logger@4.2.3:
     resolution: {integrity: sha512-mJUx9OgjrNVLQa4od/+bqnmD164VTCKnK5B4WOW8TX5y/3w2i58p+PMRE45gUuFjk2BVtOZUg55JQM3d619fdw==}
@@ -1194,7 +1194,7 @@ packages:
       '@d-fischer/typed-event-emitter': 3.3.3
       '@twurple/auth': 7.0.6
       '@twurple/common': 7.0.6
-      ircv3: 0.32.3
+      ircv3: 0.32.4
       tslib: 2.6.2
     transitivePeerDependencies:
       - bufferutil
@@ -1249,7 +1249,6 @@ packages:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
       '@types/node': 18.19.2
-    dev: false
 
   /@typescript-eslint/eslint-plugin@6.13.2(@typescript-eslint/parser@6.13.2)(eslint@8.55.0)(typescript@5.3.2):
     resolution: {integrity: sha512-3+9OGAWHhk4O1LlcwLBONbdXsAhLjyCFogJY/cWy2lxdVJ2JrcTF2pTGMaLl2AE7U1l31n8Py4a8bx5DLf/0dQ==}
@@ -3145,8 +3144,8 @@ packages:
     engines: {node: '>= 0.10'}
     dev: true
 
-  /ircv3@0.32.3:
-    resolution: {integrity: sha512-H0ejwbIPzJO73PPGJGrdEDrqRxxK0f+6/7kNZ7yY/ukTDZ8zy7w7mN4wMbmOFrnPYO78ZKnbeqmkBRgcVJ552Q==}
+  /ircv3@0.32.4:
+    resolution: {integrity: sha512-gAABNRteBwIOAv6lMCtb+rlDh1JtpEojeHNGy5bBoBUMlGSJxJj9Ap2UOUTjzX5lMQRjE0H9fC4FJLymBlQNkw==}
     dependencies:
       '@d-fischer/connection': 8.0.5
       '@d-fischer/escape-string-regexp': 5.0.0
@@ -3158,7 +3157,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-    dev: false
 
   /is-arguments@1.1.1:
     resolution: {integrity: sha512-8Q7EARjzEnKpt/PCD7e1cgUS0a6X8u5tdSiMqXhojOdoV9TsMsiO+9VLC5vAmO8N7/GmXn7yjR8qnA6bVAEzfA==}
@@ -5099,7 +5097,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: false
 
   /xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}

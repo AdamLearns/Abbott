@@ -2,7 +2,12 @@ import { exec } from "node:child_process"
 
 import { ApiClient } from "@twurple/api"
 import type { RefreshingAuthProvider } from "@twurple/auth"
-import { ChatClient, type ChatUser, LogLevel } from "@twurple/chat"
+import {
+  ChatClient,
+  type ChatUser,
+  LogLevel,
+  type ChatMessage,
+} from "@twurple/chat"
 import { formatISO } from "date-fns"
 import { UUID, uuidv7 } from "uuidv7"
 
@@ -14,7 +19,6 @@ import type { GetQuote } from "../database/types/kysely-wrappers"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand"
 import { BotCommandContext } from "./BotCommandContext"
-import type { ChatMessage } from "./ChatMessage"
 
 const prefix = "!"
 
