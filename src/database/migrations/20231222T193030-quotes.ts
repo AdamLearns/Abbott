@@ -298,8 +298,8 @@ export async function up(db: Kysely<unknown>): Promise<void> {
       },
       {
         quote:
-          "I_Like_Bunnies: whenever someone says my name I like to imagine that they're just making a statement",
-        author: "AdamLearnsLive",
+          "whenever someone says my name I like to imagine that they're just making a statement",
+        author: "I_Like_Bunnies",
         quoted_at: new Date(1474645877658),
       },
       {
