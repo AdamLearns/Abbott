@@ -26,4 +26,5 @@ export interface BotStorageLayer {
   getRandomQuote(): Promise<GetQuote | undefined>
   deleteQuote(id: number): Promise<GetQuote | undefined>
   getNumQuotes(): Promise<number>
+  getTextCommandResponse(commandName: string): Promise<string | undefined>
 }

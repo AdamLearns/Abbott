@@ -19,7 +19,11 @@ export async function readAllCommands(): Promise<Map<string, Command>> {
   const commands = new Map<string, Command>()
 
   const foldersPath = path.join(__dirname, "commands")
-  const commandFolders = fs.readdirSync(foldersPath)
+  const commandFolders = fs
+    .readdirSync(foldersPath)
+    .filter((entry) =>
+      fs.lstatSync(path.join(foldersPath, entry)).isDirectory(),
+    )
 
   for (const folder of commandFolders) {
     const commandsPath = path.join(foldersPath, folder)

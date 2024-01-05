@@ -183,4 +183,21 @@ export class BotDatabase implements BotStorageLayer {
 
     return Number.parseInt(response.count as string, 10)
   }
+
+  async getTextCommandResponse(
+    commandName: string,
+  ): Promise<string | undefined> {
+    const response = await db
+      .selectFrom("text_command_responses")
+      .innerJoin(
+        "command_names",
+        "command_names.id",
+        "text_command_responses.id",
+      )
+      .where("command_names.name", "ilike", commandName)
+      .select(["text_command_responses.response"])
+      .executeTakeFirst()
+
+    return response?.response
+  }
 }

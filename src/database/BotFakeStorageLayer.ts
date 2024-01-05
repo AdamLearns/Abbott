@@ -33,4 +33,7 @@ export class BotFakeStorageLayer implements BotStorageLayer {
   async getNumQuotes() {
     return 0
   }
+  async getTextCommandResponse() {
+    return undefined
+  }
 }
