@@ -1,6 +1,6 @@
 import type { UUID } from "uuidv7"
 
-import type { BotCommandContext } from "./BotCommandContext"
+import type { BotCommandContext } from "./BotCommandContext.js"
 
 export type BotCommandHandler = (
   params: string[],

@@ -13,10 +13,10 @@ import {
   assert,
 } from "vitest"
 
-import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer"
-import type { BotStorageLayer } from "../database/BotStorageLayer"
-import { Bot } from "../twitch/Bot"
-import { BotCommandContext } from "../twitch/BotCommandContext"
+import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer.js"
+import type { BotStorageLayer } from "../database/BotStorageLayer.js"
+import { Bot } from "../twitch/Bot.js"
+import { BotCommandContext } from "../twitch/BotCommandContext.js"
 
 let bot: Bot
 let storageLayer: BotStorageLayer

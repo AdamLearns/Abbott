@@ -1,15 +1,15 @@
 import { sql } from "kysely"
-import sample from "lodash/sample"
+import sample from "lodash/sample.js"
 
-import { db } from "../database/database"
+import { db } from "../database/database.js"
 
-import type { BotStorageLayer } from "./BotStorageLayer"
-import type { DatabaseTextCommand } from "./DatabaseTextCommand"
+import type { BotStorageLayer } from "./BotStorageLayer.js"
+import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type {
   GetQuote,
   NewCommand,
   NewCommandName,
-} from "./types/kysely-wrappers"
+} from "./types/kysely-wrappers.js"
 
 export class BotDatabase implements BotStorageLayer {
   async deleteCommand(id: string) {

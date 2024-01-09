@@ -2,7 +2,7 @@ import fs from "node:fs"
 
 import { type AccessToken, RefreshingAuthProvider } from "@twurple/auth"
 
-import { Bot } from "./Bot"
+import { Bot } from "./Bot.js"
 
 async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   const clientId = process.env.CLIENT_ID

@@ -11,14 +11,14 @@ import {
 import { formatISO } from "date-fns"
 import { UUID, uuidv7 } from "uuidv7"
 
-import type { CommandData } from "../commands/CommandData"
-import { BotDatabase } from "../database/BotDatabase"
-import type { BotStorageLayer } from "../database/BotStorageLayer"
-import type { DatabaseTextCommand } from "../database/DatabaseTextCommand"
-import type { GetQuote } from "../database/types/kysely-wrappers"
+import type { CommandData } from "../commands/CommandData.js"
+import { BotDatabase } from "../database/BotDatabase.js"
+import type { BotStorageLayer } from "../database/BotStorageLayer.js"
+import type { DatabaseTextCommand } from "../database/DatabaseTextCommand.js"
+import type { GetQuote } from "../database/types/kysely-wrappers.js"
 
-import { BotCommand, type BotCommandHandler } from "./BotCommand"
-import { BotCommandContext } from "./BotCommandContext"
+import { BotCommand, type BotCommandHandler } from "./BotCommand.js"
+import { BotCommandContext } from "./BotCommandContext.js"
 
 const prefix = "!"
 
@@ -29,8 +29,6 @@ type MakeApiClient = (authProvider: RefreshingAuthProvider) => ApiClient
 type MakeChatClient = (authProvider: RefreshingAuthProvider) => ChatClient
 
 export class Bot {
-  private readonly authProvider: RefreshingAuthProvider
-  private readonly api: ApiClient
   private readonly storageLayer: BotStorageLayer
   private readonly chat: ChatClient
 
@@ -49,17 +47,15 @@ export class Bot {
     makeApiClient?: MakeApiClient | undefined
     makeChatClient?: MakeChatClient | undefined
   }) {
-    this.authProvider = authProvider
-
     const logLevel = LogLevel.ERROR
 
-    this.api =
-      makeApiClient === undefined
-        ? new ApiClient({
-            authProvider,
-            logger: { minLevel: logLevel },
-          })
-        : makeApiClient(authProvider)
+    // TODO: actually use the resulting API client
+    makeApiClient === undefined
+      ? new ApiClient({
+          authProvider,
+          logger: { minLevel: logLevel },
+        })
+      : makeApiClient(authProvider)
 
     this.storageLayer = storageLayer ?? new BotDatabase()
 
@@ -458,7 +454,7 @@ export class Bot {
     })
   }
 
-  userGetNumQuotes = async (params: string[], context: BotCommandContext) => {
+  userGetNumQuotes = async (_params: string[], context: BotCommandContext) => {
     try {
       const numQuotes = await context.bot.storageLayer.getNumQuotes()
       return context.reply(
@@ -686,7 +682,7 @@ export class Bot {
 
   private processPotentialCommand = async (
     channel: string,
-    user: string,
+    _user: string,
     text: string,
     msg: ChatMessage,
   ) => {

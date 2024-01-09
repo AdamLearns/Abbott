@@ -5,8 +5,8 @@ import pg from "pg"
 import { uuidv7 } from "uuidv7"
 import { beforeAll, beforeEach, describe, expect, test } from "vitest"
 
-import { BotDatabase } from "../database/BotDatabase"
-import { makeMigrator } from "../database/migrate-fn"
+import { BotDatabase } from "../database/BotDatabase.js"
+import { makeMigrator } from "../database/migrate-fn.js"
 import type { DB } from "../database/types/db.d.ts"
 
 dotenvFlow.config()

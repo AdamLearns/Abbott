@@ -3,6 +3,6 @@
 // call the function). At the time of writing, the caller that needs this is the
 // "kysely-migration-cli" script in package.json.
 
-import { migrate } from "./migrate-fn"
+import { migrate } from "./migrate-fn.js"
 
 migrate()

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import type { BotStorageLayer } from "./BotStorageLayer"
-import type { DatabaseTextCommand } from "./DatabaseTextCommand"
+import type { BotStorageLayer } from "./BotStorageLayer.js"
+import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 
 export class BotFakeStorageLayer implements BotStorageLayer {
   async addAlias() {}

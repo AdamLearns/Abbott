@@ -1,6 +1,6 @@
 import type { Insertable, Selectable } from "kysely"
 
-import type { Commands, CommandNames, Quotes } from "./db"
+import type { Commands, CommandNames, Quotes } from "./db.js"
 
 export type NewCommand = Insertable<Commands>
 export type NewCommandName = Insertable<CommandNames>

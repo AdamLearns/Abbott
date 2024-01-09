@@ -1,9 +1,9 @@
-import type { DatabaseTextCommand } from "./DatabaseTextCommand"
+import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type {
   GetQuote,
   NewCommand,
   NewCommandName,
-} from "./types/kysely-wrappers"
+} from "./types/kysely-wrappers.js"
 
 export interface BotStorageLayer {
   addAlias(

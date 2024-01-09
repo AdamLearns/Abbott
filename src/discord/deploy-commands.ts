@@ -5,7 +5,7 @@ import {
 } from "discord.js"
 import dotenvFlow from "dotenv-flow"
 
-import { readAllCommands } from "./commands"
+import { readAllCommands } from "./commands.js"
 dotenvFlow.config()
 
 const clientId = process.env.DISCORD_CLIENT_ID

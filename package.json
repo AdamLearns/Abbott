@@ -3,8 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
+	"main": "dist/main.js",
 	"scripts": {
 		"start": "tsx src/main.ts",
+		"build": "rm -rf dist && tsc --build",
 		"lint": "eslint --cache --max-warnings=0 .",
 		"dev": "tsx watch tsc/main.ts",
 		"type-check": "tsc --noEmit",
@@ -16,22 +18,24 @@
 	},
 	"dependencies": {
 		"@tsconfig/node18": "^18.2.2",
+		"@twurple/api": "^7.0.6",
 		"@twurple/auth": "^7.0.6",
 		"@twurple/chat": "^7.0.6",
 		"@types/lodash": "^4.14.202",
 		"date-fns": "^3.0.6",
 		"discord.js": "^14.14.1",
 		"dotenv-flow": "^4.0.1",
+		"husky": "^8.0.3",
 		"kysely": "^0.26.3",
 		"lodash": "^4.17.21",
 		"pg": "^8.11.3",
 		"tsx": "^4.6.2",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.2",
+		"uuidv7": "^0.6.3"
 	},
 	"devDependencies": {
 		"@d-fischer/typed-event-emitter": "^3.3.3",
 		"@hideoo/eslint-config": "^2.0.2",
-		"@twurple/api": "^7.0.6",
 		"@types/node": "^18",
 		"@types/pg": "^8.10.9",
 		"@typescript-eslint/eslint-plugin": "^6.13.2",
@@ -40,13 +44,11 @@
 		"@vitest/coverage-v8": "^1.0.4",
 		"eslint": "^8.55.0",
 		"eslint-config-prettier": "^9.1.0",
-		"husky": "^8.0.3",
 		"ircv3": "^0.32.4",
 		"kysely-codegen": "^0.11.0",
 		"kysely-migration-cli": "^0.2.3",
 		"lint-staged": "^15.2.0",
 		"prettier": "3.1.0",
-		"uuidv7": "^0.6.3",
 		"vitest": "^1.0.4"
 	}
 }

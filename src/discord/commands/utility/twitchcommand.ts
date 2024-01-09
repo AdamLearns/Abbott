@@ -6,7 +6,7 @@ import {
   escapeMarkdown,
 } from "discord.js"
 
-import { BotDatabase } from "../../../database/BotDatabase"
+import { BotDatabase } from "../../../database/BotDatabase.js"
 
 export const data = new SlashCommandBuilder()
   .setName("twitchcommand")

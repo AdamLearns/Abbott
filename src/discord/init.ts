@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits } from "discord.js"
 
-import { readAllCommands, type Command } from "./commands"
+import { readAllCommands, type Command } from "./commands.js"
 
 type ClientWithCommands = Client & { Commands: Map<string, Command> }
 

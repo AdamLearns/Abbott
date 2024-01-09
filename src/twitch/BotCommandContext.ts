@@ -1,6 +1,6 @@
 import type { ChatMessage } from "@twurple/chat"
 
-import type { Bot } from "./Bot"
+import type { Bot } from "./Bot.js"
 
 export class BotCommandContext {
   #bot: Bot
