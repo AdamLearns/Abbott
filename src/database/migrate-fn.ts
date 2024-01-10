@@ -30,12 +30,10 @@ export function makeMigrator<T>(db: Kysely<T>) {
   })
 }
 
-export function migrate() {
-  dotenvFlow.config()
-
-  // The very nature of migrations is that we are about to change the
-  // types of the database, so we intentionally use `unknown` here.
-  const db = new Kysely<unknown>({
+// The very nature of migrations is that we are about to change the types of the
+// database, so we intentionally use `unknown` here.
+export function makeDbForMigration(): Kysely<unknown> {
+  return new Kysely<unknown>({
     dialect: new PostgresDialect({
       pool: new Pool({
         connectionString: process.env.DATABASE_CONNECTION_STRING,
@@ -43,6 +41,12 @@ export function migrate() {
       }),
     }),
   })
+}
+
+export function migrate() {
+  dotenvFlow.config()
+
+  const db = makeDbForMigration()
   const migrator = makeMigrator(db)
 
   // @ts-expect-error: kysely-migration-cli imports Kysely from the "cjs" path,

@@ -1,12 +1,13 @@
 import dotenvFlow from "dotenv-flow"
 
-import { init as initDiscord } from "./discord/init.js"
-import { init as initTwitch } from "./twitch/init.js"
+import { migrateIfNeeded } from "./setup/back-up-and-migrate.js"
+import { startBots } from "./setup/start-bots.js"
+
 dotenvFlow.config()
 
 async function main() {
-  await initTwitch()
-  await initDiscord()
+  await migrateIfNeeded()
+  await startBots()
 }
 
 main()
