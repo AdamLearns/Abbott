@@ -74,10 +74,28 @@
         append: yes
     # DOCKER SETUP END =========================================================
 
+    # Run "docker-compose up". We don't do this using a
+    # community.docker.docker_compose task because we run into a bunch of Python
+    # errors that are hard to fix.
+    - name: Run PostgreSQL in a container
+      ansible.builtin.command: docker-compose up -d
+      become: no
+      args:
+        chdir: ~/code/Abbott/src/database/
+
     - name: Run Watchtower
       docker_container:
         name: watchtower
         image: containrrr/watchtower
         restart_policy: unless-stopped
+        env:
+          # Check for a new image every 60 seconds
+          WATCHTOWER_POLL_INTERVAL: 60
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock
+
+    - name: Run Abbott
+      ansible.builtin.command: docker-compose up -d
+      become: no
+      args:
+        chdir: ~/code/Abbott/

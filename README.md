@@ -41,5 +41,8 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
     - Namely, this just means running `pip3 install docker` (or its equivalent, `python3 -m pip install docker`)
 - Run the playbook:
   - Modify `inventory.ini` to contain the IP address of the target (e.g. a mini PC).
+  - Change to the right directory: `cd ansible`
   - Run: `ansible-playbook -i inventory.ini playbook.yaml -K`
     - It will prompt you for the "BECOME" password. This is the password of the user that you're SSHing as.
+- Copy over the `.env` file: `scp .env.development.local adam@<IP_ADDRESS>:code/Abbott/`
+- Copy over the "tokens" file: `scp tokens.102460608.json adam@<IP_ADDRESS>:code/Abbott/`
