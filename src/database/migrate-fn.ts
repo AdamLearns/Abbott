@@ -45,6 +45,10 @@ export function migrate() {
   })
   const migrator = makeMigrator(db)
 
+  // @ts-expect-error: kysely-migration-cli imports Kysely from the "cjs" path,
+  // but my .tsconfig is set to "nodenext", so I'll try loading from the "esm"
+  // path. I think the "proper" way to fix this would be to get them to load
+  // from the same path, but I don't know the best way of doing that.
   run(db, migrator, getMigrationFolder())
 
   console.log(
