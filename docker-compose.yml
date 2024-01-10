@@ -1,0 +1,5 @@
+version: "3.8"
+services:
+  abbott:
+    image: ghcr.io/adamlearns/abbott:latest
+    restart: unless-stopped
