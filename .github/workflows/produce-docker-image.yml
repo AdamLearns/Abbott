@@ -51,4 +51,4 @@ jobs:
         with:
           file: ./Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date_in_seconds.outputs.VALUE }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date_in_seconds.outputs.VALUE }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
