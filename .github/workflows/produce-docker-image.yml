@@ -28,6 +28,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
+      - name: make IMAGE_NAME lowercase
+        run: |
+          echo "IMAGE_NAME=${IMAGE_NAME@L}" >>${GITHUB_ENV}
+
       - name: Retrieve date in seconds
         run: |
           echo "VALUE=$(date +%s)" >> $GITHUB_OUTPUT
