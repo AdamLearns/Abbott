@@ -18,8 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # Read/write access to the repository. Write access is needed only for
-      # workflow_dispatch.
+      # Read the contents of the repository
       contents: read
       # Allow access to the GitHub container registry
       packages: write
