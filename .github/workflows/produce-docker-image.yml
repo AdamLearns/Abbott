@@ -14,13 +14,13 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     permissions:
       # Read/write access to the repository. Write access is needed only for
       # workflow_dispatch.
-      contents: write
+      contents: read
       # Allow access to the GitHub container registry
       packages: write
 
