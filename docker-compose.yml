@@ -3,3 +3,4 @@ services:
   abbott:
     image: ghcr.io/adamlearns/abbott:latest
     restart: unless-stopped
+    env_file: .env.development.local
