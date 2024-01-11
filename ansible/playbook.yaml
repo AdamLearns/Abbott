@@ -90,7 +90,7 @@
         restart_policy: unless-stopped
         env:
           # Check for a new image every 60 seconds
-          WATCHTOWER_POLL_INTERVAL: 60
+          WATCHTOWER_POLL_INTERVAL: "60"
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock
 
