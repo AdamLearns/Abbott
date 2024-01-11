@@ -22,57 +22,9 @@
         dest: ~/code/Abbott
       become: no
 
-    # DOCKER SETUP BEGIN =======================================================
-    - name: Get DEB architecture
-      become: no
-      ansible.builtin.shell: dpkg --print-architecture
-      register: deb_architecture
-
-    - name: Get username
-      become: no
-      ansible.builtin.shell: whoami
-      register: user
-
-    - name: Add Docker's official GPG key
-      ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/debian/gpg
-        keyring: /etc/apt/trusted.gpg.d/docker.gpg
-
-    - name: Add Docker apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }}] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
-        state: present
-        filename: docker
-
-    - name: Install Docker Engine
-      ansible.builtin.package:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
-        state: present
-
-    # This is optional and only really needed if connected interactively to the
-    # target.
-    - name: Create docker-compose symlink for backwards compatibility (if you want to be able to run docker-compose instead of docker compose)
-      ansible.builtin.file:
-        src: /usr/libexec/docker/cli-plugins/docker-compose
-        dest: /usr/local/bin/docker-compose
-        state: link
-
-    - name: Create Docker group
-      ansible.builtin.group:
-        name: docker
-        state: present
-
-    - name: Add user to Docker group
-      ansible.builtin.user:
-        name: "{{ user.stdout }}"
-        groups: docker
-        append: yes
-    # DOCKER SETUP END =========================================================
+    - name: Set up Docker
+      ansible.builtin.include_tasks:
+        file: docker.yaml
 
     # Run "docker-compose up". We don't do this using a
     # community.docker.docker_compose task because we run into a bunch of Python
