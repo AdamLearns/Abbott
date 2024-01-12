@@ -1,15 +1,20 @@
-import { sql } from "kysely"
+import type { AccessToken } from "@twurple/auth"
+import { type Transaction, sql } from "kysely"
 import sample from "lodash/sample.js"
+import { uuidv7 } from "uuidv7"
 
 import { db } from "../database/database.js"
 
 import type { BotStorageLayer } from "./BotStorageLayer.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
+import type { DB } from "./types/db.js"
 import type {
   GetQuote,
   NewCommand,
   NewCommandName,
 } from "./types/kysely-wrappers.js"
+
+const CONFIG_PRIMARY_BOT_USER_ID = "primary_bot_user_id"
 
 export class BotDatabase implements BotStorageLayer {
   async deleteCommand(id: string) {
@@ -199,5 +204,207 @@ export class BotDatabase implements BotStorageLayer {
       .executeTakeFirst()
 
     return response?.response
+  }
+
+  private async insertOrUpdateToken(
+    trx: Transaction<DB>,
+    twitchId: string,
+    accessToken: AccessToken,
+  ) {
+    await trx
+      .insertInto("twitch_oauth_tokens")
+      .values({
+        twitch_id: twitchId,
+        access_token: accessToken.accessToken,
+        refresh_token: accessToken.refreshToken as string,
+        expires_in: accessToken.expiresIn as number,
+      })
+      .onConflict((oc) =>
+        oc.column("twitch_id").doUpdateSet({
+          access_token: accessToken.accessToken,
+          refresh_token: accessToken.refreshToken as string,
+          expires_in: accessToken.expiresIn as number,
+          updated_at: sql`now()`,
+        }),
+      )
+      .execute()
+  }
+
+  async saveTwitchToken(
+    accessToken: AccessToken,
+    twitchId: string,
+    twitchName: string,
+    isPrimaryBotUser: boolean,
+  ): Promise<void> {
+    await db.transaction().execute(async (trx) => {
+      await this.ensureTwitchUserExists(trx, twitchId, twitchName)
+
+      await this.insertOrUpdateToken(trx, twitchId, accessToken)
+
+      // Delete any scopes for this token and then re-insert them
+      await trx
+        .deleteFrom("twitch_oauth_token_scopes")
+        .where("twitch_id", "=", twitchId)
+        .execute()
+
+      for (const scope of accessToken.scope) {
+        await trx
+          .insertInto("twitch_oauth_token_scopes")
+          .values({
+            twitch_id: twitchId,
+            scope,
+          })
+          .execute()
+      }
+
+      if (isPrimaryBotUser) {
+        await trx
+          .insertInto("config")
+          .values({
+            key: CONFIG_PRIMARY_BOT_USER_ID,
+            value: twitchId,
+          })
+          .onConflict((oc) =>
+            oc.column("key").doUpdateSet({
+              value: twitchId,
+              updated_at: sql`now()`,
+            }),
+          )
+          .execute()
+      }
+    })
+  }
+
+  async ensureTwitchUserExists(
+    trx: Transaction<DB>,
+    twitchId: string,
+    twitchName: string,
+  ) {
+    let uuid: string | undefined
+
+    // Check if the user already exists
+    const response = await trx
+      .selectFrom("users")
+      .innerJoin("user_correlation", "users.id", "user_correlation.id")
+      .where("user_correlation.twitch_id", "=", twitchId)
+      .select(["users.id"])
+      .executeTakeFirst()
+
+    if (response === undefined) {
+      uuid = uuidv7()
+      await trx
+        .insertInto("users")
+        .values({
+          id: uuid,
+        })
+        .execute()
+
+      await trx
+        .insertInto("user_correlation")
+        .values({
+          id: uuid,
+          twitch_id: twitchId,
+        })
+        .execute()
+    }
+
+    await trx
+      .insertInto("twitch_names")
+      .values({
+        twitch_id: twitchId,
+        name: twitchName,
+      })
+      .onConflict((oc) =>
+        oc.column("twitch_id").doUpdateSet({
+          name: twitchName,
+          updated_at: sql`now()`,
+        }),
+      )
+      .execute()
+  }
+
+  async getTwitchToken(): Promise<AccessToken> {
+    const response = await db.transaction().execute(async (trx) => {
+      const response = await trx
+        .selectFrom("config")
+        .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
+        .select(["value"])
+        .executeTakeFirst()
+
+      if (response === undefined) {
+        throw new Error(
+          "Couldn't find the primary bot user ID in the database.",
+        )
+      }
+
+      const twitchId = response.value
+      if (twitchId === null) {
+        throw new Error(
+          "Found the primary bot user ID in the database, but it was null.",
+        )
+      }
+
+      const tokenResponse = await trx
+        .selectFrom("twitch_oauth_tokens")
+        .where("twitch_id", "=", twitchId)
+        .select(["access_token", "refresh_token", "expires_in", "updated_at"])
+        .executeTakeFirst()
+
+      if (tokenResponse === undefined) {
+        throw new Error(
+          "Found a primary bot ID, but couldn't find any tokens for it in the database.",
+        )
+      }
+
+      // Fetch the scopes corresponding to that token
+      const scopesResponse = await trx
+        .selectFrom("twitch_oauth_token_scopes")
+        .where("twitch_id", "=", twitchId)
+        .select(["scope"])
+        .execute()
+
+      const scopes = []
+      for (const row of scopesResponse) {
+        scopes.push(row.scope)
+      }
+
+      return {
+        accessToken: tokenResponse.access_token,
+        refreshToken: tokenResponse.refresh_token,
+        expiresIn: Number.parseInt(tokenResponse.expires_in),
+        scope: scopes,
+        // According to the link below, this should be the updated_at time, not
+        // created_at. See
+        // https://github.com/twurple/twurple/blob/7736fd144b108f09febf5a270a38225ca5b6f339/packages/auth/src/helpers.ts#L78-L91
+        obtainmentTimestamp: tokenResponse.updated_at.getTime(),
+      }
+    })
+
+    return response
+  }
+
+  async refreshTwitchToken(newTokenData: AccessToken): Promise<void> {
+    await db.transaction().execute(async (trx) => {
+      const response = await trx
+        .selectFrom("config")
+        .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
+        .select(["value"])
+        .executeTakeFirst()
+
+      if (response === undefined) {
+        throw new Error(
+          "Couldn't find the primary bot user ID in the database.",
+        )
+      }
+
+      const twitchId = response.value
+      if (twitchId === null) {
+        throw new Error(
+          "Found the primary bot user ID in the database, but it was null.",
+        )
+      }
+
+      await this.insertOrUpdateToken(trx, twitchId, newTokenData)
+    })
   }
 }

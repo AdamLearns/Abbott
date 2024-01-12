@@ -10,6 +10,13 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - I don't plan on making the bot be generally available or usable (e.g. I probably won't add features that people ask about).
 - I probably won't do anything explicit to maintain this repo unless it's something I need for myself.
 
+## Running
+
+- Copy `.env.example` to another file (e.g. `.env.development.local`) and fill out the values.
+- Run migrations (see [Migrations](#migrations)).
+- Get a Twitch access token: `NODE_ENV=development pnpm tsx src/get-tokens.ts`
+  - Follow the instructions that it outputs
+
 ## Linting/correctness
 
 - `pnpm run lint` (optionally with `--fix` at the end)
@@ -26,7 +33,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - Creating: `pnpm run kysely-migration-cli create <migration_name>`
 - Back up: `backUpDatabase` in my shell (this is important as of Fri 12/22/2023 when I only have one database 👀)
 - Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
-  - Note: migrations should happen automatically on start-up. See `.env.example`.
+  - Note: migrations should happen automatically on start-up. See `.env.example` for how to configure this. However, they won't automatically regenerate types.
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
 - Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./src/database/types/db.d.ts`
 

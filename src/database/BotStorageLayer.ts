@@ -1,3 +1,5 @@
+import type { AccessToken } from "@twurple/auth"
+
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type {
   GetQuote,
@@ -27,4 +29,12 @@ export interface BotStorageLayer {
   deleteQuote(id: number): Promise<GetQuote | undefined>
   getNumQuotes(): Promise<number>
   getTextCommandResponse(commandName: string): Promise<string | undefined>
+  saveTwitchToken(
+    accessToken: AccessToken,
+    userId: string,
+    userName: string,
+    isPrimaryBotUser: boolean,
+  ): Promise<void>
+  getTwitchToken(): Promise<AccessToken>
+  refreshTwitchToken(newTokenData: AccessToken): Promise<void>
 }

@@ -1,6 +1,6 @@
-import fs from "node:fs"
-
 import { type AccessToken, RefreshingAuthProvider } from "@twurple/auth"
+
+import { BotDatabase } from "../database/BotDatabase.js"
 
 import { Bot } from "./Bot.js"
 
@@ -19,13 +19,11 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
     clientSecret,
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const tokenData: AccessToken = JSON.parse(
-    fs.readFileSync("./tokens.102460608.json", "utf8"),
-  )
+  const botDatabase = new BotDatabase()
+  const token = await botDatabase.getTwitchToken()
 
   try {
-    await authProvider.addUserForToken(tokenData, ["chat"])
+    await authProvider.addUserForToken(token, ["chat"])
   } catch {
     // DO NOT PRINT THIS ERROR; it has secrets in it!
     throw new Error(
@@ -33,12 +31,8 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
     )
   }
 
-  authProvider.onRefresh((userId: string, newTokenData: AccessToken) => {
-    fs.writeFileSync(
-      `./tokens.${userId}.json`,
-      JSON.stringify(newTokenData, null, 4),
-      { encoding: "utf8" },
-    )
+  authProvider.onRefresh(async (_userId: string, newTokenData: AccessToken) => {
+    await botDatabase.refreshTwitchToken(newTokenData)
   })
 
   return authProvider
