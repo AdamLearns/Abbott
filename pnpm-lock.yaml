@@ -35,6 +35,9 @@ dependencies:
   kysely:
     specifier: ^0.26.3
     version: 0.26.3
+  kysely-migration-cli:
+    specifier: ^0.2.3
+    version: 0.2.3
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -91,9 +94,6 @@ devDependencies:
   kysely-codegen:
     specifier: ^0.11.0
     version: 0.11.0(kysely@0.26.3)(pg@8.11.3)
-  kysely-migration-cli:
-    specifier: ^0.2.3
-    version: 0.2.3
   lint-staged:
     specifier: ^15.2.0
     version: 15.2.0
@@ -331,7 +331,7 @@ packages:
       commander: 11.1.x
     dependencies:
       commander: 11.1.0
-    dev: true
+    dev: false
 
   /@d-fischer/cache-decorators@3.0.3:
     resolution: {integrity: sha512-JmM9OyZY+nNRRsW+bS3i+PSjmXiR3BCBiyHjjvpTWhS373xYtNdWbzxPDtKu2SWpE2lpnGP0QwINe3Uo5BBxDw==}
@@ -2127,7 +2127,6 @@ packages:
   /commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
-    dev: true
 
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
@@ -3719,7 +3718,7 @@ packages:
     dependencies:
       '@commander-js/extra-typings': 11.1.0(commander@11.1.0)
       commander: 11.1.0
-    dev: true
+    dev: false
 
   /kysely@0.26.3:
     resolution: {integrity: sha512-yWSgGi9bY13b/W06DD2OCDDHQmq1kwTGYlQ4wpZkMOJqMGCstVCFIvxCCVG4KfY1/3G0MhDAcZsip/Lw8/vJWw==}
