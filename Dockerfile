@@ -17,5 +17,9 @@ FROM node:18.17.0-slim
 COPY --from=base /app/package.json /app/package.json
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
+
+# postgresql-client is needed for pg_dump
+RUN apt update && apt install -y postgresql-client
+
 CMD [ "node", "app/" ]
 

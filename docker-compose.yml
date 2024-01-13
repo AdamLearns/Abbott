@@ -4,3 +4,8 @@ services:
     image: ghcr.io/adamlearns/abbott:latest
     restart: unless-stopped
     env_file: .env.development.local
+    volumes:
+      # This could be replaced with an external volume so that it's not
+      # hard-coded to $HOME/database_backups.
+      # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
+      - $HOME/database_backups:/database_backups
