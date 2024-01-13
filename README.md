@@ -52,4 +52,6 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - Run: `ansible-playbook -i inventory.ini playbook.yaml -K`
     - It will prompt you for the "BECOME" password. This is the password of the user that you're SSHing as.
 - Copy over the `.env` file: `scp .env.development.local adam@<IP_ADDRESS>:code/Abbott/`
+  - Set `DATABASE_BACKUP_LOCATION=/database_backups`.
+  - Make sure `~/database_backups` exists on the host.
 - Copy over the "tokens" file: `scp tokens.102460608.json adam@<IP_ADDRESS>:code/Abbott/`

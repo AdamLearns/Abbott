@@ -4,6 +4,9 @@ services:
     image: ghcr.io/adamlearns/abbott:latest
     restart: unless-stopped
     env_file: .env.development.local
+
+    # Use the host network so that we can access the database container
+    network_mode: host
     volumes:
       # This could be replaced with an external volume so that it's not
       # hard-coded to $HOME/database_backups.
