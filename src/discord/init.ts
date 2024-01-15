@@ -11,7 +11,9 @@ export async function init() {
   clientWithCommands.Commands = await readAllCommands()
 
   clientWithCommands.once(Events.ClientReady, (readyClient) => {
-    console.log(`Ready! Logged in as ${readyClient.user.tag}`)
+    console.log(
+      `Ready! Logged in as ${readyClient.user.tag}. Read in ${clientWithCommands.Commands.size} command(s).`,
+    )
   })
 
   clientWithCommands.on(Events.InteractionCreate, async (interaction) => {
