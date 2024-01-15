@@ -9,14 +9,17 @@ dependencies:
     specifier: ^18.2.2
     version: 18.2.2
   '@twurple/api':
-    specifier: ^7.0.6
-    version: 7.0.6(@twurple/auth@7.0.6)
+    specifier: ^7.0.7
+    version: 7.0.7(@twurple/auth@7.0.7)
   '@twurple/auth':
-    specifier: ^7.0.6
-    version: 7.0.6
+    specifier: ^7.0.7
+    version: 7.0.7
   '@twurple/chat':
-    specifier: ^7.0.6
-    version: 7.0.6(@twurple/auth@7.0.6)
+    specifier: ^7.0.7
+    version: 7.0.7(@twurple/auth@7.0.7)
+  '@twurple/eventsub-ws':
+    specifier: ^7.0.7
+    version: 7.0.7(@twurple/api@7.0.7)
   '@types/lodash':
     specifier: ^4.14.202
     version: 4.14.202
@@ -1239,22 +1242,22 @@ packages:
     resolution: {integrity: sha512-d6McJeGsuoRlwWZmVIeE8CUA27lu6jLjvv1JzqmpsytOYYbVi1tHZEnwCNVOXnj4pyLvneZlFlpXUK+X9wBWyw==}
     dev: false
 
-  /@twurple/api-call@7.0.6:
-    resolution: {integrity: sha512-3E9IAJRyRLji9bjmZzicWv/wP9aGVdIDkzaX4WaK3sTRC9EkZ3nWIxSj0WmJ977O2lDsUkpgxzwmskuDqdaTrQ==}
+  /@twurple/api-call@7.0.7:
+    resolution: {integrity: sha512-7lCiOPmFqsH/hhGeoAuRgqid/DIeOI0GTqDh8TQ6D8IdoyWUFqBY6bnGrgfqQNGhTy0kXGnGxvavJrOC1T19bw==}
     dependencies:
       '@d-fischer/cross-fetch': 5.0.3
       '@d-fischer/qs': 7.0.2
       '@d-fischer/shared-utils': 3.6.3
-      '@twurple/common': 7.0.6
+      '@twurple/common': 7.0.7
       tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@twurple/api@7.0.6(@twurple/auth@7.0.6):
-    resolution: {integrity: sha512-Fe8haADUI+m4juCuNxtkWBX2HkCU6FA2+2Biq2/KRTp50FVRCeOBdDQpkdM4r+T2KE0NaiTpiH2rtaRodkR/gQ==}
+  /@twurple/api@7.0.7(@twurple/auth@7.0.7):
+    resolution: {integrity: sha512-RReCJyQCsK/M7Al6bQbNwwv63ayxgke1Sqea8eKl0iH6d5fQtyi7fcOED3zAKaWfwby9B5hzOqw1Y6OMiyBR4g==}
     peerDependencies:
-      '@twurple/auth': 7.0.6
+      '@twurple/auth': 7.0.7
     dependencies:
       '@d-fischer/cache-decorators': 3.0.3
       '@d-fischer/cross-fetch': 5.0.3
@@ -1263,32 +1266,32 @@ packages:
       '@d-fischer/rate-limiter': 0.7.5
       '@d-fischer/shared-utils': 3.6.3
       '@d-fischer/typed-event-emitter': 3.3.3
-      '@twurple/api-call': 7.0.6
-      '@twurple/auth': 7.0.6
-      '@twurple/common': 7.0.6
+      '@twurple/api-call': 7.0.7
+      '@twurple/auth': 7.0.7
+      '@twurple/common': 7.0.7
       retry: 0.13.1
       tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@twurple/auth@7.0.6:
-    resolution: {integrity: sha512-kgjSdLRW9NKk9LD8dySkgjXDxzJQFAiNIBZFbQNgTqSn7A2ZwaxmapIxy7FcHyGV0MdRtimScnRbKK9Nm089Xw==}
+  /@twurple/auth@7.0.7:
+    resolution: {integrity: sha512-peulxyCcbjwSfppSR9WzJFJFd+AEa7YhCIw6rsLAGjtT7KI2S1/uwqB7iJ7Zyue6DxG5ofk4YUh94/ZgA7PYgg==}
     dependencies:
       '@d-fischer/logger': 4.2.3
       '@d-fischer/shared-utils': 3.6.3
       '@d-fischer/typed-event-emitter': 3.3.3
-      '@twurple/api-call': 7.0.6
-      '@twurple/common': 7.0.6
+      '@twurple/api-call': 7.0.7
+      '@twurple/common': 7.0.7
       tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@twurple/chat@7.0.6(@twurple/auth@7.0.6):
-    resolution: {integrity: sha512-sHfJ6oYb8+++qX8KGlKOlkkJnXbCHmslRwv5xMr88eze/4x/URcx+nHGTcRpzgk0qtSDdIDfCFcH2t/TWE5lBw==}
+  /@twurple/chat@7.0.7(@twurple/auth@7.0.7):
+    resolution: {integrity: sha512-E8WNAYvJQYn/1+2f8O3i14a08QQaPxg/Vcme5N/4oYmXYLTE514I2VAHab+AZRxjk0T5g+GdruxTC9QxJ10z0w==}
     peerDependencies:
-      '@twurple/auth': 7.0.6
+      '@twurple/auth': 7.0.7
     dependencies:
       '@d-fischer/cache-decorators': 3.0.3
       '@d-fischer/deprecate': 2.0.2
@@ -1296,8 +1299,8 @@ packages:
       '@d-fischer/rate-limiter': 0.7.5
       '@d-fischer/shared-utils': 3.6.3
       '@d-fischer/typed-event-emitter': 3.3.3
-      '@twurple/auth': 7.0.6
-      '@twurple/common': 7.0.6
+      '@twurple/auth': 7.0.7
+      '@twurple/common': 7.0.7
       ircv3: 0.32.4
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -1305,12 +1308,46 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@twurple/common@7.0.6:
-    resolution: {integrity: sha512-38cufsx5k1ruUNrorXsiyTVBnFCXPFgr+MMkpMoFnh3T5G9drT3RkmE6Ss7oeaK6Glr/ihQNIPL6NzTJkGmXhA==}
+  /@twurple/common@7.0.7:
+    resolution: {integrity: sha512-q+297EtBtujWtR5O88Nc5uSAKXTbAbWzDrCRWGXF5c01FolrnHGuOUyJ98p4+lepqLMxpRjldbQuPBUVbUzeIQ==}
     dependencies:
       '@d-fischer/shared-utils': 3.6.3
       klona: 2.0.6
       tslib: 2.6.2
+    dev: false
+
+  /@twurple/eventsub-base@7.0.7:
+    resolution: {integrity: sha512-RUOzC/ekltPvFzXXoEYbajVFQvZ/11OjK2+9EaCf7oKba7ucv6BEY96JzYfp9ni4sED0lfLGUAjRyGECCyOrzA==}
+    dependencies:
+      '@d-fischer/logger': 4.2.3
+      '@d-fischer/shared-utils': 3.6.3
+      '@d-fischer/typed-event-emitter': 3.3.3
+      '@twurple/api': 7.0.7(@twurple/auth@7.0.7)
+      '@twurple/auth': 7.0.7
+      '@twurple/common': 7.0.7
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@twurple/eventsub-ws@7.0.7(@twurple/api@7.0.7):
+    resolution: {integrity: sha512-EPi0gitWb9/kcew3J6Bi8XUyw0t/LObzfiVDr6J78vbkTjf/fFlv/CqgPP6JQcKJa8X14yAMuWbRfU+T8oT7cg==}
+    peerDependencies:
+      '@twurple/api': 7.0.7
+    dependencies:
+      '@d-fischer/connection': 8.0.5
+      '@d-fischer/logger': 4.2.3
+      '@d-fischer/shared-utils': 3.6.3
+      '@d-fischer/typed-event-emitter': 3.3.3
+      '@twurple/api': 7.0.7(@twurple/auth@7.0.7)
+      '@twurple/auth': 7.0.7
+      '@twurple/common': 7.0.7
+      '@twurple/eventsub-base': 7.0.7
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
     dev: false
 
   /@types/istanbul-lib-coverage@2.0.6:

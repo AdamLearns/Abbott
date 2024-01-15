@@ -1,10 +1,26 @@
-import { Client, Events, GatewayIntentBits } from "discord.js"
+import { Client, Events, GatewayIntentBits, roleMention } from "discord.js"
+
+import { emitter } from "../events/emitter.js"
 
 import { readAllCommands, type Command } from "./commands.js"
 
 type ClientWithCommands = Client & { Commands: Map<string, Command> }
 
 export async function init() {
+  if (
+    process.env.DISCORD_TOKEN === undefined ||
+    process.env.DISCORD_STREAM_ANNOUNCEMENTS_CHANNEL_ID === undefined ||
+    process.env.DISCORD_STREAM_ANNOUNCEMENTS_ROLE_ID === undefined
+  ) {
+    throw new Error("Missing environment variables for Discord.")
+  }
+
+  const announcementsChannelId =
+    process.env.DISCORD_STREAM_ANNOUNCEMENTS_CHANNEL_ID
+
+  const streamAnnouncementsRoleId =
+    process.env.DISCORD_STREAM_ANNOUNCEMENTS_ROLE_ID
+
   const client = new Client({ intents: [GatewayIntentBits.Guilds] })
   const clientWithCommands = client as ClientWithCommands
 
@@ -22,6 +38,24 @@ export async function init() {
     console.log(
       `Logged in on Discord as ${botName} to servers: ${allGuildNamesString}. Read in ${numCommands} command(s).`,
     )
+  })
+
+  emitter.onStreamOnline(async (title) => {
+    console.log("Stream went online:", title)
+    const channelId = announcementsChannelId
+    const channel = client.channels.cache.get(channelId)
+    if (channel === undefined) {
+      console.error(`Couldn't find the ${channelId} channel.`)
+      return
+    }
+    if (channel.isTextBased()) {
+      const tag = roleMention(streamAnnouncementsRoleId)
+      let message = `${tag} Adam just went live! <https://twitch.tv/AdamLearnsLive>`
+      if (title !== null) {
+        message += ` Title: ${title}`
+      }
+      await channel.send(message)
+    }
   })
 
   clientWithCommands.on(Events.InteractionCreate, async (interaction) => {

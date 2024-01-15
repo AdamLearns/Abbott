@@ -18,9 +18,10 @@
 	},
 	"dependencies": {
 		"@tsconfig/node18": "^18.2.2",
-		"@twurple/api": "^7.0.6",
-		"@twurple/auth": "^7.0.6",
-		"@twurple/chat": "^7.0.6",
+		"@twurple/api": "^7.0.7",
+		"@twurple/auth": "^7.0.7",
+		"@twurple/chat": "^7.0.7",
+		"@twurple/eventsub-ws": "^7.0.7",
 		"@types/lodash": "^4.14.202",
 		"date-fns": "^3.0.6",
 		"discord.js": "^14.14.1",

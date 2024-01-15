@@ -79,3 +79,9 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
     - Note: change `NODE_ENV` as appropriate (e.g. to `production`)
 - Invite the bot to your server ([reference](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#bot-invite-links))
   - Make sure to select the `bot` and `applications.commands` options
+- Allow permissions on the `#content-announcement` channel.
+  - In Discord, right-click the channel → Edit Channel → Permissions → Click the ➕ next to "ROLES/MEMBERS" and add your bot. Then, check the following:
+    - "Send Messages"
+    - "Embed Links"
+    - "Mention everyone, here, and All Roles"
+  - Note that opting in to the notification role is something that I handle through Discord's onboarding.

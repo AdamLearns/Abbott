@@ -8,6 +8,7 @@ import {
   LogLevel,
   type ChatMessage,
 } from "@twurple/chat"
+import { EventSubWsListener } from "@twurple/eventsub-ws"
 import { formatISO } from "date-fns"
 import { UUID, uuidv7 } from "uuidv7"
 
@@ -16,6 +17,7 @@ import { BotDatabase } from "../database/BotDatabase.js"
 import type { BotStorageLayer } from "../database/BotStorageLayer.js"
 import type { DatabaseTextCommand } from "../database/DatabaseTextCommand.js"
 import type { GetQuote } from "../database/types/kysely-wrappers.js"
+import { emitter } from "../events/emitter.js"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand.js"
 import { BotCommandContext } from "./BotCommandContext.js"
@@ -28,9 +30,13 @@ const GLOBAL_COMMAND_COOLDOWN = 4000
 type MakeApiClient = (authProvider: RefreshingAuthProvider) => ApiClient
 type MakeChatClient = (authProvider: RefreshingAuthProvider) => ChatClient
 
+const logLevel = LogLevel.ERROR
+
 export class Bot {
   private readonly storageLayer: BotStorageLayer
   private readonly chat: ChatClient
+  private readonly apiClient: ApiClient
+  private readonly twitchChannelName: string
 
   // Keys: any known command name, including an alias. This means that "lang" and
   // "language" may both point to references to the same BotCommand.
@@ -49,15 +55,14 @@ export class Bot {
     makeApiClient?: MakeApiClient | undefined
     makeChatClient?: MakeChatClient | undefined
   }) {
-    const logLevel = LogLevel.ERROR
-
-    // TODO: actually use the resulting API client
-    makeApiClient === undefined
-      ? new ApiClient({
-          authProvider,
-          logger: { minLevel: logLevel },
-        })
-      : makeApiClient(authProvider)
+    this.twitchChannelName = twitchChannelName
+    this.apiClient =
+      makeApiClient === undefined
+        ? new ApiClient({
+            authProvider,
+            logger: { minLevel: logLevel },
+          })
+        : makeApiClient(authProvider)
 
     this.storageLayer = storageLayer ?? new BotDatabase()
 
@@ -78,7 +83,37 @@ export class Bot {
     this.chat.connect()
   }
 
+  async setUpEventListeners() {
+    const listener = new EventSubWsListener({
+      apiClient: this.apiClient,
+      logger: { minLevel: logLevel },
+
+      // The mock Twitch CLI URL (which I couldn't get to work)
+      // url: "ws://127.0.0.1:8080/ws",
+    })
+
+    const userId = await this.apiClient.users.getUserByName(
+      this.twitchChannelName,
+    )
+
+    if (userId === null) {
+      throw new Error(
+        `Couldn't get user ID for Twitch name "${this.twitchChannelName}"`,
+      )
+    }
+
+    listener.start()
+
+    listener.onStreamOnline(userId, async (event) => {
+      const stream = await event.getStream()
+      const title = stream?.title ?? null
+
+      emitter.sendStreamOnline(title)
+    })
+  }
+
   async init() {
+    await this.setUpEventListeners()
     await this.addBuiltinCommands()
     await this.loadTextCommands()
   }
