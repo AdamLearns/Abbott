@@ -5,7 +5,7 @@ import { uuidv7 } from "uuidv7"
 
 import { db } from "../database/database.js"
 
-import type { BotStorageLayer } from "./BotStorageLayer.js"
+import type { AccessTokenWithName, BotStorageLayer } from "./BotStorageLayer.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type { DB } from "./types/db.js"
 import type {
@@ -323,7 +323,7 @@ export class BotDatabase implements BotStorageLayer {
       .execute()
   }
 
-  async getTwitchToken(): Promise<AccessToken> {
+  async getTwitchToken(): Promise<AccessTokenWithName> {
     const response = await db.transaction().execute(async (trx) => {
       const response = await trx
         .selectFrom("config")
@@ -346,8 +346,19 @@ export class BotDatabase implements BotStorageLayer {
 
       const tokenResponse = await trx
         .selectFrom("twitch_oauth_tokens")
-        .where("twitch_id", "=", twitchId)
-        .select(["access_token", "refresh_token", "expires_in", "updated_at"])
+        .innerJoin(
+          "twitch_names",
+          "twitch_oauth_tokens.twitch_id",
+          "twitch_names.twitch_id",
+        )
+        .where("twitch_oauth_tokens.twitch_id", "=", twitchId)
+        .select([
+          "twitch_oauth_tokens.access_token",
+          "twitch_oauth_tokens.refresh_token",
+          "twitch_oauth_tokens.expires_in",
+          "twitch_oauth_tokens.updated_at",
+          "twitch_names.name",
+        ])
         .executeTakeFirst()
 
       if (tokenResponse === undefined) {
@@ -367,8 +378,7 @@ export class BotDatabase implements BotStorageLayer {
       for (const row of scopesResponse) {
         scopes.push(row.scope)
       }
-
-      return {
+      const accessToken = {
         accessToken: tokenResponse.access_token,
         refreshToken: tokenResponse.refresh_token,
         expiresIn: Number.parseInt(tokenResponse.expires_in),
@@ -377,6 +387,11 @@ export class BotDatabase implements BotStorageLayer {
         // created_at. See
         // https://github.com/twurple/twurple/blob/7736fd144b108f09febf5a270a38225ca5b6f339/packages/auth/src/helpers.ts#L78-L91
         obtainmentTimestamp: tokenResponse.updated_at.getTime(),
+      }
+
+      return {
+        token: accessToken,
+        name: tokenResponse.name,
       }
     })
 

@@ -7,6 +7,11 @@ import type {
   NewCommandName,
 } from "./types/kysely-wrappers.js"
 
+export interface AccessTokenWithName {
+  token: AccessToken
+  name: string
+}
+
 export interface BotStorageLayer {
   addAlias(
     newCommandName: NewCommandName,
@@ -35,6 +40,6 @@ export interface BotStorageLayer {
     userName: string,
     isPrimaryBotUser: boolean,
   ): Promise<void>
-  getTwitchToken(): Promise<AccessToken>
+  getTwitchToken(): Promise<AccessTokenWithName>
   refreshTwitchToken(newTokenData: AccessToken): Promise<void>
 }

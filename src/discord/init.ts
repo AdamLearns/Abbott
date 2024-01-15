@@ -10,9 +10,17 @@ export async function init() {
 
   clientWithCommands.Commands = await readAllCommands()
 
+  clientWithCommands.once(Events.GuildCreate, (guild) => {
+    console.log(`Joined the ${guild.name} server.`)
+  })
+
   clientWithCommands.once(Events.ClientReady, (readyClient) => {
+    const allGuildNames = readyClient.guilds.cache.map((guild) => guild.name)
+    const allGuildNamesString = JSON.stringify(allGuildNames)
+    const botName = readyClient.user.tag
+    const numCommands = clientWithCommands.Commands.size
     console.log(
-      `Ready! Logged in as ${readyClient.user.tag}. Read in ${clientWithCommands.Commands.size} command(s).`,
+      `Logged in on Discord as ${botName} to servers: ${allGuildNamesString}. Read in ${numCommands} command(s).`,
     )
   })
 

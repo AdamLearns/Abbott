@@ -69,7 +69,6 @@ export class Bot {
 
             // This prevents us from having user-level rate limits
             isAlwaysMod: true,
-            // TODO: stop hard-coding this
             channels: [twitchChannelName],
           })
         : makeChatClient(authProvider)

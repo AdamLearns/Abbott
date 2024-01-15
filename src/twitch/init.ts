@@ -20,7 +20,9 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   })
 
   const botDatabase = new BotDatabase()
-  const token = await botDatabase.getTwitchToken()
+  const { token, name } = await botDatabase.getTwitchToken()
+
+  console.log("Creating Twitch auth provider. Bot name:", name)
 
   try {
     await authProvider.addUserForToken(token, ["chat"])
@@ -38,7 +40,8 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
   return authProvider
 }
 
-async function createBot(authProvider: RefreshingAuthProvider): Promise<Bot> {
+async function createBot(): Promise<Bot> {
+  const authProvider = await createAuthProvider()
   const twitchChannelName = process.env.TWITCH_CHANNEL_NAME
 
   if (twitchChannelName === undefined) {
@@ -51,14 +54,14 @@ async function createBot(authProvider: RefreshingAuthProvider): Promise<Bot> {
 
   await bot.init()
 
+  console.info(
+    "Successfully created the Twitch bot in channel:",
+    twitchChannelName,
+  )
+
   return bot
 }
 
 export async function init() {
-  console.info("Starting the Twitch bot")
-
-  const authProvider = await createAuthProvider()
-  await createBot(authProvider)
-
-  console.info("Successfully created the Twitch bot")
+  await createBot()
 }
