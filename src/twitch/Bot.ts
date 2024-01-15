@@ -37,11 +37,13 @@ export class Bot {
   private readonly commands = new Map<string, BotCommand>()
 
   constructor({
+    twitchChannelName,
     authProvider,
     storageLayer,
     makeApiClient,
     makeChatClient,
   }: {
+    twitchChannelName: string
     authProvider: RefreshingAuthProvider
     storageLayer?: BotStorageLayer | undefined
     makeApiClient?: MakeApiClient | undefined
@@ -68,7 +70,7 @@ export class Bot {
             // This prevents us from having user-level rate limits
             isAlwaysMod: true,
             // TODO: stop hard-coding this
-            channels: ["AdamLearnsLive"],
+            channels: [twitchChannelName],
           })
         : makeChatClient(authProvider)
 

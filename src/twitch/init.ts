@@ -39,7 +39,15 @@ async function createAuthProvider(): Promise<RefreshingAuthProvider> {
 }
 
 async function createBot(authProvider: RefreshingAuthProvider): Promise<Bot> {
-  const bot = new Bot({ authProvider })
+  const twitchChannelName = process.env.TWITCH_CHANNEL_NAME
+
+  if (twitchChannelName === undefined) {
+    throw new Error(
+      "Missing environment variables. Make sure to copy .env.example to .env and fill out the values.",
+    )
+  }
+
+  const bot = new Bot({ twitchChannelName, authProvider })
 
   await bot.init()
 

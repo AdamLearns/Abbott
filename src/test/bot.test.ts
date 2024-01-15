@@ -52,6 +52,7 @@ async function createBot() {
   })
   storageLayer = new BotFakeStorageLayer()
   const bot = new Bot({
+    twitchChannelName: "!madeup@",
     authProvider,
     storageLayer,
     makeApiClient: () => {
@@ -367,6 +368,7 @@ describe("Delete-command tests", () => {
     })
 
     const bot = new Bot({
+      twitchChannelName: "!madeup@",
       authProvider,
       storageLayer: new BotFakeStorageLayer(),
       makeApiClient: () => {
