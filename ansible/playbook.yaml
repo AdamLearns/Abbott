@@ -15,6 +15,9 @@
           - unzip
           - build-essential
           - pgcli
+          - bat # this is installed as "batcat"
+          - ripgrep
+          - lsd
         state: present
     - name: Check out the Abbott code
       ansible.builtin.git:
