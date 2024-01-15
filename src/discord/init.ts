@@ -92,7 +92,7 @@ function onStreamOnline(
       const tag = roleMention(streamAnnouncementsRoleId)
       let message = `${tag} Adam just went live! <https://twitch.tv/AdamLearnsLive>`
       if (title !== null) {
-        message += ` Title: ${title}`
+        message += `\n\nTitle: ${title}`
       }
       await channel.send(message)
     }
