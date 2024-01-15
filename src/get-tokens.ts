@@ -84,7 +84,7 @@ function startServer() {
     },
   )
 
-  server.listen(redirectPort, redirectHost, () => {
+  server.listen(redirectPort, "0.0.0.0", () => {
     console.log(`Server running at ${redirectUri}`)
   })
 }

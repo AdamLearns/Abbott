@@ -3,7 +3,7 @@ services:
   abbott:
     image: ghcr.io/adamlearns/abbott:latest
     restart: unless-stopped
-    env_file: .env.development.local
+    env_file: .env.production.local
 
     # Use the host network so that we can access the database container
     network_mode: host

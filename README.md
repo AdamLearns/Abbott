@@ -54,4 +54,15 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Copy over the `.env` file: `scp .env.development.local adam@<IP_ADDRESS>:code/Abbott/`
   - Set `DATABASE_BACKUP_LOCATION=/database_backups`.
   - Make sure `~/database_backups` exists on the host.
-- Copy over the "tokens" file: `scp tokens.102460608.json adam@<IP_ADDRESS>:code/Abbott/`
+- Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so you can run this from the `Abbott` folder:
+  - `docker run --net=host -v .:/abbott --entrypoint /bin/bash -it node:18.17.0-slim`
+    - (`--net=host` is needed to be able to contact the database since it's running in a separate container)
+    - (no need to do `-p 3000:3000` thanks to `--net=host`)
+  - `apt update && apt install -y wget`
+  - `wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -`
+  - `source /root/.bashrc`
+  - `cd /abbott`
+  - `NODE_ENV=development pnpm tsx src/get-tokens.ts`
+  - From main computer: `ssh -L 3000:localhost:3000 minipc@IP`
+- Migrate the database (I only did this once):
+  - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
