@@ -17,6 +17,7 @@
 		"prepare": "husky install"
 	},
 	"dependencies": {
+		"@d-fischer/typed-event-emitter": "^3.3.3",
 		"@tsconfig/node18": "^18.2.2",
 		"@twurple/api": "^7.0.7",
 		"@twurple/auth": "^7.0.7",
@@ -37,7 +38,6 @@
 		"uuidv7": "^0.6.3"
 	},
 	"devDependencies": {
-		"@d-fischer/typed-event-emitter": "^3.3.3",
 		"@hideoo/eslint-config": "^2.0.2",
 		"@types/node": "^18",
 		"@types/pg": "^8.10.9",
