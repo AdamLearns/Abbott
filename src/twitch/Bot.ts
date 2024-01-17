@@ -110,6 +110,7 @@ export class Bot {
 
       emitter.sendStreamOnline(title)
     })
+    console.log("Set up onStreamOnline listener from the Twitch bot")
   }
 
   async init() {
@@ -771,11 +772,7 @@ export class Bot {
     text: string,
     msg: ChatMessage,
   ) => {
-    console.info(
-      `Channel: ${channel}, User: ${user}, Text: ${text}, msg: ${JSON.stringify(
-        msg,
-      )}`,
-    )
+    console.info(`Channel: ${channel}, User: ${user}, Text: ${text}`)
 
     await this.processPotentialCommand(channel, user, text, msg)
   }
