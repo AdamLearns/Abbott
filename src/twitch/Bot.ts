@@ -92,19 +92,23 @@ export class Bot {
       // url: "ws://127.0.0.1:8080/ws",
     })
 
-    const userId = await this.apiClient.users.getUserByName(
+    const user = await this.apiClient.users.getUserByName(
       this.twitchChannelName,
     )
 
-    if (userId === null) {
+    if (user === null) {
       throw new Error(
         `Couldn't get user ID for Twitch name "${this.twitchChannelName}"`,
       )
     }
 
+    console.log(
+      `User ID of ${this.twitchChannelName}: ${user.id}. Setting up a listener.`,
+    )
+
     listener.start()
 
-    listener.onStreamOnline(userId, async (event) => {
+    listener.onStreamOnline(user.id, async (event) => {
       const stream = await event.getStream()
       const title = stream?.title ?? null
 
