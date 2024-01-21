@@ -1,4 +1,5 @@
 import http, { type IncomingMessage, type ServerResponse } from "node:http"
+import readline from "node:readline/promises"
 import url from "node:url"
 
 import { type AccessToken, getTokenInfo } from "@twurple/auth"
@@ -104,7 +105,41 @@ function main() {
     `&response_type=code` +
     `&scope=chat:read+chat:edit`
 
-  console.log("Go to this URL and log in on the bot account:", authUrl)
+  console.log(
+    "Go to this URL and log in on the bot account (you may want to use an incognito window so that you don't use the wrong identity):",
+    authUrl,
+  )
+}
+
+async function readChoiceFromStdin(): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  let choiceIsValid = false
+  console.log(`Is this token for your bot account, the streamer account, or both?
+The bot can do everything except subscribe to websocket events. For those, you
+need the streamer's token.
+
+If you're getting these tokens for a test channel, then it's possible that your
+bot account is the same as the streamer account.\n`)
+  let choice: string | undefined
+  while (!choiceIsValid) {
+    choice = await rl.question("Input a choice: (BOT|STREAMER|BOTH) ")
+    const choiceLower = choice.toLowerCase()
+    if (
+      choiceLower === "bot" ||
+      choiceLower === "streamer" ||
+      choiceLower === "both"
+    ) {
+      choiceIsValid = true
+    } else {
+      console.log("\nInvalid choice. Try again.")
+    }
+  }
+  rl.close()
+  return choice as string
 }
 
 async function saveToDatabase(accessToken: AccessToken) {
@@ -117,12 +152,20 @@ async function saveToDatabase(accessToken: AccessToken) {
     )
   }
 
-  const botDatabase = new BotDatabase()
-  await botDatabase.saveTwitchToken(accessToken, userId, userName, true)
+  const choice = await readChoiceFromStdin()
+  const isBotUser = choice === "bot" || choice === "both"
 
-  console.log(
-    `Saved token for ${userId} (${userName}) to database. You should be able to start the bot.`,
-  )
+  const botDatabase = new BotDatabase()
+  await botDatabase.saveTwitchToken(accessToken, userId, userName, isBotUser)
+
+  console.log(`Saved token for ${userId} (${userName}) to database.`)
+
+  const botTwitchId = await botDatabase.getPrimaryBotTwitchId()
+  if (botTwitchId === null) {
+    console.log(
+      "Note that you do not have a bot token in the database, so you should run this again and save one.",
+    )
+  }
 }
 
 main()

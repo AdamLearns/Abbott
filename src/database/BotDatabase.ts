@@ -1,5 +1,5 @@
 import type { AccessToken } from "@twurple/auth"
-import { type Transaction, sql } from "kysely"
+import { type Transaction, sql, type Kysely } from "kysely"
 import sample from "lodash/sample.js"
 import { uuidv7 } from "uuidv7"
 
@@ -207,11 +207,11 @@ export class BotDatabase implements BotStorageLayer {
   }
 
   private async insertOrUpdateToken(
-    trx: Transaction<DB>,
+    dbOrTrx: Transaction<DB> | Kysely<DB>,
     twitchId: string,
     accessToken: AccessToken,
   ) {
-    await trx
+    await dbOrTrx
       .insertInto("twitch_oauth_tokens")
       .values({
         twitch_id: twitchId,
@@ -323,27 +323,18 @@ export class BotDatabase implements BotStorageLayer {
       .execute()
   }
 
-  async getTwitchToken(): Promise<AccessTokenWithName> {
+  async getPrimaryBotTwitchId(): Promise<string | null> {
+    const response = await db
+      .selectFrom("config")
+      .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
+      .select(["value"])
+      .executeTakeFirst()
+
+    return response?.value ?? null
+  }
+
+  async getTwitchToken(twitchId: string): Promise<AccessTokenWithName> {
     const response = await db.transaction().execute(async (trx) => {
-      const response = await trx
-        .selectFrom("config")
-        .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
-        .select(["value"])
-        .executeTakeFirst()
-
-      if (response === undefined) {
-        throw new Error(
-          "Couldn't find the primary bot user ID in the database.",
-        )
-      }
-
-      const twitchId = response.value
-      if (twitchId === null) {
-        throw new Error(
-          "Found the primary bot user ID in the database, but it was null.",
-        )
-      }
-
       const tokenResponse = await trx
         .selectFrom("twitch_oauth_tokens")
         .innerJoin(
@@ -362,9 +353,7 @@ export class BotDatabase implements BotStorageLayer {
         .executeTakeFirst()
 
       if (tokenResponse === undefined) {
-        throw new Error(
-          "Found a primary bot ID, but couldn't find any tokens for it in the database.",
-        )
+        throw new Error(`Couldn't find a token for twitchId==${twitchId}.`)
       }
 
       // Fetch the scopes corresponding to that token
@@ -398,28 +387,10 @@ export class BotDatabase implements BotStorageLayer {
     return response
   }
 
-  async refreshTwitchToken(newTokenData: AccessToken): Promise<void> {
-    await db.transaction().execute(async (trx) => {
-      const response = await trx
-        .selectFrom("config")
-        .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
-        .select(["value"])
-        .executeTakeFirst()
-
-      if (response === undefined) {
-        throw new Error(
-          "Couldn't find the primary bot user ID in the database.",
-        )
-      }
-
-      const twitchId = response.value
-      if (twitchId === null) {
-        throw new Error(
-          "Found the primary bot user ID in the database, but it was null.",
-        )
-      }
-
-      await this.insertOrUpdateToken(trx, twitchId, newTokenData)
-    })
+  async refreshTwitchToken(
+    twitchId: string,
+    newTokenData: AccessToken,
+  ): Promise<void> {
+    await this.insertOrUpdateToken(db, twitchId, newTokenData)
   }
 }

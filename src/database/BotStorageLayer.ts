@@ -40,6 +40,7 @@ export interface BotStorageLayer {
     userName: string,
     isPrimaryBotUser: boolean,
   ): Promise<void>
-  getTwitchToken(): Promise<AccessTokenWithName>
-  refreshTwitchToken(newTokenData: AccessToken): Promise<void>
+  getPrimaryBotTwitchId(): Promise<string | null>
+  getTwitchToken(twitchId: string): Promise<AccessTokenWithName>
+  refreshTwitchToken(twitchId: string, newTokenData: AccessToken): Promise<void>
 }

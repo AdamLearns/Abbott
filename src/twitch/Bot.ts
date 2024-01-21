@@ -1,7 +1,7 @@
 import { exec } from "node:child_process"
 
 import { ApiClient } from "@twurple/api"
-import type { RefreshingAuthProvider } from "@twurple/auth"
+import type { AccessToken, RefreshingAuthProvider } from "@twurple/auth"
 import {
   ChatClient,
   type ChatUser,
@@ -36,7 +36,10 @@ export class Bot {
   private readonly storageLayer: BotStorageLayer
   private readonly chat: ChatClient
   private readonly apiClient: ApiClient
+  private readonly authProvider: RefreshingAuthProvider
   private readonly twitchChannelName: string
+  private name = "unset" // the Twitch user name of the bot
+  private twitchId = "unset"
 
   // Keys: any known command name, including an alias. This means that "lang" and
   // "language" may both point to references to the same BotCommand.
@@ -56,6 +59,7 @@ export class Bot {
     makeChatClient?: MakeChatClient | undefined
   }) {
     this.twitchChannelName = twitchChannelName
+    this.authProvider = authProvider
     this.apiClient =
       makeApiClient === undefined
         ? new ApiClient({
@@ -114,13 +118,94 @@ export class Bot {
 
       emitter.sendStreamOnline(title)
     })
-    console.log("Set up onStreamOnline listener from the Twitch bot")
   }
 
   async init() {
+    await this.fetchTwitchIdFromStorage()
+    await this.addBotUserToAuthProvider()
+    await this.addStreamerToken()
     await this.setUpEventListeners()
     await this.addBuiltinCommands()
     await this.loadTextCommands()
+  }
+
+  async fetchTwitchIdFromStorage() {
+    const twitchId = await this.storageLayer.getPrimaryBotTwitchId()
+    if (twitchId === null) {
+      throw new Error(
+        "No primary bot Twitch ID found in the database. Run get-tokens.ts to get a token for the bot.",
+      )
+    }
+
+    this.twitchId = twitchId
+  }
+
+  async addBotUserToAuthProvider() {
+    const { token, name } = await this.storageLayer.getTwitchToken(
+      this.twitchId,
+    )
+
+    this.name = name
+
+    console.log(
+      `Adding user to AuthProvider: bot name: ${name}. Channel name: ${process.env.TWITCH_CHANNEL_NAME}`,
+    )
+
+    try {
+      this.authProvider.addUser(this.twitchId, token, ["chat"])
+    } catch {
+      // DO NOT PRINT THIS ERROR; it has secrets in it!
+      throw new Error(
+        "Couldn't call addUser. Probably sent a bad refresh token. Follow https://twurple.js.org/docs/examples/chat/basic-bot.html to fix it.",
+      )
+    }
+
+    this.authProvider.onRefresh(
+      async (userId: string, newTokenData: AccessToken) => {
+        await this.storageLayer.refreshTwitchToken(userId, newTokenData)
+      },
+    )
+  }
+
+  /**
+   * Adds the streamer's token to the AuthProvider that we use. This is required
+   * by some websocket subscriptions. See the Discord thread below where the
+   * creator of Twurple talks about how you can't use just any token to
+   * subscribe to certain events.
+   * @see
+   * https://discord.com/channels/325552783787032576/1190377507279614103https://discord.com/channels/325552783787032576/1190377507279614103
+   */
+  async addStreamerToken() {
+    const channelInfo = await this.apiClient.users.getUserByName(
+      this.twitchChannelName,
+    )
+
+    if (channelInfo == null) {
+      throw new Error(
+        `Couldn't look up Twitch user by name: ${this.twitchChannelName}`,
+      )
+    }
+
+    if (channelInfo.id === this.twitchId) {
+      return
+    }
+    console.log(
+      `The bot account (${this.name}) does not match the channel name \
+(${this.twitchChannelName}). The streamer's token is required to subscribe to \
+websocket events, so we're going to try to fetch ${this.twitchChannelName}'s \
+token from the database now. It this doesn't work, then you need to run \
+get-tokens.ts.`,
+    )
+    const { token } = await this.storageLayer.getTwitchToken(channelInfo.id)
+
+    try {
+      this.authProvider.addUser(channelInfo.id, token, ["chat"])
+    } catch {
+      // DO NOT PRINT THIS ERROR; it has secrets in it!
+      throw new Error(
+        "Couldn't call addUser. Probably sent a bad refresh token.",
+      )
+    }
   }
 
   /**

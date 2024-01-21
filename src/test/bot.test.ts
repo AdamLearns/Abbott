@@ -67,12 +67,21 @@ async function createBot() {
 }
 
 vi.mock("@twurple/auth", () => {
-  const RefreshingAuthProvider = vi.fn()
+  const RefreshingAuthProvider = vi.fn(() => ({
+    addUser: vi.fn(),
+    onRefresh: vi.fn(),
+  }))
   return { RefreshingAuthProvider }
 })
 
 vi.mock("@twurple/api", () => {
-  const ApiClient = vi.fn()
+  const ApiClient = vi.fn(() => ({
+    users: {
+      getUserByName: vi.fn(() => ({
+        id: "fake",
+      })),
+    },
+  }))
   return { ApiClient }
 })
 

@@ -37,6 +37,9 @@ export class BotFakeStorageLayer implements BotStorageLayer {
     return undefined
   }
   async saveTwitchToken() {}
+  async getPrimaryBotTwitchId(): Promise<string> {
+    return "fake"
+  }
   async getTwitchToken(): Promise<AccessTokenWithName> {
     return {
       token: {
