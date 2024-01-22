@@ -3,7 +3,7 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "@hideoo",
+    "@hideoo", // this includes Astro
     "prettier",
   ],
   rules: {

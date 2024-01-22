@@ -1,0 +1,7 @@
+{
+  // https://ota-meshi.github.io/eslint-plugin-astro/user-guide/#visual-studio-code
+  "eslint.validate": [
+    "astro", // Enable .astro
+    "typescript" // Enable .ts
+  ]
+}
