@@ -173,7 +173,7 @@ export class Bot {
    * creator of Twurple talks about how you can't use just any token to
    * subscribe to certain events.
    * @see
-   * https://discord.com/channels/325552783787032576/1190377507279614103https://discord.com/channels/325552783787032576/1190377507279614103
+   * https://discord.com/channels/325552783787032576/1190377507279614103
    */
   async addStreamerToken() {
     const channelInfo = await this.apiClient.users.getUserByName(
@@ -193,7 +193,7 @@ export class Bot {
       `The bot account (${this.name}) does not match the channel name \
 (${this.twitchChannelName}). The streamer's token is required to subscribe to \
 websocket events, so we're going to try to fetch ${this.twitchChannelName}'s \
-token from the database now. It this doesn't work, then you need to run \
+token from the database now. If this doesn't work, then you need to run \
 get-tokens.ts.`,
     )
     const { token } = await this.storageLayer.getTwitchToken(channelInfo.id)
