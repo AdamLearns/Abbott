@@ -49,6 +49,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5.1.0
         with:
-          file: ./Dockerfile
+          file: ./packages/bots/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.date_in_seconds.outputs.VALUE }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
