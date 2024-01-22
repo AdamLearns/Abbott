@@ -61,7 +61,9 @@ function handlePotentialMigrationError(
   if (error !== undefined) {
     if (results === undefined) {
       throw new Error(
-        "Couldn't migrate the database. No results returned to be able to give more information.",
+        `Couldn't migrate the database. No results returned to be able to give more information. Error: ${JSON.stringify(
+          error,
+        )}`,
       )
     }
     console.error("Failed to run the following migration files:")

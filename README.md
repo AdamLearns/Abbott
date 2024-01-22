@@ -14,7 +14,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 
 - Copy `.env.example` to another file (e.g. `.env.development.local`) and fill out the values.
 - Run migrations (see [Migrations](#migrations)).
-- Get a Twitch access token: `NODE_ENV=development pnpm tsx src/get-tokens.ts`
+- Get a Twitch access token: `NODE_ENV=development pnpm tsx packages/bots/src/get-tokens.ts`
   - Follow the instructions that it outputs
 
 ## Linting/correctness
@@ -24,8 +24,8 @@ This code is publicly viewable, but it isn't exactly "open-source":
 
 ## Testing
 
-- Start the test database in a Docker image: `docker compose -f ./src/database/test_compose.yml up`
-- Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./src/test/database.test.ts`.
+- Start the test database in a Docker image: `docker compose -f ./packages/bots/src/database/test_compose.yml up`
+- Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./packages/bots/src/test/database.test.ts`.
 - When running `pnpm coverage`, open the results with `open coverage/index.html`.
 
 ## Migrations
@@ -35,7 +35,11 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
   - Note: migrations should happen automatically on start-up. See `.env.example` for how to configure this. However, they won't automatically regenerate types.
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
-- Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./src/database/types/db.d.ts`
+- Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./packages/bots/src/database/types/db.d.ts`
+
+## Manually building the Docker images
+
+From the root of the directory, run `docker build . -t adamlearns/abbott -f packages/bots/Dockerfile`.
 
 ## `ircv3`
 
@@ -70,7 +74,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - `wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -`
   - `source /root/.bashrc`
   - `cd /abbott`
-  - `NODE_ENV=development pnpm tsx src/get-tokens.ts`
+  - `NODE_ENV=development pnpm tsx packages/bots/src/get-tokens.ts`
     - Follow the instructions from `get-tokens` on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
     - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
 - Migrate the database (I only did this once):
@@ -79,7 +83,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 ## Register Discord bot
 
 - Register the commands with the Discord API
-  - `NODE_ENV=development pnpm tsx ./src/discord/deploy-commands.ts`
+  - `NODE_ENV=development pnpm tsx ./packages/bots/src/discord/deploy-commands.ts`
     - Note: change `NODE_ENV` as appropriate (e.g. to `production`)
 - Invite the bot to your server ([reference](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#bot-invite-links))
   - Make sure to select the `bot` and `applications.commands` options

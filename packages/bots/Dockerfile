@@ -6,16 +6,21 @@ RUN corepack enable
 COPY . /app
 WORKDIR /app
 
-FROM base AS prod-deps
+# FROM base AS prod-deps
+# RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+FROM base AS install-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN pnpm --filter "abbott-bots" deploy pruned
 
 FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build
+COPY --from=install-deps /app/pruned /app
+WORKDIR /app
+RUN pnpm build
 
 FROM node:18.17.0-slim
-COPY --from=base /app/package.json /app/package.json
-COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=install-deps /app/pruned/package.json /app/package.json
+COPY --from=install-deps /app/pruned/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 
 # Allow for Postgres 16 to be installed
@@ -28,4 +33,3 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 RUN apt-get update && apt install -y postgresql-client-16
 
 CMD [ "node", "app/" ]
-
