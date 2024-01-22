@@ -60,6 +60,9 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - Set `DATABASE_BACKUP_LOCATION=/database_backups`.
   - Make sure `~/database_backups` exists on the host.
 - Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so you can run this from the `Abbott` folder:
+  - From main computer: `ssh -L 3000:localhost:3000 minipc@IP`
+  - `git pull`
+    - Without this, you may not be working with the latest code.
   - `docker run --net=host -v .:/abbott --entrypoint /bin/bash -it node:18.17.0-slim`
     - (`--net=host` is needed to be able to contact the database since it's running in a separate container)
     - (no need to do `-p 3000:3000` thanks to `--net=host`)
@@ -68,9 +71,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - `source /root/.bashrc`
   - `cd /abbott`
   - `NODE_ENV=development pnpm tsx src/get-tokens.ts`
-    - Don't follow the instructions yet
-  - From main computer: `ssh -L 3000:localhost:3000 minipc@IP`
-    - Now follow the instructions from `get-tokens` on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
+    - Follow the instructions from `get-tokens` on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
     - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
 - Migrate the database (I only did this once):
   - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
