@@ -1,0 +1,17 @@
+# This file really SHOULDN'T exist, but I keep finding myself wanting to test
+# the Docker image that I create, and the image/env_file/volumes need to change.
+# This file has the required changes.
+version: "3.8"
+services:
+  abbott:
+    image: ghcr.io/adamlearns/abbott:latest
+    restart: unless-stopped
+    env_file: .env.production.local
+
+    # Use the host network so that we can access the database container
+    network_mode: host
+    volumes:
+      # This could be replaced with an external volume so that it's not
+      # hard-coded to $HOME/database_backups.
+      # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
+      - $HOME/database_backups:/database_backups
