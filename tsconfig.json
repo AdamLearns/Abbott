@@ -25,5 +25,11 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
-  }
+  },
+
+  // "references" and "files" come from https://medium.com/the-daily-coder/how-to-correctly-set-up-typescript-project-references-in-a-monorepo-50f33cf0d984
+  "references": [
+    { "path": "./packages/bots" },
+    { "path": "./packages/database" }
+  ]
 }

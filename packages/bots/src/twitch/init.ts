@@ -1,5 +1,7 @@
 import { RefreshingAuthProvider } from "@twurple/auth"
 
+import { onProcessClose } from "../setup/termination-handler.js"
+
 import { Bot } from "./Bot.js"
 
 function createAuthProvider(): RefreshingAuthProvider {
@@ -41,6 +43,10 @@ async function createBot(): Promise<Bot> {
     "Successfully created the Twitch bot in channel:",
     twitchChannelName,
   )
+
+  onProcessClose(() => {
+    bot.destroy()
+  })
 
   return bot
 }

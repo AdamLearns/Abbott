@@ -12,14 +12,18 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^2.0.6",
+    "@astrojs/node": "^8.0.0",
     "@astrojs/tailwind": "^5.1.0",
     "@typescript-eslint/parser": "^6.13.2",
     "astro": "^4.2.2",
     "autoprefixer": "^10.4.15",
-    "eslint-plugin-astro": "^0.31.3",
     "postcss": "^8.4.28",
     "prettier-plugin-astro": "^0.13.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "tailwindcss": "^3.3.5"
+  },
+  "devDependencies": {
+    "eslint-plugin-astro": "^0.31.3",
+    "eslint-plugin-jsx-a11y": "^6.8.0"
   }
 }

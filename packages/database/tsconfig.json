@@ -6,7 +6,6 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "composite": true,
-    "declarationMap": true,
     "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,9 +21,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "dist",
-    "paths": {
-      "abbott-database": ["../database"]
-    },
     "resolveJsonModule": true,
     "rootDir": "./src",
     "skipLibCheck": true,
@@ -32,6 +28,5 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
-  },
-  "references": [{ "path": "../database" }]
+  }
 }

@@ -1,6 +1,6 @@
+import { migrateIfNeeded } from "abbott-database"
 import dotenvFlow from "dotenv-flow"
 
-import { migrateIfNeeded } from "./setup/back-up-and-migrate.js"
 import { startBots } from "./setup/start-bots.js"
 import { setUpTerminationHandler } from "./setup/termination-handler.js"
 

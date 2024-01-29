@@ -1,9 +1,14 @@
-import { db } from "../database/database.js"
+import { db } from "abbott-database"
 
 export function setUpTerminationHandler() {
-  process.once("SIGTERM", async () => {
-    console.log("SIGTERM received. Closing everything down.")
+  onProcessClose(async () => {
+    console.log("Signal to close received. Closing everything down.")
     await db.destroy()
     console.log("Closed database connection. Exiting.")
   })
+}
+
+export function onProcessClose(callback: () => void) {
+  process.once("SIGINT", callback)
+  process.once("SIGTERM", callback)
 }

@@ -30,7 +30,11 @@ export async function readAllCommands(): Promise<Map<string, Command>> {
     const commandFiles = fs
       .readdirSync(commandsPath)
       // (in the Docker image, .ts files become .js files, so find them both)
-      .filter((file) => file.endsWith(".ts") || file.endsWith(".js"))
+      .filter(
+        (file) =>
+          (file.endsWith(".ts") && !file.endsWith(".d.ts")) ||
+          file.endsWith(".js"),
+      )
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file)
       const command = (await import(filePath)) as Command

@@ -6,22 +6,20 @@ RUN corepack enable
 COPY . /app
 WORKDIR /app
 
-# FROM base AS prod-deps
-# RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-
 FROM base AS install-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-RUN pnpm --filter "abbott-bots" deploy pruned
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm --filter "abbott-bots" deploy deploy/bots
+RUN pnpm --filter "abbott-database" deploy deploy/database
 
 FROM base AS build
-COPY --from=install-deps /app/pruned /app
-WORKDIR /app
+COPY --from=install-deps /app/deploy/ /app/deploy
+WORKDIR /app/deploy/bots
 RUN pnpm build
 
 FROM node:18.17.0-slim
-COPY --from=install-deps /app/pruned/package.json /app/package.json
-COPY --from=install-deps /app/pruned/node_modules /app/node_modules
-COPY --from=build /app/dist /app/dist
+COPY --from=install-deps /app/deploy/bots/package.json /app/deploy/package.json
+COPY --from=install-deps /app/deploy/bots/node_modules /app/deploy/node_modules
+COPY --from=build /app/deploy/bots/dist /app/deploy/dist
 
 # Allow for Postgres 16 to be installed
 RUN apt-get update && apt-get install -y wget gnupg lsb-release
@@ -32,4 +30,4 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 # Its version needs to match the database server
 RUN apt-get update && apt install -y postgresql-client-16
 
-CMD [ "node", "app/" ]
+CMD [ "node", "app/deploy" ]

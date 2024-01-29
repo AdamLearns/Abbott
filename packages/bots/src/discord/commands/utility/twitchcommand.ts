@@ -1,3 +1,4 @@
+import { BotDatabase } from "abbott-database"
 import {
   SlashCommandBuilder,
   type ChatInputCommandInteraction,
@@ -5,8 +6,6 @@ import {
   blockQuote,
   escapeMarkdown,
 } from "discord.js"
-
-import { BotDatabase } from "../../../database/BotDatabase.js"
 
 export const data = new SlashCommandBuilder()
   .setName("twitchcommand")

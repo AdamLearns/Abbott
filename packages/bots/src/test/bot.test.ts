@@ -3,7 +3,10 @@ import { Listener } from "@d-fischer/typed-event-emitter"
 import { ApiClient } from "@twurple/api"
 import { RefreshingAuthProvider } from "@twurple/auth"
 import { ChatClient, type ChatMessage } from "@twurple/chat"
+import { BotFakeStorageLayer } from "abbott-database"
+import type { BotStorageLayer } from "abbott-database"
 import {
+  type TestAPI,
   beforeEach,
   describe,
   expect,
@@ -13,8 +16,6 @@ import {
   assert,
 } from "vitest"
 
-import { BotFakeStorageLayer } from "../database/BotFakeStorageLayer.js"
-import type { BotStorageLayer } from "../database/BotStorageLayer.js"
 import { Bot } from "../twitch/Bot.js"
 import { BotCommandContext } from "../twitch/BotCommandContext.js"
 
@@ -30,7 +31,9 @@ interface ContextAndReplySpy {
   replySpy: MockInstance<[text: string], Promise<void>>
 }
 
-export const testWithReplySpy = test.extend<{
+export const testWithReplySpy: TestAPI<{
+  contextAndReplySpy: ContextAndReplySpy
+}> = test.extend<{
   contextAndReplySpy: ContextAndReplySpy
 }>({
   // Can't use an underscore here or you get a runtime error in the test.

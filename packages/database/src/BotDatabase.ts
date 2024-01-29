@@ -3,9 +3,8 @@ import { type Transaction, sql, type Kysely } from "kysely"
 import sample from "lodash/sample.js"
 import { uuidv7 } from "uuidv7"
 
-import { db } from "../database/database.js"
-
 import type { AccessTokenWithName, BotStorageLayer } from "./BotStorageLayer.js"
+import { db } from "./database.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type { DB } from "./types/db.js"
 import type {

@@ -4,7 +4,7 @@ import path from "node:path"
 
 import type { MigrationResult } from "kysely"
 
-import { makeDbForMigration, makeMigrator } from "../database/migrate-fn.js"
+import { makeDbForMigration, makeMigrator } from "./migrate-fn.js"
 
 function backupDatabase(): string {
   if (process.env.DATABASE_BACKUP_LOCATION === undefined) {

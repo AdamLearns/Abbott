@@ -9,14 +9,16 @@ import {
   type ChatMessage,
 } from "@twurple/chat"
 import { EventSubWsListener } from "@twurple/eventsub-ws"
+import { BotDatabase } from "abbott-database"
+import type {
+  BotStorageLayer,
+  DatabaseTextCommand,
+  GetQuote,
+} from "abbott-database"
 import { formatISO } from "date-fns"
 import { UUID, uuidv7 } from "uuidv7"
 
 import type { CommandData } from "../commands/CommandData.js"
-import { BotDatabase } from "../database/BotDatabase.js"
-import type { BotStorageLayer } from "../database/BotStorageLayer.js"
-import type { DatabaseTextCommand } from "../database/DatabaseTextCommand.js"
-import type { GetQuote } from "../database/types/kysely-wrappers.js"
 import { emitter } from "../events/emitter.js"
 
 import { BotCommand, type BotCommandHandler } from "./BotCommand.js"
@@ -38,6 +40,7 @@ export class Bot {
   private readonly apiClient: ApiClient
   private readonly authProvider: RefreshingAuthProvider
   private readonly twitchChannelName: string
+  private readonly eventSubListener: EventSubWsListener
   private name = "unset" // the Twitch user name of the bot
   private twitchId = "unset"
 
@@ -70,6 +73,14 @@ export class Bot {
 
     this.storageLayer = storageLayer ?? new BotDatabase()
 
+    this.eventSubListener = new EventSubWsListener({
+      apiClient: this.apiClient,
+      logger: { minLevel: logLevel },
+
+      // The mock Twitch CLI URL (which I couldn't get to work)
+      // url: "ws://127.0.0.1:8080/ws",
+    })
+
     this.chat =
       makeChatClient === undefined
         ? new ChatClient({
@@ -88,14 +99,6 @@ export class Bot {
   }
 
   async setUpEventListeners() {
-    const listener = new EventSubWsListener({
-      apiClient: this.apiClient,
-      logger: { minLevel: logLevel },
-
-      // The mock Twitch CLI URL (which I couldn't get to work)
-      // url: "ws://127.0.0.1:8080/ws",
-    })
-
     const user = await this.apiClient.users.getUserByName(
       this.twitchChannelName,
     )
@@ -110,14 +113,39 @@ export class Bot {
       `User ID of ${this.twitchChannelName}: ${user.id}. Setting up a listener.`,
     )
 
-    listener.start()
+    this.eventSubListener.start()
 
-    listener.onStreamOnline(user.id, async (event) => {
+    this.eventSubListener.onStreamOnline(user.id, async (event) => {
       const stream = await event.getStream()
       const title = stream?.title ?? null
 
       emitter.sendStreamOnline(title)
     })
+
+    this.eventSubListener.onUserSocketDisconnect(
+      (userId: string, error?: Error) => {
+        if (error === undefined) {
+          console.log(`Web socket for userID==${userId} disconnected cleanly.`)
+          return
+        }
+
+        console.error(
+          `User socket disconnected for user ID==${userId} at ${JSON.stringify(
+            new Date(),
+          )}. Error:`,
+          error,
+        )
+        console.log(
+          `Attempting to reconnect the web-socket listener for ${userId}`,
+        )
+        this.eventSubListener.start()
+      },
+    )
+  }
+
+  destroy() {
+    console.log("Stopping the web-socket listener")
+    this.eventSubListener.stop()
   }
 
   async init() {
@@ -530,7 +558,7 @@ get-tokens.ts.`,
       await context.reply(
         `Deleted quote #${id}. Old contents: "${deletedQuote.quote}" - ${
           deletedQuote.author
-        }, ${deletedQuote.quoted_at.toString()}`,
+        }, ${JSON.stringify(deletedQuote.quoted_at)}`,
       )
     } catch {
       return context.reply("There was a database error deleting that quote")

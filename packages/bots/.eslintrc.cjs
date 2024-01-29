@@ -1,13 +1,11 @@
 /* eslint-env node */
 module.exports = {
-  overrides: [
-    // Disable the linting rule on file names in the migrations folder because
-    // the migration names contain the letter "T" for the timestamp
-    {
-      files: ["src/database/migrations/*T*.ts"],
-      rules: {
-        "unicorn/filename-case": "off",
-      },
-    },
-  ],
+  // This only stops VSCode from giving me lint errors on the file. To stop
+  // lint-staged from giving me errors, we just have to change the glob that
+  // lint-staged tries matching.
+  ignorePatterns: ["vitest.config.ts"],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ["./tsconfig.json"],
+  },
 }
