@@ -9,8 +9,9 @@ import {
   PostgresDialect,
   FileMigrationProvider,
 } from "kysely"
-import { run } from "kysely-migration-cli"
 import pg from "pg"
+
+import { run } from "./kysely-migration-cli.js"
 const { Pool } = pg
 
 function getMigrationFolder() {
@@ -43,17 +44,13 @@ export function makeDbForMigration(): Kysely<unknown> {
   })
 }
 
-export function migrate() {
+export async function migrate() {
   dotenvFlow.config()
 
   const db = makeDbForMigration()
   const migrator = makeMigrator(db)
 
-  // @ts-expect-error: kysely-migration-cli imports Kysely from the "cjs" path,
-  // but my .tsconfig is set to "nodenext", so I'll try loading from the "esm"
-  // path. I think the "proper" way to fix this would be to get them to load
-  // from the same path, but I don't know the best way of doing that.
-  run(db, migrator, getMigrationFolder())
+  await run(db, migrator, getMigrationFolder())
 
   console.log(
     "Don't forget to regenerate types with something like this: DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen",

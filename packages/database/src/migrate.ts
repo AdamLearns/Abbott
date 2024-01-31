@@ -5,4 +5,4 @@
 
 import { migrate } from "./migrate-fn.js"
 
-migrate()
+await migrate()

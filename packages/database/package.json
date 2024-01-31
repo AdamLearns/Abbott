@@ -7,16 +7,17 @@
     "coverage": "vitest run --coverage",
     "test": "vitest",
     "kysely-codegen": "kysely-codegen",
-    "kysely-migration-cli": "tsx src/database/migrate.ts"
+    "kysely-migration-cli": "tsx src/migrate.ts"
   },
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@commander-js/extra-typings": "^11.1.0",
+    "commander": "^11.1.0",
     "dotenv-flow": "^4.0.1",
     "kysely": "^0.27.2",
-    "kysely-migration-cli": "^0.2.3",
     "lodash": "^4.17.21",
     "pg": "^8.11.3",
     "tsx": "^4.6.2",

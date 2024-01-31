@@ -1,6 +1,12 @@
 {
   "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
-    "composite": true
-  }
+    "composite": true,
+    "outDir": "dist",
+    "rootDir": "./src",
+    "paths": {
+      "abbott-database": ["../database"]
+    }
+  },
+  "references": [{ "path": "../database" }]
 }

@@ -1,7 +1,181 @@
 ---
+import { BotDatabase, type TextCommand } from "abbott-database"
+
 import HtmlLayout from "../layouts/main.astro"
+
+const botDatabase = new BotDatabase()
+const dbCommands = await botDatabase.loadTextCommands()
+const commands: TextCommand[] = dbCommands.map((command) => {
+  return {
+    name: command.name,
+    response: command.response,
+    updated_at: command.updated_at,
+  }
+})
 ---
 
-<HtmlLayout pageTitle={"Hello"}>
-  <div>Hello world</div>
+<HtmlLayout pageTitle={"Adam Learns command search"}>
+  <command-table data-commands={JSON.stringify(commands)}>
+    <div class="search-area">
+      <label>
+        Search commands and responses:
+        {/* eslint-disable-next-line astro/jsx-a11y/no-autofocus */}
+        <input type="search" name="command" required autofocus />
+      </label>
+    </div>
+    <table></table>
+  </command-table>
 </HtmlLayout>
+<script>
+  import Fuse from "fuse.js"
+  import linkifyHtml from "linkify-html"
+  import type { TextCommand } from "abbott-database"
+  import { safeHtml } from "common-tags"
+
+  class CommandTable extends HTMLElement {
+    input: HTMLInputElement
+    commands: TextCommand[]
+    table: HTMLTableElement
+    fuse: Fuse<TextCommand>
+    constructor() {
+      super()
+
+      if (this.dataset.commands === undefined) {
+        throw new Error("Missing commands attribute.")
+      }
+      const input = this.querySelector("input")
+      if (input === null) {
+        throw new Error("Missing input element.")
+      }
+
+      const table = this.querySelector("table")
+      if (table === null) {
+        throw new Error("Missing table element.")
+      }
+      this.commands = JSON.parse(this.dataset.commands)
+      this.commands.forEach((command) => {
+        command.updated_at = new Date(command.updated_at)
+      })
+      this.input = input
+      this.table = table
+
+      this.fuse = new Fuse(this.commands, {
+        keys: ["name", "response"],
+        includeScore: true,
+      })
+      this.input.addEventListener("input", this.onInputChanged)
+      this.setDefaultTableContents()
+
+      this.readInitialQueryParams()
+    }
+
+    readInitialQueryParams = () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const commandQuery = urlParams.get("query")
+      if (commandQuery) {
+        this.input.value = commandQuery
+        this.setCommandQuery(commandQuery)
+      }
+    }
+
+    setTableContents(tbody: string) {
+      this.table.innerHTML = `<thead>
+<tr>
+  <th scope="col">Name</th>
+  <th scope="col">Response</th>
+  <th scope="col">Last updated</th>
+</tr>
+</thead>
+<tbody>
+  ${tbody}
+</tbody>`
+    }
+
+    makeTableRow = (
+      commandName: string,
+      commandResponse: string,
+      updatedAt: Date,
+    ) => {
+      return `<tr>
+<th scope="row">${commandName}</th>
+<td>${linkifyHtml(safeHtml`${commandResponse}`)}</td>
+<td>${updatedAt.toLocaleDateString()}</td>
+</tr>`
+    }
+
+    makeTable(textCommands: TextCommand[]) {
+      const tbody = textCommands
+        .map(({ name, response, updated_at }) => {
+          return this.makeTableRow(name, response, updated_at)
+        })
+        .join("")
+      this.setTableContents(tbody)
+    }
+
+    setDefaultTableContents = () => {
+      const sortedByName = this.commands.sort((a, b) => {
+        return a.name.localeCompare(b.name)
+      })
+      this.makeTable(sortedByName)
+    }
+
+    setCommandQuery = (query: string) => {
+      if (query.trim() === "") {
+        history.replaceState({}, "", location.pathname)
+        this.setDefaultTableContents()
+        return
+      }
+      history.replaceState({}, "", "?query=" + query)
+
+      const fuse = new Fuse(this.commands, {
+        keys: ["name", "response"],
+      })
+      const results = fuse.search(query)
+
+      this.makeTable(results.map((r) => r.item))
+    }
+
+    onInputChanged = () => {
+      this.setCommandQuery(this.input.value)
+    }
+  }
+
+  customElements.define("command-table", CommandTable)
+</script>
+<style>
+  :global(body) {
+    background-color: #006bc9;
+  }
+  :global(a) {
+    color: deepskyblue;
+  }
+  :global(a:hover) {
+    color: aliceblue;
+  }
+  :global(table) {
+    color: white;
+    min-width: 100%;
+  }
+  :global(td) {
+    padding: 0.2em;
+  }
+  :global(tr) {
+    padding: 30px;
+  }
+  :global(tr):nth-child(even) {
+    background-color: #13334e;
+  }
+  :global(tr):nth-child(odd) {
+    background-color: #122d45;
+  }
+  .search-area {
+    padding: 10px;
+    color: white;
+    font-size: 1.4rem;
+  }
+  .search-area input {
+    background-color: #e0f1ff;
+    color: black;
+    padding: 5px;
+  }
+</style>

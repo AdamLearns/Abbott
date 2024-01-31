@@ -4,4 +4,10 @@ export interface DatabaseTextCommand {
   is_privileged: boolean
   name: string
   response: string
+  updated_at: Date
 }
+
+export type TextCommand = Pick<
+  DatabaseTextCommand,
+  "name" | "response" | "updated_at"
+>
