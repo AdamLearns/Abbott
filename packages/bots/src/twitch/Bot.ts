@@ -889,8 +889,6 @@ get-tokens.ts.`,
     text: string,
     msg: ChatMessage,
   ) => {
-    console.info(`Channel: ${channel}, User: ${user}, Text: ${text}`)
-
     await this.processPotentialCommand(channel, user, text, msg)
   }
 }
