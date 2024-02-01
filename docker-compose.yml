@@ -13,7 +13,7 @@ services:
       # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
       - $HOME/database_backups:/database_backups
   abbott-web:
-    image: adamlearns/abbott-web:latest
+    image: ghcr.io/adamlearns/abbott-web:latest
     restart: unless-stopped
     env_file:
       - ./packages/web/.env.production.local
