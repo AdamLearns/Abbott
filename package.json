@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "docker:web": "docker compose -f ./docker-compose-adam-dev.yml up abbott-web",
-    "docker:bots": "docker compose -f ./docker-compose-adam-dev.yml up abbott-bots",
+    "docker:up": "docker compose -f ./docker-compose-adam-dev.yml up --no-attach db",
+    "docker:web": "docker compose -f ./docker-compose-adam-dev.yml up abbott-web --no-attach db",
+    "docker:bots": "docker compose -f ./docker-compose-adam-dev.yml up abbott-bots --no-attach db",
     "docker:down": "docker compose -f ./docker-compose-adam-dev.yml down",
     "test": "pnpm --stream -r test",
     "lint": "pnpm -r lint",
