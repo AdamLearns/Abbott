@@ -17,6 +17,10 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - Get a Twitch access token: `NODE_ENV=development pnpm tsx packages/bots/src/get-tokens.ts`
   - Follow the instructions that it outputs
 
+### Running Docker images locally
+
+Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:web`.
+
 ## Linting/correctness
 
 - `pnpm run lint` (optionally with `--fix` at the end)
@@ -24,7 +28,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 
 ## Testing
 
-- Start the test database in a Docker image: `docker compose -f ./packages/bots/src/database/test_compose.yml up`
+- Start the test database in a Docker image: `docker compose -f ./packages/database/src/test_compose.yml up`
 - Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./packages/bots/src/test/database.test.ts`.
 - When running `pnpm coverage`, open the results with `open coverage/index.html`.
 
