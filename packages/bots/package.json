@@ -8,7 +8,6 @@
 		"start": "tsx src/main.ts",
 		"build": "rm -rf dist && tsc --build --force",
 		"lint": "eslint --cache --max-warnings=0 .",
-		"dev": "tsx watch tsc/main.ts",
 		"type-check": "tsc --noEmit",
 		"test": "vitest",
 		"coverage": "vitest run --coverage"
