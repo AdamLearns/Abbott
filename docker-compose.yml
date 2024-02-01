@@ -5,14 +5,14 @@ services:
     restart: unless-stopped
     env_file: .env.production.local
 
-  depends_on:
+    depends_on:
       - db
     volumes:
       # This could be replaced with an external volume so that it's not
       # hard-coded to $HOME/database_backups.
       # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
       - $HOME/database_backups:/database_backups
-    abbott-web:
+  abbott-web:
     image: adamlearns/abbott-web:latest
     restart: unless-stopped
     env_file:
