@@ -14,7 +14,8 @@ services:
       - ./packages/bots/.env.development-docker.local
 
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       # This could be replaced with an external volume so that it's not
       # hard-coded to $HOME/database_backups.
@@ -29,7 +30,8 @@ services:
       # (see the comment above for the bot image for why this is needed)
       - ./packages/web/.env.development-docker.local
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - 3000:3000
   db:
@@ -39,7 +41,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: bar
       POSTGRES_DB: foo
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - dbvolume:/var/lib/postgresql/data
     ports:

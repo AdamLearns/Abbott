@@ -4,9 +4,9 @@ services:
     image: ghcr.io/adamlearns/abbott-bots:latest
     restart: unless-stopped
     env_file: packages/bots/.env.production.local
-
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       # This could be replaced with an external volume so that it's not
       # hard-coded to $HOME/database_backups.
@@ -18,7 +18,8 @@ services:
     env_file:
       - ./packages/web/.env.production.local
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - 3000:3000
   db:
@@ -28,7 +29,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: bar
       POSTGRES_DB: foo
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - $HOME/tmp/postgres:/var/lib/postgresql/data
     ports:
