@@ -5,7 +5,6 @@ import url from "node:url"
 import { type AccessToken, getTokenInfo } from "@twurple/auth"
 import { BotDatabase } from "abbott-database"
 import dotenvFlow from "dotenv-flow"
-import fetch from "node-fetch"
 
 dotenvFlow.config()
 

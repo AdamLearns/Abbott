@@ -23,7 +23,6 @@
 		"date-fns": "^3.0.6",
 		"discord.js": "^14.14.1",
 		"dotenv-flow": "^4.0.1",
-		"node-fetch": "^3.3.2",
 		"tsx": "^4.6.2",
 		"typescript": "^5.3.2"
 	},
