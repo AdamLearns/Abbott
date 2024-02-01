@@ -116,7 +116,7 @@ export class BotDatabase implements BotStorageLayer {
         )
         .select([
           "commands.id",
-          "commands.updated_at",
+          "text_command_responses.updated_at",
           "command_names.name",
           "commands.is_privileged",
           "commands.can_be_deleted",
