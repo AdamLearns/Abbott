@@ -1,4 +1,4 @@
-import type { UUID } from "uuidv7"
+import type { UUID } from "abbott-database"
 
 import type { BotCommandContext } from "./BotCommandContext.js"
 
