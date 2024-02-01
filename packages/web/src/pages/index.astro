@@ -178,4 +178,48 @@ const commands: TextCommand[] = dbCommands.map((command) => {
     color: black;
     padding: 5px;
   }
+
+  :global(tr) > :global(*) {
+    width: 15%;
+    word-break: break-word;
+  }
+  :global(tr) :global(td):nth-child(2) {
+    width: 70%;
+  }
+  :global(tr) :global(td):last-child {
+    text-align: center;
+  }
+  @media screen and (max-width: 750px) {
+    :global(table),
+    :global(tbody),
+    :global(td),
+    :global(th),
+    :global(thead),
+    :global(tr) {
+      display: block;
+    }
+    :global(thead) :global(tr) {
+      display: none;
+    }
+    :global(tbody) :global(tr) :global(th[scope="row"]):before {
+      content: "Command";
+    }
+    :global(tbody) :global(tr) :global(td):nth-of-type(1):before {
+      content: "Response";
+      font-weight: bold;
+    }
+    :global(tbody) :global(tr) :global(td):nth-of-type(2):before {
+      content: "Last Updated";
+      font-weight: bold;
+    }
+    :global(table) :global(tbody) :global(td):before,
+    :global(table) :global(tbody) :global(th):before {
+      display: block;
+      width: 100%;
+    }
+    :global(tr) > :global(*) {
+      width: 100% !important;
+      text-align: center;
+    }
+  }
 </style>
