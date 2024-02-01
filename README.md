@@ -21,6 +21,20 @@ This code is publicly viewable, but it isn't exactly "open-source":
 
 Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:web`.
 
+## Typical development flow
+
+- Start everything up:
+  - Go to root
+  - `cd packages/web`
+  - `pnpm run dev`
+  - Go to root
+  - `cd packages/bots`
+  - `NODE_ENV=development pnpm run start`
+  - Go to root
+  - `cd packages/database`
+  - `pnpm run watch`
+- Go to the web interface or the test channel to try things out
+
 ## Linting/correctness
 
 - `pnpm run lint` (optionally with `--fix` at the end)
