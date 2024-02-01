@@ -123,8 +123,9 @@ export class Bot {
 
     this.eventSubListener.onUserSocketDisconnect(
       (userId: string, error?: Error) => {
+        // This happens every so often without an explicit disconnect being
+        // called. It just indicates that the disconnect happened cleanly.
         if (error === undefined) {
-          console.log(`Web socket for userID==${userId} disconnected cleanly.`)
           return
         }
 
