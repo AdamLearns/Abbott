@@ -246,7 +246,6 @@ get-tokens.ts.`,
     await this.addAliasComCommand()
     await this.addUnaliasComCommand()
     await this.addAlertCommand()
-    await this.addFuzzyFindCommand()
     await this.addAddQuoteCommand()
     await this.addGetQuoteCommand()
     await this.addDelQuoteCommand()
@@ -409,45 +408,6 @@ get-tokens.ts.`,
 
   async addAlertCommand() {
     return this.addBuiltInCommand("alert", this.playAlertSound)
-  }
-
-  private fuzzyFindCommands = async (
-    params: string[],
-    context: BotCommandContext,
-  ) => {
-    if (params.length === 0) {
-      await context.reply(
-        `Usage: ${prefix}ff COMMAND_NAME - this searches all text command responses for the string that you provide, that way, you can search for a command whose name you don't remember.`,
-      )
-      return
-    }
-
-    const searchString = params[0] as string
-
-    let commandNames: string[]
-    try {
-      commandNames = await this.storageLayer.fuzzyFindCommands(searchString)
-    } catch (error) {
-      console.error(`Error fuzzy-finding ${searchString}:`, error)
-      return context.reply(
-        "There was a database error while trying to fuzzy-find.",
-      )
-    }
-
-    const commandString = commandNames.join(", ").slice(0, 350)
-
-    await context.reply(
-      `Commands found matching "${searchString}": ${commandString}`,
-    )
-  }
-
-  async addFuzzyFindCommand() {
-    return this.addCommand({
-      name: "ff",
-      handler: this.fuzzyFindCommands,
-      isPrivileged: false, // one of the few built-in commands that isn't privileged
-      canBeDeleted: false,
-    })
   }
 
   async addUnaliasComCommand() {
