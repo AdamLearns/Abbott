@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "coverage": "vitest run --coverage",
+    "build": "rm -rf dist && tsc --build --force",
     "test": "vitest",
     "kysely-codegen": "kysely-codegen",
     "kysely-migration-cli": "tsx src/migrate.ts"
