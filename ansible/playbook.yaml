@@ -29,15 +29,6 @@
       ansible.builtin.include_tasks:
         file: docker.yaml
 
-    # Run "docker-compose up". We don't do this using a
-    # community.docker.docker_compose task because we run into a bunch of Python
-    # errors that are hard to fix.
-    - name: Run PostgreSQL in a container
-      ansible.builtin.command: docker-compose up -d
-      become: no
-      args:
-        chdir: ~/code/Abbott/src/database/
-
     - name: Run Watchtower
       docker_container:
         name: watchtower
@@ -49,8 +40,11 @@
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock
 
+    # Run "docker-compose up". We don't do this using a
+    # community.docker.docker_compose task because we run into a bunch of Python
+    # errors that are hard to fix.
     - name: Run Abbott
-      ansible.builtin.command: docker-compose up -d
+      ansible.builtin.command: docker-compose -f docker-compose.yml up -d
       become: no
       args:
         chdir: ~/code/Abbott/

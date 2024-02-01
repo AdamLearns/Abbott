@@ -1,10 +1,10 @@
 FROM node:18.17.0-slim AS base
 
+WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-COPY . /app
-WORKDIR /app
+COPY . ./
 
 FROM base AS install-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile

@@ -40,7 +40,15 @@ This code is publicly viewable, but it isn't exactly "open-source":
 
 ## Manually building the Docker images
 
-From the root of the directory, run `docker build . -t adamlearns/abbott -f packages/bots/Dockerfile`.
+- Build the `bots` image:
+  - From the root of the directory, run `docker build . -t adamlearns/abbott-bots -f packages/bots/Dockerfile`.
+- Build the `web` image:
+  - From the root of the directory, run `docker build . -t adamlearns/abbott-web -f packages/web/Dockerfile`.
+
+Notes:
+
+- This needs to be run from the root because that's where `pnpm-lock.yaml` is, which we need from each package that gets built. Also, packages may depend on one another (e.g. `bots` depends on `database`).
+- The `.dockerignore` files can be next to the `Dockerfile`s as long as their names match the `Dockerfile`s ([reference](https://docs.docker.com/build/building/context/#filename-and-location)).
 
 ## `ircv3`
 
@@ -75,11 +83,21 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - `wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -`
   - `source /root/.bashrc`
   - `cd /abbott`
-  - `NODE_ENV=development pnpm tsx packages/bots/src/get-tokens.ts`
+  - `NODE_ENV=development pnpx tsx packages/bots/src/get-tokens.ts`
     - Follow the instructions from `get-tokens` on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
     - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
 - Migrate the database (I only did this once):
   - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
+
+### How to run `get-tokens` with a test database from my Mac
+
+- Note: at the time I'm writing these instructions, it's possible that there'll be a collision on port 3000. If that's the case, then update `get-tokens` and probably this README.
+- Start the database with `docker-compose-adam-dev.yml`.
+- Copy `.env.development.local` from the `bots` directory to `.env.madeup.local`.
+- Overwrite `DATABASE_CONNECTION_STRING` to point to port 5434 (which is what the compose file exposes)
+- `cd packages/bots`
+- `NODE_ENV=madeup pnpx tsx src/get-tokens.ts`
+- Follow the instructions
 
 ## Register Discord bot
 

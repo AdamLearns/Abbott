@@ -3,15 +3,47 @@
 # This file has the required changes.
 version: "3.8"
 services:
-  abbott:
-    image: ghcr.io/adamlearns/abbott:latest
+  abbott-bots:
+    image: adamlearns/abbott:latest
     restart: unless-stopped
-    env_file: .env.production.local
+    env_file:
+      - ./packages/bots/.env.development.local
 
-    # Use the host network so that we can access the database container
-    network_mode: host
+      # This is to specify a different database connection string (so that we
+      # connect to the one from this compose file)
+      - ./packages/bots/.env.development-docker.local
+
+    depends_on:
+      - db
     volumes:
       # This could be replaced with an external volume so that it's not
       # hard-coded to $HOME/database_backups.
       # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
-      - $HOME/database_backups:/database_backups
+      - $HOME/tmp/abbott_database_backups:/Users/adam/tmp/abbott_database_backups
+  abbott-web:
+    image: adamlearns/abbott-web:latest
+    restart: unless-stopped
+    env_file:
+      - ./packages/web/.env.development.local
+
+      # (see the comment above for the bot image for why this is needed)
+      - ./packages/web/.env.development-docker.local
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+  db:
+    image: postgres:16.1
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bar
+      POSTGRES_DB: foo
+
+    volumes:
+      - dbvolume:/var/lib/postgresql/data
+    ports:
+      # This is only for connections from outside of this compose file
+      - 5434:5432
+volumes:
+  dbvolume:
