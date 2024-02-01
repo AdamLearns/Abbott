@@ -3,7 +3,7 @@ services:
   abbott-bots:
     image: ghcr.io/adamlearns/abbott-bots:latest
     restart: unless-stopped
-    env_file: .env.production.local
+    env_file: packages/bots/.env.production.local
 
     depends_on:
       - db
