@@ -51,6 +51,7 @@ Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:w
 - Switch to the database directory first: `cd packages/database`
 - Creating: `pnpm run kysely-migration-cli create <migration_name>`
 - Back up: `backUpDatabase` in my shell (command defined [here](https://github.com/Adam13531/AdamsApple/blob/dbfbfdfa4ad9b09e969fb4aeab2b88228757bdbb/shell/zsh/.zshrc#L637-L643))
+- Write the contents of the migration file.
 - Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
   - Note: migrations should happen automatically on start-up. See `.env.example` for how to configure this. However, they won't automatically regenerate types.
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
