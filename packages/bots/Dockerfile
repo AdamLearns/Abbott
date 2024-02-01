@@ -8,13 +8,17 @@ COPY . ./
 
 FROM base AS install-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Without this, we won't have bots/node_modules/abbott-database/dist, which is
+# needed by the "bots" package.
+WORKDIR /app/packages/bots
+RUN pnpm build
+WORKDIR /app
 RUN pnpm --filter "abbott-bots" deploy deploy/bots
 RUN pnpm --filter "abbott-database" deploy deploy/database
 
 FROM base AS build
 COPY --from=install-deps /app/deploy/ /app/deploy
-WORKDIR /app/deploy/bots
-RUN pnpm build
 
 FROM node:18.17.0-slim
 COPY --from=install-deps /app/deploy/bots/package.json /app/deploy/package.json
