@@ -140,7 +140,27 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 `
     }
 
+    renderZeroResults(): string {
+      return `
+<div class="flex flex-col gap-4">
+  <div>
+    <p class="mb-2 text-gray-400 text-xl">
+      No command matches that query.
+    </p>
+  
+    <p class="text-gray-400">
+      Please feel free to ask about this on the next stream or at any time via Discord.
+    </p>
+  </p>
+</div>
+`
+    }
+
     renderResultsHtml(commands: TextCommand[]): string {
+      if (commands.length === 0) {
+        return this.renderZeroResults();
+      }
+
       const commandsHtml = commands.map(this.renderCommandHtml).join("")
 
       return `
