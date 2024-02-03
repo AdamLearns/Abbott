@@ -211,11 +211,12 @@ const commands: TextCommand[] = dbCommands.map((command) => {
         "text-gray-600 decoration-blue-600 dark:text-zinc-300",
         "hover:text-gray-500 hover:decoration-teal-500",
         "active:text-gray-600 active:decoration-blue-600",
+        "break-all lg:break-normal"
       ].join(" ")
 
       return `
-<div class="w-full">
-  <h2 class="mb-1 font-mono font-bold text-xl text-gray-800 dark:text-zinc-200" tabindex="0">
+<div class="w-full overflow-x-hidden">
+  <h2 class="mb-1 font-mono font-bold text-xl text-gray-800 dark:text-zinc-200" tabindex="0" title="${command.name}">
     ${command.name}
   </h2>
 
