@@ -16,14 +16,38 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
 <HtmlLayout pageTitle={"Adam Learns command search"}>
   <command-table data-commands={JSON.stringify(commands)}>
-    <div class="search-area">
-      <label>
-        Search commands and responses:
-        {/* eslint-disable-next-line astro/jsx-a11y/no-autofocus */}
-        <input type="search" name="command" required autofocus />
-      </label>
-    </div>
-    <table></table>
+    <main class="flex min-h-screen w-full justify-center bg-blue-50/10 px-4">
+      <div class="w-full max-w-2xl">
+        <div>
+          <h1 class="mt-16 text-center text-3xl font-bold text-gray-800">
+            Abbott Commands
+          </h1>
+
+          <div>
+            <label
+                for="js-query-input"
+                class="mt-4 block text-center text-gray-500"
+            >
+              Search commands and responses
+            </label>
+
+            <input
+                type="search"
+                name="command"
+                id="js-query-input"
+                class="mt-4 h-16 w-full px-4 py-2 rounded font-mono text-lg shadow outline-cyan-700"
+                placeholder="Search commands or responses"
+                required
+                autofocus
+            />
+          </div>
+        </div>
+
+        <div class="mt-12">
+          <div id="js-results"></div>
+        </div>
+      </div>
+    </main>
   </command-table>
 </HtmlLayout>
 <script>
@@ -35,37 +59,47 @@ const commands: TextCommand[] = dbCommands.map((command) => {
   class CommandTable extends HTMLElement {
     input: HTMLInputElement
     commands: TextCommand[]
-    table: HTMLTableElement
+    results: HTMLDivElement
     fuse: Fuse<TextCommand>
+
     constructor() {
       super()
 
-      if (this.dataset.commands === undefined) {
-        throw new Error("Missing commands attribute.")
-      }
-      const input = this.querySelector("input")
+      // Query and initialize the elements
+      const input = this.querySelector<HTMLInputElement>("#js-query-input")
       if (input === null) {
         throw new Error("Missing input element.")
       }
 
-      const table = this.querySelector("table")
-      if (table === null) {
-        throw new Error("Missing table element.")
+      const results = this.querySelector<HTMLDivElement>("#js-results")
+      if (results === null) {
+        throw new Error("Missing results element.")
       }
+
+      this.input = input
+      this.results = results
+
+      // Initialize the commands
+      if (this.dataset.commands === undefined) {
+        throw new Error("Missing commands attribute.")
+      }
+
       this.commands = JSON.parse(this.dataset.commands)
       this.commands.forEach((command) => {
         command.updated_at = new Date(command.updated_at)
       })
-      this.input = input
-      this.table = table
 
+      // Light the fuse (for fuzzy search)
       this.fuse = new Fuse(this.commands, {
         keys: ["name", "response"],
         includeScore: true,
       })
-      this.input.addEventListener("input", this.onInputChanged)
-      this.setDefaultTableContents()
 
+      // Register the event listeners
+      this.input.addEventListener("input", this.onInputChanged)
+
+      // Launch
+      this.makeDefaultResults()
       this.readInitialQueryParams()
     }
 
@@ -78,51 +112,60 @@ const commands: TextCommand[] = dbCommands.map((command) => {
       }
     }
 
-    setTableContents(tbody: string) {
-      this.table.innerHTML = `<thead>
-<tr>
-  <th scope="col">Command</th>
-  <th scope="col">Response</th>
-  <th scope="col">Last updated</th>
-</tr>
-</thead>
-<tbody>
-  ${tbody}
-</tbody>`
+    renderCommandHtml(command: TextCommand): string {
+      const linkClassName = [
+        "transition-all duration-75",
+        "underline decoration-2",
+        "text-gray-600 decoration-blue-600",
+        "hover:text-gray-500 hover:decoration-teal-500",
+        "active:text-gray-600 active:decoration-blue-600",
+      ].join(" ")
+
+      return `
+<div class="w-full">
+  <h2 class="mb-1 font-mono font-bold text-xl text-gray-800">
+    ${command.name}
+  </h2>
+
+  <p class="mb-4 text-xs text-gray-400">
+    ${command.updated_at.toLocaleDateString()}
+  </p>
+  
+  <div class="mb-2 text-gray-600 max-w-[35em]">
+    ${linkifyHtml(safeHtml`${command.response}`, { className: linkClassName })}
+  </div>
+
+  <hr />
+</div>
+`
     }
 
-    makeTableRow = (
-      commandName: string,
-      commandResponse: string,
-      updatedAt: Date,
-    ) => {
-      return `<tr>
-<th scope="row">${commandName}</th>
-<td>${linkifyHtml(safeHtml`${commandResponse}`)}</td>
-<td>${updatedAt.toLocaleDateString()}</td>
-</tr>`
+    renderResultsHtml(commands: TextCommand[]): string {
+      const commandsHtml = commands.map(this.renderCommandHtml).join("")
+
+      return `
+<div class="flex flex-col gap-4">
+  ${commandsHtml}
+</div>
+`
     }
 
-    makeTable(textCommands: TextCommand[]) {
-      const tbody = textCommands
-        .map(({ name, response, updated_at }) => {
-          return this.makeTableRow(name, response, updated_at)
-        })
-        .join("")
-      this.setTableContents(tbody)
+    makeResults(commands: TextCommand[]): void {
+      this.results.innerHTML = this.renderResultsHtml(commands)
     }
 
-    setDefaultTableContents = () => {
+    makeDefaultResults = () => {
       const sortedByName = this.commands.sort((a, b) => {
         return a.name.localeCompare(b.name)
       })
-      this.makeTable(sortedByName)
+
+      this.makeResults(sortedByName)
     }
 
-    setCommandQuery = (query: string) => {
+    setCommandQuery = (query: string): void => {
       if (query.trim() === "") {
         history.replaceState({}, "", location.pathname)
-        this.setDefaultTableContents()
+        this.makeDefaultResults()
         return
       }
       history.replaceState({}, "", "?query=" + query)
@@ -132,7 +175,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
       })
       const results = fuse.search(query)
 
-      this.makeTable(results.map((r) => r.item))
+      this.makeResults(results.map((r) => r.item))
     }
 
     onInputChanged = () => {
@@ -142,84 +185,3 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
   customElements.define("command-table", CommandTable)
 </script>
-<style>
-  :global(body) {
-    background-color: #006bc9;
-  }
-  :global(a) {
-    color: deepskyblue;
-  }
-  :global(a:hover) {
-    color: aliceblue;
-  }
-  :global(table) {
-    color: white;
-    min-width: 100%;
-  }
-  :global(td) {
-    padding: 0.2em;
-  }
-  :global(tr) {
-    padding: 30px;
-  }
-  :global(tr):nth-child(even) {
-    background-color: #13334e;
-  }
-  :global(tr):nth-child(odd) {
-    background-color: #122d45;
-  }
-  .search-area {
-    padding: 10px;
-    color: white;
-    font-size: 1.4rem;
-  }
-  .search-area input {
-    background-color: #e0f1ff;
-    color: black;
-    padding: 5px;
-  }
-
-  :global(tr) > :global(*) {
-    width: 15%;
-    word-break: break-word;
-  }
-  :global(tr) :global(td):nth-child(2) {
-    width: 70%;
-  }
-  :global(tr) :global(td):last-child {
-    text-align: center;
-  }
-  @media screen and (max-width: 750px) {
-    :global(table),
-    :global(tbody),
-    :global(td),
-    :global(th),
-    :global(thead),
-    :global(tr) {
-      display: block;
-    }
-    :global(thead) :global(tr) {
-      display: none;
-    }
-    :global(tbody) :global(tr) :global(th[scope="row"]):before {
-      content: "Command";
-    }
-    :global(tbody) :global(tr) :global(td):nth-of-type(1):before {
-      content: "Response";
-      font-weight: bold;
-    }
-    :global(tbody) :global(tr) :global(td):nth-of-type(2):before {
-      content: "Last Updated";
-      font-weight: bold;
-    }
-    :global(table) :global(tbody) :global(td):before,
-    :global(table) :global(tbody) :global(th):before {
-      display: block;
-      width: 100%;
-    }
-    :global(tr) > :global(*) {
-      width: 100% !important;
-      text-align: center;
-    }
-  }
-</style>
