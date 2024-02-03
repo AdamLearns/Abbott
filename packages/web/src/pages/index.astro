@@ -303,7 +303,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
     }
 
     onDocumentKeyDown = (event: KeyboardEvent): void => {
-      const isSlash = event.code === "Slash"
+      const isSlash = event.key === "/"
       const isInputAlreadyInFocus = document.activeElement === this.input
       if (!isSlash || isInputAlreadyInFocus) {
         return
