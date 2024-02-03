@@ -100,6 +100,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
       // Register the event listeners
       this.input.addEventListener("input", this.onInputChanged)
+      document.addEventListener("keydown", this.onDocumentKeyDown)
 
       // Launch
       this.makeDefaultResults()
@@ -211,6 +212,17 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
     onInputChanged = () => {
       this.setCommandQuery(this.input.value)
+    }
+
+    onDocumentKeyDown = (event: KeyboardEvent): void => {
+      const isSlash = event.code === "Slash"
+      const isInputAlreadyInFocus = document.activeElement === this.input
+      if (!isSlash || isInputAlreadyInFocus) {
+        return
+      }
+
+      this.input.focus()
+      event.preventDefault()
     }
   }
 
