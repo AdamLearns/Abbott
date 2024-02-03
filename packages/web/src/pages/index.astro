@@ -206,7 +206,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
     renderCommandHtml(command: TextCommand): string {
       const linkClassName = [
-        "transition-all duration-75",
+        "motion-safe:transition-all duration-75",
         "underline decoration-2",
         "text-gray-600 decoration-blue-600 dark:text-zinc-300",
         "hover:text-gray-500 hover:decoration-teal-500",
