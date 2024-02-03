@@ -167,8 +167,16 @@ const commands: TextCommand[] = dbCommands.map((command) => {
       const commandsHtml = commands.map(this.renderCommandHtml).join("")
 
       return `
-<div class="flex flex-col gap-4">
-  ${commandsHtml}
+<div>
+  <div class="mb-4">
+    <p class="text-gray-500">
+      Found: <span class="ml-2 text-lg text-gray-600 font-bold">${commands.length}</span>
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-4">
+    ${commandsHtml}
+  </div>
 </div>
 `
     }
