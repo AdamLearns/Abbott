@@ -16,35 +16,39 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
 <HtmlLayout pageTitle={"Adam Learns command search"}>
   <command-table data-commands={JSON.stringify(commands)}>
-    <main class="px-4 min-h-screen w-full flex justify-center bg-blue-50/10 dark:bg-zinc-800">
-      <div class="w-full max-w-2xl relative">
+    <main
+      class="flex min-h-screen w-full justify-center bg-blue-50/10 px-4 dark:bg-slate-800"
+    >
+      <div class="relative w-full max-w-2xl">
         <div class="w-full">
           <button
-              id="js-dark-mode-toggle"
-              class="absolute top-2 right-0 p-2 h-10 w-10 rounded-full text-gray-700 hover:bg-gray-100 active:bg-gray-200 dark:text-zinc-200 dark:hover:bg-zinc-700  dark:active:bg-zinc-600  motion-safe:transition"
+            id="js-dark-mode-toggle"
+            class="absolute right-0 top-2 h-10 w-10 rounded-full p-2 text-gray-700 hover:bg-gray-100 active:bg-gray-200 motion-safe:transition dark:text-slate-200 dark:hover:bg-slate-700 dark:active:bg-slate-600"
           >
           </button>
 
-          <h1 class="mt-16 text-center text-3xl font-bold text-gray-800 dark:text-gray-200">
+          <h1
+            class="mt-16 text-center text-3xl font-bold text-gray-800 dark:text-gray-200"
+          >
             Abbott Commands
           </h1>
 
           <div>
             <label
-                for="js-query-input"
-                class="mt-4 block text-center text-gray-500 dark:text-zinc-400"
+              for="js-query-input"
+              class="mt-4 block text-center text-gray-500 dark:text-slate-400"
             >
               Search commands and responses
             </label>
 
             <input
-                type="search"
-                name="command"
-                id="js-query-input"
-                class="mt-4 h-16 w-full px-4 py-2 rounded font-mono text-lg shadow outline-none focus:outline-none focus:ring-2 focus:ring-cyan-700 dark:bg-zinc-700 dark:text-zinc-300 dark:focus:ring-zinc-400"
-                placeholder="Search commands or responses"
-                required
-                autofocus
+              type="search"
+              name="command"
+              id="js-query-input"
+              class="mt-4 h-16 w-full rounded px-4 py-2 font-mono text-lg shadow outline-none focus:outline-none focus:ring-2 focus:ring-cyan-700 dark:bg-slate-700 dark:text-slate-300 dark:focus:ring-slate-400"
+              placeholder="Search commands or responses"
+              required
+              autofocus
             />
           </div>
         </div>
@@ -86,7 +90,9 @@ const commands: TextCommand[] = dbCommands.map((command) => {
         throw new Error("Missing results element.")
       }
 
-      const darkModeToggle = this.querySelector<HTMLButtonElement>("#js-dark-mode-toggle")
+      const darkModeToggle = this.querySelector<HTMLButtonElement>(
+        "#js-dark-mode-toggle",
+      )
       if (darkModeToggle === null) {
         throw new Error("Missing dark mode toggle element.")
       }
@@ -132,7 +138,6 @@ const commands: TextCommand[] = dbCommands.map((command) => {
     }
 
     initializeDarkModeToggle = (): void => {
-      // Check local storage first
       const darkModeLocalStorage = localStorage.getItem("dark-mode")
       if (darkModeLocalStorage) {
         this.setDarkMode(darkModeLocalStorage === "true")
@@ -140,32 +145,28 @@ const commands: TextCommand[] = dbCommands.map((command) => {
         return
       }
 
-      // Defaults to dark mode, unless Light Mode is explicitly preferred
-      const isLightModePreferred = window.matchMedia
-        && window.matchMedia('(prefers-color-scheme: light)').matches
+      // Defaults to dark mode, unless light mode is explicitly preferred
+      const isLightModePreferred =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: light)").matches
 
       this.setDarkMode(!isLightModePreferred)
     }
 
     setDarkMode = (isDarkMode: boolean): void => {
-      // Update LocalStorage
-      isDarkMode
-        ? localStorage.setItem("dark-mode", "true")
-        : localStorage.setItem("dark-mode", "false")
+      localStorage.setItem("dark-mode", isDarkMode ? "true" : "false")
 
-      // Update body class list
       isDarkMode
         ? document.body.classList.add("dark")
         : document.body.classList.remove("dark")
 
-      // Update the toggle icon
       this.darkModeToggle.innerHTML = isDarkMode
         ? this.renderDarkModeIcon()
         : this.renderLightModeIcon()
     }
 
     renderDarkModeIcon(): string {
-      // Hero Icons: Sun, Outline
+      // Hero Icons (https://heroicons.com/): outline of "sun"
       return `
 <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +186,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
     }
 
     renderLightModeIcon(): string {
-      // Hero Icons: Moon, Outline
+      // Hero Icons (https://heroicons.com/): outline of "moon"
       return `
 <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -204,45 +205,52 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 `
     }
 
-    renderCommandHtml(command: TextCommand): string {
-      const linkClassName = [
+    getLinkClassName(): string {
+      return [
         "motion-safe:transition-all duration-75",
         "underline decoration-2",
-        "text-gray-600 decoration-blue-600 dark:text-zinc-300",
+        "text-gray-600 decoration-blue-600 dark:text-slate-300",
         "hover:text-gray-500 hover:decoration-teal-500",
         "active:text-gray-600 active:decoration-blue-600",
-        "break-all lg:break-normal"
+        "break-all lg:break-normal",
       ].join(" ")
+    }
+
+    renderCommandHtml = (command: TextCommand): string => {
+      const linkClassName = this.getLinkClassName()
 
       return `
 <div class="w-full overflow-x-hidden">
-  <h2 class="mb-1 font-mono font-bold text-xl text-gray-800 dark:text-zinc-200" tabindex="0" title="${command.name}">
+  <h2 class="mb-1 font-mono font-bold text-xl text-gray-800 dark:text-slate-200" tabindex="0" title="${
+    command.name
+  }">
     ${command.name}
   </h2>
 
-  <p class="mb-4 text-xs text-gray-400 dark:text-zinc-500">
+  <p class="mb-4 text-xs text-gray-400 dark:text-slate-500">
     ${command.updated_at.toLocaleDateString()}
   </p>
-  
-  <div class="mb-2 text-gray-600 max-w-[35em] dark:text-zinc-300">
+
+  <div class="mb-2 text-gray-600 max-w-[35em] dark:text-slate-300">
     ${linkifyHtml(safeHtml`${command.response}`, { className: linkClassName })}
   </div>
 
-  <hr class="border-gray-200 dark:border-zinc-600" />
+  <hr class="border-gray-200 dark:border-slate-600" />
 </div>
 `
     }
 
-    renderZeroResults(): string {
+    renderZeroResults = (): string => {
+      const linkClassName = this.getLinkClassName()
       return `
 <div class="flex flex-col gap-4">
   <div>
-    <p class="mb-2 text-gray-400 text-xl dark:text-zinc-500">
+    <p class="mb-2 text-gray-400 text-xl dark:text-slate-500">
       No command matches that query.
     </p>
-  
-    <p class="text-gray-400 dark:text-zinc-500">
-      Please feel free to ask about this on the next stream or at any time via Discord.
+
+    <p class="text-gray-400 dark:text-slate-500">
+      Please feel free to ask about this on the next stream or at any time via <a class="${linkClassName}" href="https://discord.gg/AdamLearns">Discord</a>.
     </p>
   </p>
 </div>
@@ -256,11 +264,13 @@ const commands: TextCommand[] = dbCommands.map((command) => {
 
       const commandsHtml = commands.map(this.renderCommandHtml).join("")
 
+      const pluralizedCommands = commands.length === 1 ? "command" : "commands"
+
       return `
 <div>
   <div class="mb-4">
-    <p class="text-gray-500 dark:text-zinc-400">
-      Found: <span class="ml-2 text-lg text-gray-600 font-bold dark:text-zinc-300">${commands.length}</span>
+    <p class="text-gray-500 dark:text-slate-400">
+      Found: <span class="ml-2 text-lg text-gray-600 font-bold dark:text-slate-300">${commands.length} ${pluralizedCommands}</span>
     </p>
   </div>
 
