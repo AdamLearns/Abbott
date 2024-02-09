@@ -1,5 +1,6 @@
 import { RefreshingAuthProvider } from "@twurple/auth"
 
+import { init as initServer } from "../server/init.js"
 import { onProcessClose } from "../setup/termination-handler.js"
 
 import { Bot } from "./Bot.js"
@@ -52,5 +53,6 @@ async function createBot(): Promise<Bot> {
 }
 
 export async function init() {
-  await createBot()
+  const bot = await createBot()
+  initServer(bot)
 }

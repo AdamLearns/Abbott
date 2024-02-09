@@ -16,6 +16,7 @@ import type {
 } from "abbott-database"
 import { BotDatabase, UUID, uuidv7 } from "abbott-database"
 import { formatISO } from "date-fns"
+import Fuse, { type FuseResult } from "fuse.js"
 
 import type { CommandData } from "../commands/CommandData.js"
 import { emitter } from "../events/emitter.js"
@@ -850,5 +851,28 @@ get-tokens.ts.`,
     msg: ChatMessage,
   ) => {
     await this.processPotentialCommand(channel, user, text, msg)
+  }
+
+  async emitFuzzyCommand(query: string) {
+    const dbCommands = await this.storageLayer.loadTextCommands()
+    const fuse = new Fuse(dbCommands, { keys: ["name"] })
+
+    const results = fuse.search(query)
+    if (results.length === 0) {
+      await this.say(
+        this.twitchChannelName,
+        `Adam tried getting you to check out a command, but I couldn't find one matching "${query}".`,
+      )
+    } else {
+      const firstResult = results[0] as FuseResult<DatabaseTextCommand>
+
+      const { name, response } = firstResult.item
+
+      await this.say(
+        this.twitchChannelName,
+        `Adam suggested that you check out the !${name} command. I'll run that for you now. MrDestructoid`,
+      )
+      await this.say(this.twitchChannelName, response)
+    }
   }
 }

@@ -51,6 +51,9 @@ importers:
       '@d-fischer/typed-event-emitter':
         specifier: ^3.3.3
         version: 3.3.3
+      '@hono/node-server':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@twurple/api':
         specifier: ^7.0.7
         version: 7.0.7(@twurple/auth@7.0.7)
@@ -75,6 +78,12 @@ importers:
       dotenv-flow:
         specifier: ^4.0.1
         version: 4.0.1
+      fuse.js:
+        specifier: ^7.0.0
+        version: 7.0.0
+      hono:
+        specifier: ^4.0.0
+        version: 4.0.0
       tsx:
         specifier: ^4.6.2
         version: 4.6.2
@@ -1211,6 +1220,11 @@ packages:
   /@fastify/busboy@2.1.0:
     resolution: {integrity: sha512-+KpH+QxZU7O4675t3mnkQKcZZg56u+K/Ct2K+N2AZYNVK8kyeo/bI18tI8aPm3tvNNRyTWfj6s5tnGNlcbQRsA==}
     engines: {node: '>=14'}
+    dev: false
+
+  /@hono/node-server@1.7.0:
+    resolution: {integrity: sha512-W+Gy16xWZMgB8hYU4XInCwE746y8V3VDTH1J3+EhUBqbCzk4zEXo1p6dv3BiCD5O6Z4aHuoCW+mRKoJgUn3ZCA==}
+    engines: {node: '>=18.14.1'}
     dev: false
 
   /@humanwhocodes/config-array@0.11.13:
@@ -4091,6 +4105,11 @@ packages:
       hast-util-parse-selector: 4.0.0
       property-information: 6.4.0
       space-separated-tokens: 2.0.2
+    dev: false
+
+  /hono@4.0.0:
+    resolution: {integrity: sha512-8dKhuBBpRZEodUttQhrSFJ6PQqHRjXHyeeegfxOf132pvgbf0tOb9qqb7q7eYwAWpOcYrsUOsWdJ0sQIIovhZg==}
+    engines: {node: '>=16.0.0'}
     dev: false
 
   /hosted-git-info@2.8.9:
