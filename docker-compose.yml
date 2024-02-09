@@ -12,6 +12,8 @@ services:
       # hard-coded to $HOME/database_backups.
       # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
       - $HOME/database_backups:/database_backups
+    ports:
+      - 3001:3001
   abbott-web:
     image: ghcr.io/adamlearns/abbott-web:latest
     restart: unless-stopped
