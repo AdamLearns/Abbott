@@ -263,7 +263,7 @@ export class BotDatabase implements BotStorageLayer {
     trx: Transaction<DB>,
     twitchId: string,
     twitchName: string,
-  ) {
+  ): Promise<string> {
     let uuid: string | undefined
 
     // Check if the user already exists
@@ -290,6 +290,8 @@ export class BotDatabase implements BotStorageLayer {
           twitch_id: twitchId,
         })
         .execute()
+    } else {
+      uuid = response.id
     }
 
     await trx
@@ -305,6 +307,8 @@ export class BotDatabase implements BotStorageLayer {
         }),
       )
       .execute()
+
+    return uuid
   }
 
   async getPrimaryBotTwitchId(): Promise<string | null> {
@@ -376,5 +380,40 @@ export class BotDatabase implements BotStorageLayer {
     newTokenData: AccessToken,
   ): Promise<void> {
     await this.insertOrUpdateToken(db, twitchId, newTokenData)
+  }
+
+  async modifyPoints(
+    twitchId: string,
+    userName: string,
+    numPoints: number,
+  ): Promise<number> {
+    return db.transaction().execute(async (trx) => {
+      const uuid = await this.ensureTwitchUserExists(trx, twitchId, userName)
+
+      const response = await trx
+        .selectFrom("points")
+        .where("user_id", "=", uuid)
+        .select("num_points")
+        .executeTakeFirst()
+
+      const currentPoints = response?.num_points ?? 0
+      const newNumPoints = currentPoints + numPoints
+
+      await trx
+        .insertInto("points")
+        .values({
+          user_id: uuid,
+          num_points: newNumPoints,
+        })
+        .onConflict((oc) =>
+          oc.column("user_id").doUpdateSet({
+            num_points: newNumPoints,
+            updated_at: sql`now()`,
+          }),
+        )
+        .execute()
+
+      return newNumPoints
+    })
   }
 }

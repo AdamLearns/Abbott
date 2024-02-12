@@ -252,6 +252,7 @@ get-tokens.ts.`,
     await this.addGetQuoteCommand()
     await this.addDelQuoteCommand()
     await this.addNumQuotesCommand()
+    await this.addGiftPointsCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
@@ -582,11 +583,59 @@ get-tokens.ts.`,
     }
   }
 
+  userGiftPoints = async (params: string[], context: BotCommandContext) => {
+    if (params.length < 2) {
+      await context.reply(
+        `Usage: ${prefix}gift USER_NAME NUM_POINTS (can be negative)`,
+      )
+      return
+    }
+
+    const userName = params[0] as string
+
+    const user = await this.apiClient.users.getUserByName(userName)
+    if (user === null) {
+      return context.reply(
+        `Could not find a Twitch user by the name "${userName}" (did you make a typo?).`,
+      )
+    }
+
+    const pointsString = params[1] as string
+    const numPoints = Number.parseInt(pointsString, 10)
+    if (Number.isNaN(numPoints)) {
+      return context.reply(
+        `"${pointsString}" is not a valid number of points! 😡`,
+      )
+    }
+
+    try {
+      const newNumPoints = await this.storageLayer.modifyPoints(
+        user.id,
+        userName,
+        numPoints,
+      )
+      await context.reply(
+        `Gifted ${numPoints} point(s) to ${userName}. New total: ${newNumPoints} point(s).`,
+      )
+    } catch {
+      return context.reply("There was a database error modifying points")
+    }
+  }
+
   async addNumQuotesCommand() {
     return this.addCommand({
       name: "numquotes",
       handler: this.userGetNumQuotes,
       isPrivileged: false, // one of the few built-in commands that isn't privileged
+      canBeDeleted: false,
+    })
+  }
+
+  async addGiftPointsCommand() {
+    return this.addCommand({
+      name: "gift",
+      handler: this.userGiftPoints,
+      isPrivileged: true,
       canBeDeleted: false,
     })
   }

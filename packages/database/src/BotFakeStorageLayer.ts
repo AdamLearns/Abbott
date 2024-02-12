@@ -50,4 +50,7 @@ export class BotFakeStorageLayer implements BotStorageLayer {
     }
   }
   async refreshTwitchToken() {}
+  async modifyPoints(): Promise<number> {
+    return 0
+  }
 }

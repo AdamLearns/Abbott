@@ -42,4 +42,9 @@ export interface BotStorageLayer {
   getPrimaryBotTwitchId(): Promise<string | null>
   getTwitchToken(twitchId: string): Promise<AccessTokenWithName>
   refreshTwitchToken(twitchId: string, newTokenData: AccessToken): Promise<void>
+  modifyPoints(
+    twitchId: string,
+    userName: string,
+    numPoints: number,
+  ): Promise<number>
 }
