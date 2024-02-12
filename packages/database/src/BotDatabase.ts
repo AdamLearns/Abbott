@@ -15,6 +15,11 @@ import type {
 
 const CONFIG_PRIMARY_BOT_USER_ID = "primary_bot_user_id"
 
+export interface NameAndPointTotal {
+  name: string
+  numPoints: number
+}
+
 export class BotDatabase implements BotStorageLayer {
   async deleteCommand(id: string) {
     await db.deleteFrom("commands").where("id", "=", id).execute()
@@ -414,6 +419,27 @@ export class BotDatabase implements BotStorageLayer {
         .execute()
 
       return newNumPoints
+    })
+  }
+
+  async getTopPointsWithTwitchNames(): Promise<NameAndPointTotal[]> {
+    const response = await db
+      .selectFrom("points")
+      .innerJoin("users", "points.user_id", "users.id")
+      .innerJoin("user_correlation", "users.id", "user_correlation.id")
+      .innerJoin(
+        "twitch_names",
+        "user_correlation.twitch_id",
+        "twitch_names.twitch_id",
+      )
+      .select(["twitch_names.name", "points.num_points"])
+      .orderBy("points.num_points", "desc")
+      .orderBy("twitch_names.name", "asc")
+      .where("points.num_points", ">", 0)
+      .execute()
+
+    return response.map(({ name, num_points }) => {
+      return { name, numPoints: num_points }
     })
   }
 }
