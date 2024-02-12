@@ -592,12 +592,19 @@ get-tokens.ts.`,
     }
 
     const userName = params[0] as string
+    let twitchId: string | undefined
 
-    const user = await this.apiClient.users.getUserByName(userName)
-    if (user === null) {
-      return context.reply(
-        `Could not find a Twitch user by the name "${userName}" (did you make a typo?).`,
-      )
+    try {
+      const user = await this.apiClient.users.getUserByName(userName)
+      if (user === null) {
+        return context.reply(
+          `Could not find a Twitch user by the name "${userName}" (did you make a typo?).`,
+        )
+      }
+      twitchId = user.id
+    } catch (error) {
+      console.error(`Error looking up user by name "${userName}":`, error)
+      return context.reply("There was an error looking up that user.")
     }
 
     const pointsString = params[1] as string
@@ -610,7 +617,7 @@ get-tokens.ts.`,
 
     try {
       const newNumPoints = await this.storageLayer.modifyPoints(
-        user.id,
+        twitchId,
         userName,
         numPoints,
       )
