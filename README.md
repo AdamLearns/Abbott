@@ -55,7 +55,8 @@ Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:w
 - Migrating: `NODE_ENV=development pnpm run kysely-migration-cli latest`
   - Note: migrations should happen automatically on start-up. See `.env.example` for how to configure this. However, they won't automatically regenerate types.
 - Regenerating types (make sure to replace the variables): `DATABASE_URL=postgres://postgres:bar@localhost/foo pnpm run kysely-codegen`
-- Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./packages/bots/src/database/types/db.d.ts`
+- Copy the regenerated types to the right location: `cp ./node_modules/kysely-codegen/dist/db.d.ts ./src/types/db.d.ts`
+- Make sure to run "Developer: Restart Extension Host" in VSCode or else you'll get a lot of squigglies.
 
 ## Manually building the Docker images
 
@@ -131,3 +132,9 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
     - "Embed Links"
     - "Mention everyone, here, and All Roles"
   - Note that opting in to the notification role is something that I handle through Discord's onboarding.
+
+## Troubleshooting
+
+### Generic issues
+
+Are you building everything? Run `pnpm watch`. The typical problem is that I'll make changes in the `database` package and then not be able to run that code from another package. It's because nothing is building `database`.
