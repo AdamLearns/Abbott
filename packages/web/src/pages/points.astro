@@ -1,39 +1,37 @@
 ---
 import { BotDatabase } from "abbott-database"
 
+import HtmlLayout from "../layouts/main.astro"
+
 const botDatabase = new BotDatabase()
 const topPoints = await botDatabase.getTopPointsWithTwitchNames()
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf8" />
-  </head>
-  <body class="m-4">
-    <h2 class="text-xl">
-      Point totals in <a
-        class="text-fuchsia-200 underline"
-        href=" https: twitch.tv AdamLearnsLive">Adam's Twitch channel</a
-      >
-    </h2>
-    <div class="mb-4 text-sm">
-      (note that points are only ever given by Adam or moderators and don't
-      really mean anything 🤫)
-    </div>
-    <ol class="mx-8 list-decimal">
-      {
-        topPoints.map(({ name, numPoints }) => (
-          <li>
-            {name}: {numPoints}
-          </li>
-        ))
-      }
-    </ol>
-  </body>
-</html>
+<HtmlLayout pageTitle={"Adam Learns top points"}>
+  <h2 class="text-xl">
+    Point totals in <a
+      class="text-fuchsia-200 underline"
+      href=" https: twitch.tv AdamLearnsLive">Adam's Twitch channel</a
+    >
+  </h2>
+  <div class="mb-4 text-sm">
+    (note that points are only ever given by Adam or moderators and don't really
+    mean anything 🤫)
+  </div>
+  <ol class="mx-8 list-decimal">
+    {
+      topPoints.map(({ name, numPoints }) => (
+        <li>
+          {name}: {numPoints}
+        </li>
+      ))
+    }
+  </ol>
+</HtmlLayout>
 <style>
   body {
     background-color: rgb(0, 0, 57);
     color: white;
+    margin: 1rem;
   }
 </style>
