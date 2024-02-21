@@ -17,6 +17,7 @@ const CONFIG_PRIMARY_BOT_USER_ID = "primary_bot_user_id"
 
 export interface PointStanding {
   name: string
+  profilePictureUrl: string
   rank: number
   numPoints: number
 }
@@ -433,8 +434,14 @@ export class BotDatabase implements BotStorageLayer {
         "user_correlation.twitch_id",
         "twitch_names.twitch_id",
       )
+      .leftJoin(
+        "twitch_profile_pictures",
+        "twitch_profile_pictures.twitch_id",
+        "user_correlation.twitch_id",
+      )
       .select([
         "twitch_names.name",
+        "twitch_profile_pictures.profile_picture_url",
         "points.num_points",
         sql<number>`DENSE_RANK() OVER (ORDER BY num_points DESC)`.as("rank"),
       ])
@@ -443,8 +450,39 @@ export class BotDatabase implements BotStorageLayer {
       .where("points.num_points", ">", 0)
       .execute()
 
-    return response.map(({ name, num_points, rank }) => {
-      return { name, numPoints: num_points, rank }
+    return response.map(({ name, num_points, rank, profile_picture_url }) => {
+      return {
+        name,
+        numPoints: num_points,
+        rank,
+        profilePictureUrl:
+          profile_picture_url ??
+          "https://static-cdn.jtvnw.net/user-default-pictures-uv/de130ab0-def7-11e9-b668-784f43822e80-profile_image-70x70.png",
+      }
+    })
+  }
+
+  async updateProfilePicture(
+    twitchId: string,
+    userName: string,
+    profilePictureUrl: string,
+  ): Promise<void> {
+    return db.transaction().execute(async (trx) => {
+      await this.ensureTwitchUserExists(trx, twitchId, userName)
+
+      await trx
+        .insertInto("twitch_profile_pictures")
+        .values({
+          twitch_id: twitchId,
+          profile_picture_url: profilePictureUrl,
+        })
+        .onConflict((oc) =>
+          oc.column("twitch_id").doUpdateSet({
+            profile_picture_url: profilePictureUrl,
+            updated_at: sql`now()`,
+          }),
+        )
+        .execute()
     })
   }
 }

@@ -47,4 +47,9 @@ export interface BotStorageLayer {
     userName: string,
     numPoints: number,
   ): Promise<number>
+  updateProfilePicture(
+    twitchId: string,
+    userName: string,
+    profilePictureUrl: string,
+  ): Promise<void>
 }

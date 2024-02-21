@@ -593,6 +593,7 @@ get-tokens.ts.`,
 
     let userName = params[0] as string
     let twitchId: string | undefined
+    let profilePictureUrl: string | undefined
 
     try {
       const user = await this.apiClient.users.getUserByName(userName)
@@ -602,6 +603,7 @@ get-tokens.ts.`,
         )
       }
       twitchId = user.id
+      profilePictureUrl = user.profilePictureUrl
 
       // Update their name to match what THEY want, not what *I* typed.
       userName = user.displayName
@@ -616,6 +618,19 @@ get-tokens.ts.`,
       return context.reply(
         `"${pointsString}" is not a valid number of points! 😡`,
       )
+    }
+
+    try {
+      await this.storageLayer.updateProfilePicture(
+        twitchId,
+        userName,
+        profilePictureUrl,
+      )
+    } catch {
+      const errorMessage =
+        "There was a database error updating their profile picture. Moving on anyway."
+      console.error(errorMessage)
+      await context.reply(errorMessage)
     }
 
     try {

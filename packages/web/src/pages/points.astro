@@ -39,7 +39,7 @@ const topPoints = await botDatabase.getTopPointsWithTwitchNames()
     </svg>
   </div>
 
-  <div class="h-screen bg-slate-50 dark:bg-slate-900">
+  <div class="bg-slate-50 dark:bg-slate-900">
     <div class="pt-8 sm:mx-auto sm:max-w-xl sm:rounded-lg">
       <h1
         class="mb-2 text-center text-2xl font-bold text-slate-800 dark:text-slate-50"
@@ -68,7 +68,7 @@ const topPoints = await botDatabase.getTopPointsWithTwitchNames()
         </thead>
         <tbody class="bg-white dark:bg-slate-800">
           {
-            topPoints.map(({ name, numPoints, rank }) => {
+            topPoints.map(({ name, numPoints, rank, profilePictureUrl }) => {
               const medalColors = ["gold", "silver", "bronze"]
               const showMedal = rank < 4
               const medalClasses = showMedal
@@ -88,7 +88,14 @@ const topPoints = await botDatabase.getTopPointsWithTwitchNames()
               return (
                 <tr class="relative border border-slate-200 text-slate-500 dark:border-slate-700 dark:text-slate-400">
                   <td class="relative py-4 text-center">{rankHtml}</td>
-                  <td class="items-center gap-2 py-4">{name}</td>
+                  <td class="flex items-center gap-2 py-4">
+                    <img
+                      src={profilePictureUrl}
+                      alt={`${name}'s avatar`}
+                      class="h-8 w-8 rounded-full"
+                    />{" "}
+                    {name}
+                  </td>
                   <td class="py-4 pr-8 text-right">{numPoints}</td>
                 </tr>
               )
@@ -101,7 +108,7 @@ const topPoints = await botDatabase.getTopPointsWithTwitchNames()
 </HtmlLayout>
 <style>
   body {
-    background-color: rgb(0, 0, 57);
+    background-color: rgb(15, 23, 42);
     color: white;
     margin: 1rem;
   }

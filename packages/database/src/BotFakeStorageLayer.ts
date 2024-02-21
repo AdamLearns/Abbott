@@ -53,4 +53,5 @@ export class BotFakeStorageLayer implements BotStorageLayer {
   async modifyPoints(): Promise<number> {
     return 0
   }
+  async updateProfilePicture(): Promise<void> {}
 }
