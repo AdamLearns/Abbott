@@ -15,8 +15,9 @@ import type {
 
 const CONFIG_PRIMARY_BOT_USER_ID = "primary_bot_user_id"
 
-export interface NameAndPointTotal {
+export interface PointStanding {
   name: string
+  rank: number
   numPoints: number
 }
 
@@ -422,7 +423,7 @@ export class BotDatabase implements BotStorageLayer {
     })
   }
 
-  async getTopPointsWithTwitchNames(): Promise<NameAndPointTotal[]> {
+  async getTopPointsWithTwitchNames(): Promise<PointStanding[]> {
     const response = await db
       .selectFrom("points")
       .innerJoin("users", "points.user_id", "users.id")
@@ -432,14 +433,18 @@ export class BotDatabase implements BotStorageLayer {
         "user_correlation.twitch_id",
         "twitch_names.twitch_id",
       )
-      .select(["twitch_names.name", "points.num_points"])
-      .orderBy("points.num_points", "desc")
+      .select([
+        "twitch_names.name",
+        "points.num_points",
+        sql<number>`DENSE_RANK() OVER (ORDER BY num_points DESC)`.as("rank"),
+      ])
+      .orderBy("rank", "asc")
       .orderBy("twitch_names.name", "asc")
       .where("points.num_points", ">", 0)
       .execute()
 
-    return response.map(({ name, num_points }) => {
-      return { name, numPoints: num_points }
+    return response.map(({ name, num_points, rank }) => {
+      return { name, numPoints: num_points, rank }
     })
   }
 }
