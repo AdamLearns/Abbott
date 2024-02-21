@@ -591,7 +591,7 @@ get-tokens.ts.`,
       return
     }
 
-    const userName = params[0] as string
+    let userName = params[0] as string
     let twitchId: string | undefined
 
     try {
@@ -602,6 +602,9 @@ get-tokens.ts.`,
         )
       }
       twitchId = user.id
+
+      // Update their name to match what THEY want, not what *I* typed.
+      userName = user.displayName
     } catch (error) {
       console.error(`Error looking up user by name "${userName}":`, error)
       return context.reply("There was an error looking up that user.")
