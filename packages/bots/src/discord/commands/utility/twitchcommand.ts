@@ -5,6 +5,7 @@ import {
   inlineCode,
   blockQuote,
   escapeMarkdown,
+  hyperlink,
 } from "discord.js"
 
 export const data = new SlashCommandBuilder()
@@ -31,7 +32,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // eslint-disable-next-line unicorn/prefer-ternary
   if (response === undefined) {
     await interaction.reply({
-      content: `Command ${inlineCode(trimmedValue)} not found.`,
+      content: `Command ${inlineCode(
+        trimmedValue,
+      )} not found. Check ${hyperlink(
+        "the command site",
+        `https://a.bot.land/?query=${trimmedValue}`,
+      )} to see if there are similar commands.`,
       ephemeral: true,
     })
   } else {
