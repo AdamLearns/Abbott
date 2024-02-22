@@ -583,6 +583,20 @@ get-tokens.ts.`,
     }
   }
 
+  getRankMessage = (oldRank: number, newRank: number) => {
+    switch (oldRank) {
+      case -1: {
+        return `They went from being unranked to being #${newRank}`
+      }
+      case newRank: {
+        return `Their rank stayed the same at #${oldRank}`
+      }
+      default: {
+        return `Their rank went from #${oldRank} → #${newRank}`
+      }
+    }
+  }
+
   userGiftPoints = async (params: string[], context: BotCommandContext) => {
     if (params.length < 2) {
       await context.reply(
@@ -634,13 +648,12 @@ get-tokens.ts.`,
     }
 
     try {
-      const newNumPoints = await this.storageLayer.modifyPoints(
-        twitchId,
-        userName,
-        numPoints,
-      )
+      const { newNumPoints, oldRank, newRank } =
+        await this.storageLayer.modifyPoints(twitchId, userName, numPoints)
+
+      const rankMessage = this.getRankMessage(oldRank, newRank)
       await context.reply(
-        `Gifted ${numPoints} point(s) to ${userName}. New total: ${newNumPoints} point(s). See point rankings at https://a.bot.land/points`,
+        `Gifted ${numPoints} point(s) to ${userName}. New total: ${newNumPoints} point(s). ${rankMessage}. See point rankings at https://a.bot.land/points`,
       )
     } catch {
       return context.reply("There was a database error modifying points")

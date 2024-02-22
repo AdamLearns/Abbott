@@ -12,6 +12,12 @@ export interface AccessTokenWithName {
   name: string
 }
 
+export interface PointChangeResults {
+  oldRank: number
+  newRank: number
+  newNumPoints: number
+}
+
 export interface BotStorageLayer {
   addAlias(
     newCommandName: NewCommandName,
@@ -46,7 +52,7 @@ export interface BotStorageLayer {
     twitchId: string,
     userName: string,
     numPoints: number,
-  ): Promise<number>
+  ): Promise<PointChangeResults>
   updateProfilePicture(
     twitchId: string,
     userName: string,

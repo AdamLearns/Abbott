@@ -3,7 +3,11 @@ import { type Transaction, sql, type Kysely } from "kysely"
 import sample from "lodash/sample.js"
 import { uuidv7 } from "uuidv7"
 
-import type { AccessTokenWithName, BotStorageLayer } from "./BotStorageLayer.js"
+import type {
+  AccessTokenWithName,
+  BotStorageLayer,
+  PointChangeResults,
+} from "./BotStorageLayer.js"
 import { db } from "./database.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 import type { DB } from "./types/db.js"
@@ -389,13 +393,33 @@ export class BotDatabase implements BotStorageLayer {
     await this.insertOrUpdateToken(db, twitchId, newTokenData)
   }
 
+  async getPointRanking(
+    dbOrTrx: Transaction<DB> | Kysely<DB>,
+    uuid: string,
+  ): Promise<number> {
+    const response = await dbOrTrx
+      .selectFrom("points")
+      .innerJoin("users", "points.user_id", "users.id")
+      .select([
+        "users.id",
+        sql<number>`DENSE_RANK() OVER (ORDER BY num_points DESC)`.as("rank"),
+      ])
+      .orderBy("rank", "asc")
+      .where("points.num_points", ">", 0)
+      .execute()
+
+    return response.find(({ id }) => id === uuid)?.rank ?? -1
+  }
+
   async modifyPoints(
     twitchId: string,
     userName: string,
     numPoints: number,
-  ): Promise<number> {
+  ): Promise<PointChangeResults> {
     return db.transaction().execute(async (trx) => {
       const uuid = await this.ensureTwitchUserExists(trx, twitchId, userName)
+
+      const oldRank = await this.getPointRanking(trx, uuid)
 
       const response = await trx
         .selectFrom("points")
@@ -420,7 +444,13 @@ export class BotDatabase implements BotStorageLayer {
         )
         .execute()
 
-      return newNumPoints
+      const newRank = await this.getPointRanking(trx, uuid)
+
+      return {
+        oldRank,
+        newRank,
+        newNumPoints,
+      }
     })
   }
 

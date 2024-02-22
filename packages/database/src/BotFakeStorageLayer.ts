@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import type { AccessTokenWithName, BotStorageLayer } from "./BotStorageLayer.js"
+import type {
+  AccessTokenWithName,
+  BotStorageLayer,
+  PointChangeResults,
+} from "./BotStorageLayer.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
 
 export class BotFakeStorageLayer implements BotStorageLayer {
@@ -50,8 +54,8 @@ export class BotFakeStorageLayer implements BotStorageLayer {
     }
   }
   async refreshTwitchToken() {}
-  async modifyPoints(): Promise<number> {
-    return 0
+  async modifyPoints(): Promise<PointChangeResults> {
+    return { oldRank: 0, newRank: 0, newNumPoints: 0 }
   }
   async updateProfilePicture(): Promise<void> {}
 }
