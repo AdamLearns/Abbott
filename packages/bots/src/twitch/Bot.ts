@@ -598,9 +598,9 @@ get-tokens.ts.`,
   }
 
   userGiftPoints = async (params: string[], context: BotCommandContext) => {
-    if (params.length < 2) {
+    if (params.length === 0) {
       await context.reply(
-        `Usage: ${prefix}gift USER_NAME NUM_POINTS (can be negative)`,
+        `Usage: ${prefix}gift USER_NAME [NUM_POINTS=1] (can be negative)`,
       )
       return
     }
@@ -626,7 +626,7 @@ get-tokens.ts.`,
       return context.reply("There was an error looking up that user.")
     }
 
-    const pointsString = params[1] as string
+    const pointsString = params[1] ?? "1"
     const numPoints = Number.parseInt(pointsString, 10)
     if (Number.isNaN(numPoints)) {
       return context.reply(
