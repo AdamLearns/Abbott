@@ -640,7 +640,7 @@ get-tokens.ts.`,
         numPoints,
       )
       await context.reply(
-        `Gifted ${numPoints} point(s) to ${userName}. New total: ${newNumPoints} point(s).`,
+        `Gifted ${numPoints} point(s) to ${userName}. New total: ${newNumPoints} point(s). See point rankings at https://a.bot.land/points`,
       )
     } catch {
       return context.reply("There was a database error modifying points")
