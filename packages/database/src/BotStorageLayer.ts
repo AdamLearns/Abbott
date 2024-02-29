@@ -12,6 +12,13 @@ export interface AccessTokenWithName {
   name: string
 }
 
+export interface YouTubeTokenWithName {
+  accessToken: string
+  refreshToken: string
+  expiresAt: number
+  name: string
+}
+
 export interface PointChangeResults {
   oldRank: number
   newRank: number

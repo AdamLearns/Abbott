@@ -33,6 +33,9 @@ Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:w
   - Go to root
   - `cd packages/database`
   - `pnpm run watch`
+  - Go to root
+  - `cd packages/youtube-api`
+  - `pnpm run watch`
 - Go to the web interface or the test channel to try things out
 
 ## Linting/correctness
@@ -117,6 +120,12 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Overwrite `DATABASE_CONNECTION_STRING` to point to port 5434 (which is what the compose file exposes)
 - `cd packages/bots`
 - `NODE_ENV=madeup pnpx tsx src/get-tokens.ts`
+- Follow the instructions
+
+## Getting YouTube tokens
+
+- `cd packages/bots`
+- `NODE_ENV=development pnpx tsx src/get-youtube-tokens.ts`
 - Follow the instructions
 
 ## Register Discord bot

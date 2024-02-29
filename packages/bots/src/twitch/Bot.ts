@@ -119,7 +119,7 @@ export class Bot {
       const stream = await event.getStream()
       const title = stream?.title ?? null
 
-      emitter.sendStreamOnline(title)
+      emitter.sendTwitchStreamLive(title)
     })
 
     this.eventSubListener.onUserSocketDisconnect(

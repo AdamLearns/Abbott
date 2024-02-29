@@ -13,6 +13,7 @@ services:
       # See https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose
       - $HOME/database_backups:/database_backups
     ports:
+      # Note: the YouTube API requires OAuth, and I use port 3005 for that.
       - 3001:3001
   abbott-web:
     image: ghcr.io/adamlearns/abbott-web:latest

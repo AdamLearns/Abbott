@@ -26,7 +26,8 @@
 		"fuse.js": "^7.0.0",
 		"hono": "^4.0.0",
 		"tsx": "^4.6.2",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.2",
+		"youtube-api": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "^18",

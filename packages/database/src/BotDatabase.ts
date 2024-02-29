@@ -7,6 +7,7 @@ import type {
   AccessTokenWithName,
   BotStorageLayer,
   PointChangeResults,
+  YouTubeTokenWithName,
 } from "./BotStorageLayer.js"
 import { db } from "./database.js"
 import type { DatabaseTextCommand } from "./DatabaseTextCommand.js"
@@ -17,7 +18,8 @@ import type {
   NewCommandName,
 } from "./types/kysely-wrappers.js"
 
-const CONFIG_PRIMARY_BOT_USER_ID = "primary_bot_user_id"
+const CONFIG_PRIMARY_BOT_TWITCH_ID = "primary_bot_user_id"
+const CONFIG_PRIMARY_BOT_YOUTUBE_ID = "primary_bot_youtube_user_id"
 
 export interface PointStanding {
   name: string
@@ -201,7 +203,7 @@ export class BotDatabase implements BotStorageLayer {
     return response?.response
   }
 
-  private async insertOrUpdateToken(
+  private async insertOrUpdateTwitchToken(
     dbOrTrx: Transaction<DB> | Kysely<DB>,
     twitchId: string,
     accessToken: AccessToken,
@@ -225,6 +227,32 @@ export class BotDatabase implements BotStorageLayer {
       .execute()
   }
 
+  private async insertOrUpdateYouTubeToken(
+    dbOrTrx: Transaction<DB> | Kysely<DB>,
+    youTubeId: string,
+    accessToken: string,
+    refreshToken: string,
+    expiresAt: number,
+  ) {
+    await dbOrTrx
+      .insertInto("youtube_oauth_tokens")
+      .values({
+        youtube_id: youTubeId,
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        expires_at: expiresAt,
+      })
+      .onConflict((oc) =>
+        oc.column("youtube_id").doUpdateSet({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresAt,
+          updated_at: sql`now()`,
+        }),
+      )
+      .execute()
+  }
+
   async saveTwitchToken(
     accessToken: AccessToken,
     twitchId: string,
@@ -234,7 +262,7 @@ export class BotDatabase implements BotStorageLayer {
     await db.transaction().execute(async (trx) => {
       await this.ensureTwitchUserExists(trx, twitchId, twitchName)
 
-      await this.insertOrUpdateToken(trx, twitchId, accessToken)
+      await this.insertOrUpdateTwitchToken(trx, twitchId, accessToken)
 
       // Delete any scopes for this token and then re-insert them
       await trx
@@ -256,7 +284,7 @@ export class BotDatabase implements BotStorageLayer {
         await trx
           .insertInto("config")
           .values({
-            key: CONFIG_PRIMARY_BOT_USER_ID,
+            key: CONFIG_PRIMARY_BOT_TWITCH_ID,
             value: twitchId,
           })
           .onConflict((oc) =>
@@ -268,6 +296,58 @@ export class BotDatabase implements BotStorageLayer {
           .execute()
       }
     })
+  }
+
+  async ensureYouTubeUserExists(
+    trx: Transaction<DB>,
+    youTubeId: string,
+    channelTitle: string,
+  ): Promise<string> {
+    let uuid: string | undefined
+
+    // Check if the user already exists
+    const response = await trx
+      .selectFrom("users")
+      .innerJoin("user_correlation", "users.id", "user_correlation.id")
+      .where("user_correlation.youtube_id", "=", youTubeId)
+      .select(["users.id"])
+      .executeTakeFirst()
+
+    if (response === undefined) {
+      uuid = uuidv7()
+      await trx
+        .insertInto("users")
+        .values({
+          id: uuid,
+        })
+        .execute()
+
+      await trx
+        .insertInto("user_correlation")
+        .values({
+          id: uuid,
+          youtube_id: youTubeId,
+        })
+        .execute()
+    } else {
+      uuid = response.id
+    }
+
+    await trx
+      .insertInto("youtube_names")
+      .values({
+        youtube_id: youTubeId,
+        name: channelTitle,
+      })
+      .onConflict((oc) =>
+        oc.column("youtube_id").doUpdateSet({
+          name: channelTitle,
+          updated_at: sql`now()`,
+        }),
+      )
+      .execute()
+
+    return uuid
   }
 
   async ensureTwitchUserExists(
@@ -325,7 +405,7 @@ export class BotDatabase implements BotStorageLayer {
   async getPrimaryBotTwitchId(): Promise<string | null> {
     const response = await db
       .selectFrom("config")
-      .where("key", "=", CONFIG_PRIMARY_BOT_USER_ID)
+      .where("key", "=", CONFIG_PRIMARY_BOT_TWITCH_ID)
       .select(["value"])
       .executeTakeFirst()
 
@@ -386,11 +466,55 @@ export class BotDatabase implements BotStorageLayer {
     return response
   }
 
+  async getPrimaryBotYouTubeId(): Promise<string | null> {
+    const response = await db
+      .selectFrom("config")
+      .where("key", "=", CONFIG_PRIMARY_BOT_YOUTUBE_ID)
+      .select(["value"])
+      .executeTakeFirst()
+
+    return response?.value ?? null
+  }
+
+  async getYouTubeTokens(youTubeId: string): Promise<YouTubeTokenWithName> {
+    const response = await db.transaction().execute(async (trx) => {
+      const response = await trx
+        .selectFrom("youtube_oauth_tokens")
+        .innerJoin(
+          "youtube_names",
+          "youtube_oauth_tokens.youtube_id",
+          "youtube_names.youtube_id",
+        )
+        .where("youtube_oauth_tokens.youtube_id", "=", youTubeId)
+        .select([
+          "youtube_oauth_tokens.access_token",
+          "youtube_oauth_tokens.refresh_token",
+          "youtube_oauth_tokens.expires_at",
+          "youtube_oauth_tokens.updated_at",
+          "youtube_names.name",
+        ])
+        .executeTakeFirst()
+
+      if (response === undefined) {
+        throw new Error(`Couldn't find a token for youtubeId==${youTubeId}.`)
+      }
+
+      return {
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        expiresAt: Number.parseInt(response.expires_at),
+        name: response.name,
+      }
+    })
+
+    return response
+  }
+
   async refreshTwitchToken(
     twitchId: string,
     newTokenData: AccessToken,
   ): Promise<void> {
-    await this.insertOrUpdateToken(db, twitchId, newTokenData)
+    await this.insertOrUpdateTwitchToken(db, twitchId, newTokenData)
   }
 
   async getPointRanking(
@@ -509,6 +633,40 @@ export class BotDatabase implements BotStorageLayer {
         .onConflict((oc) =>
           oc.column("twitch_id").doUpdateSet({
             profile_picture_url: profilePictureUrl,
+            updated_at: sql`now()`,
+          }),
+        )
+        .execute()
+    })
+  }
+
+  async saveYouTubeTokens(
+    accessToken: string,
+    refreshToken: string,
+    expiryDate: number,
+    channelId: string,
+    channelTitle: string,
+  ): Promise<void> {
+    await db.transaction().execute(async (trx) => {
+      await this.ensureYouTubeUserExists(trx, channelId, channelTitle)
+
+      await this.insertOrUpdateYouTubeToken(
+        trx,
+        channelId,
+        accessToken,
+        refreshToken,
+        expiryDate,
+      )
+
+      await trx
+        .insertInto("config")
+        .values({
+          key: CONFIG_PRIMARY_BOT_YOUTUBE_ID,
+          value: channelId,
+        })
+        .onConflict((oc) =>
+          oc.column("key").doUpdateSet({
+            value: channelId,
             updated_at: sql`now()`,
           }),
         )

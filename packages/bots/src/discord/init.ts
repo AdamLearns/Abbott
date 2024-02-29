@@ -35,7 +35,7 @@ export async function init() {
     .DISCORD_STREAM_ANNOUNCEMENTS_CHANNEL_ID as string
   const streamAnnouncementsRoleId = process.env
     .DISCORD_STREAM_ANNOUNCEMENTS_ROLE_ID as string
-  emitter.onStreamOnline(
+  emitter.onTwitchStreamLive(
     onStreamOnline(announcementsChannelId, client, streamAnnouncementsRoleId),
   )
 
