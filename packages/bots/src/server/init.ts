@@ -30,6 +30,8 @@ async function handleRunFuzzyCommand(
   return c.text("Successfully emitted a command.")
 }
 
+// This is a web server that listens for requests that the bot itself should
+// handle (i.e. ones that the website itself can't handle with just a database)
 function startServer(bot: Bot) {
   const app = new Hono()
 
