@@ -95,7 +95,7 @@ importers:
         version: link:../youtube-api
     devDependencies:
       '@types/node':
-        specifier: ^18
+        specifier: ^18.19.2
         version: 18.19.2
       '@vitest/coverage-v8':
         specifier: ^1.0.4

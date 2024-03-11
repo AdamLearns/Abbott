@@ -30,7 +30,7 @@
 		"youtube-api": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/node": "^18",
+		"@types/node": "^18.19.2",
 		"@vitest/coverage-v8": "^1.0.4",
 		"@vitest/runner": "^1.2.1",
 		"ircv3": "^0.32.4",
