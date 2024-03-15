@@ -49,10 +49,10 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 }
 
 export async function down(db: Kysely<unknown>): Promise<void> {
+  await db.schema.dropTable("youtube_names").execute()
+  await db.schema.dropTable("youtube_oauth_tokens").execute()
   await db.schema
     .alterTable("user_correlation")
     .dropColumn("youtube_id")
     .execute()
-  await db.schema.dropTable("youtube_names").execute()
-  await db.schema.dropTable("youtube_oauth_tokens").execute()
 }
