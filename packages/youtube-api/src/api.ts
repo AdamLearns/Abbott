@@ -9,6 +9,8 @@ export type LiveChatMessageListResponse =
 
 export interface YouTubeMessage {
   messageText: string
+  // This is in UTC.
+  publishedAt: Date
   authorId: string
   authorDisplayName: string
   isPrivileged: boolean
