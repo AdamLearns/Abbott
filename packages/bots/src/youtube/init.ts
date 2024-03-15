@@ -8,9 +8,9 @@ import {
   readChatMessages,
   type YouTubeMessage,
   type LiveChatMessageListResponse,
+  StreamNoLongerLiveError,
 } from "youtube-api"
 
-import { StreamNoLongerLiveError } from "../../../youtube-api/src/StreamNoLongerLiveError.js"
 import type { InMemoryCommands } from "../commands/InMemoryCommands.js"
 import { emitter } from "../events/emitter.js"
 
