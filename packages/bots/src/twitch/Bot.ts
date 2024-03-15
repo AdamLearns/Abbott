@@ -319,7 +319,6 @@ get-tokens.ts.`,
   }
 
   private processPotentialCommand = async (
-    channel: string,
     _user: string,
     text: string,
     msg: ChatMessage,
@@ -379,11 +378,11 @@ get-tokens.ts.`,
   }
 
   private onMessage = async (
-    channel: string,
+    _channel: string,
     user: string,
     text: string,
     msg: ChatMessage,
   ) => {
-    await this.processPotentialCommand(channel, user, text, msg)
+    await this.processPotentialCommand(user, text, msg)
   }
 }
