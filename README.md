@@ -46,7 +46,8 @@ Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:w
 ## Testing
 
 - Start the test database in a Docker image: `docker compose -f ./packages/database/src/test_compose.yml up`
-- Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./packages/bots/src/test/database.test.ts`.
+- Switch to the package where you want to run tests. Note that at the time of writing, the `bots` package doesn't need a `.env.test` file since it doesn't connect to a real database.
+- Make sure to use the test environment: `NODE_ENV=test pnpm test`. If you want to run only certain files, add them like this `NODE_ENV=test pnpm test ./packages/bots/src/test/bot.test.ts`.
 - When running `pnpm coverage`, open the results with `open coverage/index.html`.
 
 ## Migrations
