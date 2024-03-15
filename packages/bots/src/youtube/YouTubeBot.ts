@@ -87,7 +87,6 @@ export class YouTubeBot extends GenericBot {
     isUserPrivileged: boolean,
   ) => {
     const commandData = getCommandAndParams(text)
-    console.log("commandData", JSON.stringify(commandData))
 
     if (commandData === null) {
       return
