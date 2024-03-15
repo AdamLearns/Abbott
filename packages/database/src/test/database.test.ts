@@ -32,7 +32,6 @@ beforeAll(async () => {
   })
 
   migrator = makeMigrator(db)
-  await migrator.migrateToLatest()
 })
 
 beforeEach(async () => {
@@ -41,7 +40,12 @@ beforeEach(async () => {
   // Technically, it's also helping us test that our "down" migrations work
   // properly. But also, I just don't feel like figuring out how to drop and
   // recreate the database here. 👀
-  await migrator.migrateTo(NO_MIGRATIONS)
+  const results = await migrator.migrateTo(NO_MIGRATIONS)
+  if (results.error) {
+    // For whatever reason, you can't log from here, so you just have to run the
+    // migrations manually and figure out what's wrong
+    process.exit(1)
+  }
   await migrator.migrateToLatest()
 })
 
@@ -57,7 +61,7 @@ describe("Database tests", () => {
 
     await botDatabase.deleteCommand(id)
 
-    const response = await db.selectFrom("commands").execute()
+    const response = await db.selectFrom("commands").selectAll().execute()
 
     expect(response).toHaveLength(0)
   })

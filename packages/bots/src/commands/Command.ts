@@ -1,16 +1,15 @@
-import type { UUID } from "abbott-database"
+import { UUID } from "abbott-database"
 
-import type { BotCommandContext } from "./BotCommandContext.js"
+import { CommandContext } from "./CommandContext.js"
 
-export type BotCommandHandler = (
+export type CommandHandler = (
   params: string[],
-  context: BotCommandContext,
+  context: CommandContext,
 ) => void | Promise<void>
 
-export class BotCommand {
+export class Command {
   #id: UUID
-  #lastExecutionTimeOnTwitch = 0
-  #handler: BotCommandHandler
+  #handler: CommandHandler
   #isPrivileged: boolean
   #canBeDeleted: boolean
 
@@ -26,7 +25,7 @@ export class BotCommand {
     canBeDeleted = true,
     isTextCommand = true,
   }: {
-    handler: BotCommandHandler
+    handler: CommandHandler
     id: UUID
     isPrivileged?: boolean
     canBeDeleted?: boolean
@@ -39,16 +38,8 @@ export class BotCommand {
     this.#isTextCommand = isTextCommand
   }
 
-  set handler(value: BotCommandHandler) {
+  set handler(value: CommandHandler) {
     this.#handler = value
-  }
-
-  get lastExecutionTimeOnTwitch(): number {
-    return this.#lastExecutionTimeOnTwitch
-  }
-
-  set lastExecutionTimeOnTwitch(value: number) {
-    this.#lastExecutionTimeOnTwitch = value
   }
 
   get isPrivileged(): boolean {
@@ -67,7 +58,7 @@ export class BotCommand {
     return this.#id
   }
 
-  execute(params: string[], context: BotCommandContext): void | Promise<void> {
+  execute(params: string[], context: CommandContext): void | Promise<void> {
     return this.#handler(params, context)
   }
 }

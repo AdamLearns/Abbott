@@ -5,15 +5,15 @@ import type { YouTubeMessage } from "youtube-api"
 // eslint-disable-next-line unicorn/prefer-event-target
 class AbbottMessageBus extends EventEmitter {
   onTwitchStreamLive = this.registerEvent<[title: string | null]>()
-  onYouTubeStreamLive = this.registerEvent()
+  onYouTubeStreamLive = this.registerEvent<[liveChatId: string]>()
   onYouTubeStreamOffline = this.registerEvent()
   onYouTubeMessagesReceived = this.registerEvent<[messages: YouTubeMessage[]]>()
 
   sendTwitchStreamLive(title: string | null) {
     this.emit(this.onTwitchStreamLive, title)
   }
-  sendYouTubeStreamLive() {
-    this.emit(this.onYouTubeStreamLive)
+  sendYouTubeStreamLive(liveChatId: string) {
+    this.emit(this.onYouTubeStreamLive, liveChatId)
   }
   sendYouTubeStreamOffline() {
     this.emit(this.onYouTubeStreamOffline)

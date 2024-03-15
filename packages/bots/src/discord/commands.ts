@@ -6,17 +6,17 @@ import type { CommandInteraction, SlashCommandBuilder } from "discord.js"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export interface Command {
+export interface DiscordCommand {
   data: SlashCommandBuilder
   execute: (interaction: CommandInteraction) => Promise<void>
 }
 
-function isCommand(command: Command): command is Command {
+function isCommand(command: DiscordCommand): command is DiscordCommand {
   return "data" in command && "execute" in command
 }
 
-export async function readAllCommands(): Promise<Map<string, Command>> {
-  const commands = new Map<string, Command>()
+export async function readAllCommands(): Promise<Map<string, DiscordCommand>> {
+  const commands = new Map<string, DiscordCommand>()
 
   const foldersPath = path.join(__dirname, "commands")
   const commandFolders = fs
@@ -37,7 +37,7 @@ export async function readAllCommands(): Promise<Map<string, Command>> {
       )
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file)
-      const command = (await import(filePath)) as Command
+      const command = (await import(filePath)) as DiscordCommand
 
       if (!isCommand(command)) {
         throw new Error(`The file at ${filePath} is not a command`)

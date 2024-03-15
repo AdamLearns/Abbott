@@ -1,6 +1,6 @@
 import { RefreshingAuthProvider } from "@twurple/auth"
 
-import { init as initServer } from "../server/init.js"
+import type { InMemoryCommands } from "../commands/InMemoryCommands.js"
 import { onProcessClose } from "../setup/termination-handler.js"
 
 import { Bot } from "./Bot.js"
@@ -23,7 +23,7 @@ function createAuthProvider(): RefreshingAuthProvider {
   return authProvider
 }
 
-async function createBot(): Promise<Bot> {
+async function createBot(commands: InMemoryCommands): Promise<Bot> {
   const authProvider = createAuthProvider()
   const twitchChannelName = process.env.TWITCH_CHANNEL_NAME
 
@@ -36,6 +36,7 @@ async function createBot(): Promise<Bot> {
   const bot = new Bot({
     twitchChannelName,
     authProvider,
+    commands,
   })
 
   await bot.init()
@@ -52,7 +53,6 @@ async function createBot(): Promise<Bot> {
   return bot
 }
 
-export async function init() {
-  const bot = await createBot()
-  initServer(bot)
+export async function init(commands: InMemoryCommands): Promise<Bot> {
+  return createBot(commands)
 }

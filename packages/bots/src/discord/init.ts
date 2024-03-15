@@ -8,9 +8,9 @@ import {
 
 import { emitter } from "../events/emitter.js"
 
-import { readAllCommands, type Command } from "./commands.js"
+import { readAllCommands, type DiscordCommand } from "./commands.js"
 
-type ClientWithCommands = Client & { Commands: Map<string, Command> }
+type ClientWithCommands = Client & { Commands: Map<string, DiscordCommand> }
 
 function ensureEnvVars() {
   if (

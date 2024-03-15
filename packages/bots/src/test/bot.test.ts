@@ -16,8 +16,9 @@ import {
   assert,
 } from "vitest"
 
+import { CommandContext } from "../commands/CommandContext.js"
+import { InMemoryCommands } from "../commands/InMemoryCommands.js"
 import { Bot } from "../twitch/Bot.js"
-import { BotCommandContext } from "../twitch/BotCommandContext.js"
 
 let bot: Bot
 let storageLayer: BotStorageLayer
@@ -27,7 +28,7 @@ beforeEach(async () => {
 })
 
 interface ContextAndReplySpy {
-  context: BotCommandContext
+  context: CommandContext
   replySpy: MockInstance<[text: string], Promise<void>>
 }
 
@@ -54,10 +55,14 @@ async function createBot() {
     clientSecret: "clientSecret",
   })
   storageLayer = new BotFakeStorageLayer()
+
+  const inMemoryCommands = new InMemoryCommands(storageLayer)
+  await inMemoryCommands.init()
   const bot = new Bot({
     twitchChannelName: "!madeup@",
     authProvider,
     storageLayer,
+    commands: inMemoryCommands,
     makeApiClient: () => {
       return new ApiClient({ authProvider })
     },
@@ -100,15 +105,15 @@ vi.mock("@twurple/chat", async () => {
   }
 })
 
-function createMockContext(): BotCommandContext {
-  return new BotCommandContext(bot, {} as ChatMessage)
+function createMockContext(): CommandContext {
+  return new CommandContext(bot, {} as ChatMessage)
 }
 
 describe("Edit-command tests", () => {
   testWithReplySpy(
     "editing a command with no parameters returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userEditCommand([], context)
+      await bot.commands.userEditCommand([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -118,7 +123,10 @@ describe("Edit-command tests", () => {
   testWithReplySpy(
     "editing a command that doesn't exist returns an error",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userEditCommand(["madeupcommand", "new", "response"], context)
+      await bot.commands.userEditCommand(
+        ["madeupcommand", "new", "response"],
+        context,
+      )
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("doesn't exist")
@@ -128,12 +136,15 @@ describe("Edit-command tests", () => {
   testWithReplySpy(
     "can't edit a non-text command",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.addCommand({
+      await bot.commands.addCommand({
         name: "nontextcommand",
         handler: () => {},
       })
 
-      await bot.userEditCommand(["nontextcommand", "new", "response"], context)
+      await bot.commands.userEditCommand(
+        ["nontextcommand", "new", "response"],
+        context,
+      )
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("not a text command")
@@ -152,7 +163,10 @@ describe("Edit-command tests", () => {
       ]
       let numCalls = 0
       for (const commandName of builtInCommandNames) {
-        await bot.userEditCommand([commandName, "new", "response"], context)
+        await bot.commands.userEditCommand(
+          [commandName, "new", "response"],
+          context,
+        )
         numCalls++
         expect(replySpy).toHaveBeenCalledTimes(numCalls)
         expect(replySpy.mock.lastCall?.[0]).toContain("not a text command")
@@ -163,9 +177,15 @@ describe("Edit-command tests", () => {
   testWithReplySpy(
     "can successfully edit a text command",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
+      await bot.commands.addCommand({
+        name: "testcommand",
+        textResponse: "Hello world",
+      })
 
-      await bot.userEditCommand(["testcommand", "new", "response"], context)
+      await bot.commands.userEditCommand(
+        ["testcommand", "new", "response"],
+        context,
+      )
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("successfully edited")
@@ -177,7 +197,7 @@ describe("Unalias-command tests", () => {
   testWithReplySpy(
     "unaliasing a command with no parameters returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userUnaliasCommand([], context)
+      await bot.commands.userUnaliasCommand([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -187,7 +207,7 @@ describe("Unalias-command tests", () => {
   testWithReplySpy(
     "cannot unalias a command that doesn't exist",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userUnaliasCommand(["madeupcommand"], context)
+      await bot.commands.userUnaliasCommand(["madeupcommand"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("There is no command")
@@ -197,8 +217,11 @@ describe("Unalias-command tests", () => {
   testWithReplySpy(
     "cannot use unalias to delete a command",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
-      await bot.userUnaliasCommand(["testcommand"], context)
+      await bot.commands.addCommand({
+        name: "testcommand",
+        textResponse: "Hello world",
+      })
+      await bot.commands.userUnaliasCommand(["testcommand"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(
@@ -211,14 +234,21 @@ describe("Unalias-command tests", () => {
     const context = createMockContext()
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
-    await bot.addCommand({ name: "testcommand", textResponse: "Hello world" })
-    await bot.addAlias("testcommandalias", "testcommand")
-    expect(bot.getAllNamesOfCommand("testcommandalias")).toHaveLength(2)
-    expect(bot.getAllNamesOfCommand("testcommandalias").sort()).toEqual(
-      ["testcommand", "testcommandalias"].sort(),
+    await bot.commands.addCommand({
+      name: "testcommand",
+      textResponse: "Hello world",
+    })
+    await bot.commands.addAlias("testcommandalias", "testcommand")
+    expect(bot.commands.getAllNamesOfCommand("testcommandalias")).toHaveLength(
+      2,
     )
-    await bot.userUnaliasCommand(["testcommand"], context)
-    expect(bot.getAllNamesOfCommand("testcommandalias")).toHaveLength(1)
+    expect(
+      bot.commands.getAllNamesOfCommand("testcommandalias").sort(),
+    ).toEqual(["testcommand", "testcommandalias"].sort())
+    await bot.commands.userUnaliasCommand(["testcommand"], context)
+    expect(bot.commands.getAllNamesOfCommand("testcommandalias")).toHaveLength(
+      1,
+    )
   })
 })
 
@@ -226,7 +256,7 @@ describe("Alias-command tests", () => {
   testWithReplySpy(
     "aliasing a command with no parameters returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAliasCommand([], context)
+      await bot.commands.userAliasCommand([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -236,7 +266,7 @@ describe("Alias-command tests", () => {
   testWithReplySpy(
     "cannot make an alias if there's already a command with that name",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAliasCommand(["addcom", "delcom"], context)
+      await bot.commands.userAliasCommand(["addcom", "delcom"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Alias is already defined")
@@ -246,7 +276,10 @@ describe("Alias-command tests", () => {
   testWithReplySpy(
     "cannot make an alias to a command that doesn't exist",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAliasCommand(["newalias", "madeupcommand"], context)
+      await bot.commands.userAliasCommand(
+        ["newalias", "madeupcommand"],
+        context,
+      )
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(
@@ -259,9 +292,9 @@ describe("Alias-command tests", () => {
     const context = createMockContext()
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
-    expect(bot.getAllNamesOfCommand("addcom")).toHaveLength(2)
-    await bot.userAliasCommand(["addacommand", "addcom"], context)
-    expect(bot.getAllNamesOfCommand("addcom")).toHaveLength(3)
+    expect(bot.commands.getAllNamesOfCommand("addcom")).toHaveLength(2)
+    await bot.commands.userAliasCommand(["addacommand", "addcom"], context)
+    expect(bot.commands.getAllNamesOfCommand("addcom")).toHaveLength(3)
   })
 })
 
@@ -269,7 +302,7 @@ describe("Add-command tests", () => {
   testWithReplySpy(
     "adding a command with no parameters returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAddCommand([], context)
+      await bot.commands.userAddCommand([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -279,7 +312,10 @@ describe("Add-command tests", () => {
   testWithReplySpy(
     "cannot add a command through chat that already exists",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAddCommand(["delcom", "Deletes", "a", "command"], context)
+      await bot.commands.userAddCommand(
+        ["delcom", "Deletes", "a", "command"],
+        context,
+      )
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("already exists")
@@ -291,7 +327,7 @@ describe("Add-command tests", () => {
     vi.spyOn(context, "reply").mockImplementation(async () => {})
 
     await expect(async () => {
-      await bot.addCommand({ name: "delcom", handler: () => {} })
+      await bot.commands.addCommand({ name: "delcom", handler: () => {} })
     }).rejects.toThrowError("already")
   })
 
@@ -299,9 +335,9 @@ describe("Add-command tests", () => {
     const context = createMockContext()
     context.reply = vi.fn().mockImplementation(async () => {})
 
-    expect(bot.getAllNamesOfCommand("fruit")).toHaveLength(0)
-    await bot.userAddCommand(["fruit", "Tasty", "apple"], context)
-    expect(bot.getAllNamesOfCommand("fruit")).toHaveLength(1)
+    expect(bot.commands.getAllNamesOfCommand("fruit")).toHaveLength(0)
+    await bot.commands.userAddCommand(["fruit", "Tasty", "apple"], context)
+    expect(bot.commands.getAllNamesOfCommand("fruit")).toHaveLength(1)
   })
 })
 
@@ -309,7 +345,7 @@ describe("Delete-command tests", () => {
   testWithReplySpy(
     "delete returns usage message with no parameters",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userDeleteCommand([], context)
+      await bot.commands.userDeleteCommand([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -319,7 +355,7 @@ describe("Delete-command tests", () => {
   testWithReplySpy(
     "cannot delete nonexistent command",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userDeleteCommand(["commandthatdoesnotexist"], context)
+      await bot.commands.userDeleteCommand(["commandthatdoesnotexist"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("doesn't exist")
@@ -329,7 +365,7 @@ describe("Delete-command tests", () => {
   testWithReplySpy(
     "cannot delete built-in command",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userDeleteCommand(["addcom"], context)
+      await bot.commands.userDeleteCommand(["addcom"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(
@@ -342,23 +378,23 @@ describe("Delete-command tests", () => {
     const context = createMockContext()
     context.reply = vi.fn().mockImplementation(async () => {})
 
-    await bot.addCommand({ name: "aaa", textResponse: "bbb" })
-    expect(bot.getAllNamesOfCommand("aaa")).toHaveLength(1)
-    await bot.userDeleteCommand(["aaa"], context)
-    expect(bot.getAllNamesOfCommand("aaa")).toHaveLength(0)
+    await bot.commands.addCommand({ name: "aaa", textResponse: "bbb" })
+    expect(bot.commands.getAllNamesOfCommand("aaa")).toHaveLength(1)
+    await bot.commands.userDeleteCommand(["aaa"], context)
+    expect(bot.commands.getAllNamesOfCommand("aaa")).toHaveLength(0)
   })
 
   test("deleting a command deletes all of its names", async () => {
     const context = createMockContext()
     context.reply = vi.fn().mockImplementation(async () => {})
 
-    await bot.addCommand({ name: "food", textResponse: "Apple" })
-    await bot.addAlias("fruit", "food")
-    await bot.addAlias("redstuff", "fruit")
-    expect(bot.getAllNamesOfCommand("food")).toHaveLength(3)
-    expect(bot.getAllNamesOfCommand("fruit")).toHaveLength(3)
-    await bot.userDeleteCommand(["food"], context)
-    expect(bot.getAllNamesOfCommand("food")).toHaveLength(0)
+    await bot.commands.addCommand({ name: "food", textResponse: "Apple" })
+    await bot.commands.addAlias("fruit", "food")
+    await bot.commands.addAlias("redstuff", "fruit")
+    expect(bot.commands.getAllNamesOfCommand("food")).toHaveLength(3)
+    expect(bot.commands.getAllNamesOfCommand("fruit")).toHaveLength(3)
+    await bot.commands.userDeleteCommand(["food"], context)
+    expect(bot.commands.getAllNamesOfCommand("food")).toHaveLength(0)
   })
 
   test("non-mod user cannot delete commands", async () => {
@@ -379,10 +415,13 @@ describe("Delete-command tests", () => {
       return new Listener(mockChatClient, vi.fn(), vi.fn())
     })
 
+    const inMemoryCommands = new InMemoryCommands(storageLayer)
+    await inMemoryCommands.init()
     const bot = new Bot({
       twitchChannelName: "!madeup@",
       authProvider,
       storageLayer: new BotFakeStorageLayer(),
+      commands: inMemoryCommands,
       makeApiClient: () => {
         return new ApiClient({ authProvider })
       },
@@ -395,7 +434,7 @@ describe("Delete-command tests", () => {
 
     const commandName = "today"
     const response = "Today is a good day"
-    await bot.addCommand({ name: commandName, textResponse: response })
+    await bot.commands.addCommand({ name: commandName, textResponse: response })
 
     assert(fn)
 
@@ -433,7 +472,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "adding a quote with no arguments returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAddQuote([], context)
+      await bot.commands.userAddQuote([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -443,7 +482,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "can add a quote",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userAddQuote(["Author", "Quote"], context)
+      await bot.commands.userAddQuote(["Author", "Quote"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("successfully added")
@@ -453,7 +492,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "deleting a quote with no arguments returns a usage message",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userDelQuote([], context)
+      await bot.commands.userDelQuote([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("Usage")
@@ -463,7 +502,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "cannot delete a quote with an invalid ID",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userDelQuote(["zebra"], context)
+      await bot.commands.userDelQuote(["zebra"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("not a valid quote ID")
@@ -474,7 +513,7 @@ describe("Quote tests", () => {
     "cannot delete a quote that doesn't exist",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
       const id = 1
-      await bot.userDelQuote([`${id}`], context)
+      await bot.commands.userDelQuote([`${id}`], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(
@@ -499,7 +538,7 @@ describe("Quote tests", () => {
 
       // The ID just needs to be a number since we mocked the implementation
       const id = 1
-      await bot.userDelQuote([`${id}`], context)
+      await bot.commands.userDelQuote([`${id}`], context)
 
       expect(deleteQuoteSpy).toHaveBeenCalledOnce()
       expect(deleteQuoteSpy.mock.lastCall?.[0]).toBe(id)
@@ -512,7 +551,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "cannot get a quote with an invalid ID",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userGetQuote(["zebra"], context)
+      await bot.commands.userGetQuote(["zebra"], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain("not a valid quote ID")
@@ -522,7 +561,7 @@ describe("Quote tests", () => {
   testWithReplySpy(
     "cannot get a random quote if none exist",
     async ({ contextAndReplySpy: { context, replySpy } }) => {
-      await bot.userGetQuote([], context)
+      await bot.commands.userGetQuote([], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(
@@ -536,7 +575,7 @@ describe("Quote tests", () => {
     async ({ contextAndReplySpy: { context, replySpy } }) => {
       const id = 1
 
-      await bot.userGetQuote([`${id}`], context)
+      await bot.commands.userGetQuote([`${id}`], context)
 
       expect(replySpy).toHaveBeenCalledOnce()
       expect(replySpy.mock.lastCall?.[0]).toContain(`There is no quote #${id}`)
@@ -559,7 +598,7 @@ describe("Quote tests", () => {
         })
 
       const id = 1
-      await bot.userGetQuote([`${id}`], context)
+      await bot.commands.userGetQuote([`${id}`], context)
 
       expect(getQuoteSpy).toHaveBeenCalledOnce()
       expect(getQuoteSpy.mock.lastCall?.[0]).toBe(id)
@@ -584,7 +623,7 @@ describe("Quote tests", () => {
           })
         })
 
-      await bot.userGetQuote([], context)
+      await bot.commands.userGetQuote([], context)
 
       expect(getRandomQuoteSpy).toHaveBeenCalledOnce()
 

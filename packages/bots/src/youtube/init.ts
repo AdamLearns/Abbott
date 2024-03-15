@@ -11,7 +11,10 @@ import {
 } from "youtube-api"
 
 import { StreamNoLongerLiveError } from "../../../youtube-api/src/StreamNoLongerLiveError.js"
+import type { InMemoryCommands } from "../commands/InMemoryCommands.js"
 import { emitter } from "../events/emitter.js"
+
+import { YouTubeBot } from "./YouTubeBot.js"
 
 dotenvFlow.config()
 
@@ -46,11 +49,12 @@ let nextPageToken: string | undefined
  * The number of milliseconds that we MUST wait before polling for chat
  * messages. This is because the quota is quite restrictive at 10k requests per
  * day, so 1 request per second would use it all up in 2.7 hours, and I stream
- * for ~6 hours per day right now.
+ * for ~6 hours per day right now. Also, I'm pretty sure reading chat messages
+ * costs more than one quota point per request.
  */
-const MIN_CHAT_POLLING_TIME = 4000
+const MIN_CHAT_POLLING_TIME = 15_000
 
-export async function init() {
+export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
   const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI
   const CLIENT_ID = process.env.YOUTUBE_CLIENT_ID
   const CLIENT_SECRET = process.env.YOUTUBE_SECRET
@@ -103,9 +107,9 @@ export async function init() {
     )
   })
 
+  const youTubeBot = new YouTubeBot({ auth: oauth2Client, commands })
   emitter.onYouTubeStreamLive(youTubeStreamWentLive)
   emitter.onYouTubeStreamOffline(youTubeStreamWentOffline)
-  emitter.onYouTubeMessagesReceived(receivedYouTubeMessages)
 
   await checkIfLive()
 
@@ -114,12 +118,8 @@ export async function init() {
   } else {
     console.log("The YouTube stream is offline.")
   }
-}
 
-function receivedYouTubeMessages(messages: YouTubeMessage[]) {
-  // TODO: check for a command here and then delete the log calls that I have
-  console.log("---------------------------------------")
-  console.log(messages)
+  return youTubeBot
 }
 
 function clearChatPollTimer() {
@@ -153,6 +153,7 @@ function processChatMessages(messages: LiveChatMessageListResponse) {
   const youTubeMessages: YouTubeMessage[] = []
   for (const message of messages.items) {
     if (message.snippet?.type === "chatEndedEvent") {
+      console.log("Received chatEndedEvent. The YouTube stream is now offline.")
       emitter.sendYouTubeStreamOffline()
       return
     }
@@ -162,8 +163,13 @@ function processChatMessages(messages: LiveChatMessageListResponse) {
       if (authorDetails === undefined) {
         continue
       }
+      message.snippet.publishedAt
       youTubeMessages.push({
         messageText: message.snippet.textMessageDetails?.messageText as string,
+
+        // publishedAt is a datetime string like "2024-03-01T18:07:04.153256+00:00". It can
+        // be fed into `new Date()`.
+        publishedAt: new Date(message.snippet.publishedAt as string),
         authorId: authorDetails.channelId as string,
         authorDisplayName: authorDetails.displayName as string,
         isPrivileged:
@@ -198,6 +204,9 @@ async function pollForChatMessages() {
     scheduleNextChatPoll(msToWait)
   } catch (error) {
     if (error instanceof StreamNoLongerLiveError) {
+      console.log(
+        'Got "chat is no longer live" when reading messages. The YouTube stream is now offline.',
+      )
       emitter.sendYouTubeStreamOffline()
       return
     }
@@ -219,6 +228,6 @@ async function checkIfLive() {
   if (liveChatId === undefined) {
     livestreamStatus = LivestreamStatus.OFFLINE
   } else {
-    emitter.sendYouTubeStreamLive()
+    emitter.sendYouTubeStreamLive(liveChatId)
   }
 }
