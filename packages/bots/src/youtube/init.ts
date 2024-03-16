@@ -113,9 +113,7 @@ export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
 
   await checkIfLive()
 
-  if (livestreamStatus === LivestreamStatus.LIVE) {
-    console.log("🔴 The stream is live on YouTube!")
-  } else {
+  if (livestreamStatus !== LivestreamStatus.LIVE) {
     console.log("The YouTube stream is offline.")
   }
 
@@ -124,6 +122,7 @@ export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
 
 function clearChatPollTimer() {
   if (chatPollTimer !== undefined) {
+    console.log("Clearing chatPollTimer", chatPollTimer)
     clearTimeout(chatPollTimer)
     chatPollTimer = undefined
   }
@@ -135,6 +134,7 @@ function youTubeStreamWentLive() {
 }
 
 function youTubeStreamWentOffline() {
+  console.log("youTubeStreamWentOffline was hit")
   livestreamStatus = LivestreamStatus.OFFLINE
   clearChatPollTimer()
 }
@@ -143,6 +143,7 @@ function scheduleNextChatPoll(numMsFromNow: number) {
   // Ensure that there's only ever one call to pollForChatMessages.
   clearChatPollTimer()
   chatPollTimer = setTimeout(pollForChatMessages, numMsFromNow)
+  console.log("in scheduleNextChatPoll", chatPollTimer)
 }
 
 function processChatMessages(messages: LiveChatMessageListResponse) {
@@ -187,6 +188,7 @@ async function pollForChatMessages() {
   // we detect that the stream went offline, in which case this call will be
   // canceled. It's also possible that we decide to poll LATER than this amount
   // of time, in which case the call will be adjusted.
+  console.log("Sheduling next chat poll at top of pollForChatMessages")
   scheduleNextChatPoll(MIN_CHAT_POLLING_TIME)
   try {
     const messages = await readChatMessages(
@@ -201,6 +203,7 @@ async function pollForChatMessages() {
       MIN_CHAT_POLLING_TIME,
       messages.pollingIntervalMillis ?? 1000,
     )
+    console.log("Sheduling next chat poll in body of pollForChatMessages")
     scheduleNextChatPoll(msToWait)
   } catch (error) {
     if (error instanceof StreamNoLongerLiveError) {
@@ -228,6 +231,7 @@ async function checkIfLive() {
   if (liveChatId === undefined) {
     livestreamStatus = LivestreamStatus.OFFLINE
   } else {
+    console.log("🔴 The stream is live on YouTube! Chat ID: " + liveChatId)
     emitter.sendYouTubeStreamLive(liveChatId)
   }
 }
