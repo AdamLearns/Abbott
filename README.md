@@ -97,7 +97,8 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
   - Set `DATABASE_BACKUP_LOCATION=/database_backups`.
   - Make sure `~/database_backups` exists on the host.
 - Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so you can run this from the `Abbott` folder:
-  - From main computer: `ssh -L 3000:localhost:3000 minipc@IP`
+  - From main computer: `ssh -L 3000:localhost:3000 -L 3005:localhost:3005 adam@minipc`
+  - `cd code/Abbott`
   - `git pull`
     - Without this, you may not be working with the latest code.
   - `docker run --net=host -v .:/abbott --entrypoint /bin/bash -it node:18.17.0-slim`
