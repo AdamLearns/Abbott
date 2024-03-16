@@ -16,6 +16,7 @@ RUN pnpm build
 WORKDIR /app
 RUN pnpm --filter "abbott-bots" deploy deploy/bots
 RUN pnpm --filter "abbott-database" deploy deploy/database
+RUN pnpm --filter "youtube-api" deploy deploy/youtube-api
 
 FROM base AS build
 COPY --from=install-deps /app/deploy/ /app/deploy
