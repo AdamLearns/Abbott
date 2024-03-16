@@ -93,24 +93,26 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 
 ## Post-Ansible steps
 
-- Copy over the `.env` file: `scp .env.development.local adam@<IP_ADDRESS>:code/Abbott/`
-  - Set `DATABASE_BACKUP_LOCATION=/database_backups`.
+- Set up the `.env` file. It may help to start with a local one: `scp .env.development.local adam@minipc:code/Abbott/`
+  - Set `DATABASE_BACKUP_LOCATION=/database_backups` in the `.env` file since that's what Docker expects.
   - Make sure `~/database_backups` exists on the host.
-- Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so you can run this from the `Abbott` folder:
+- Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so we use the Docker images we build, which have Node AND the requirements to connect to the database:
   - From main computer: `ssh -L 3000:localhost:3000 -L 3005:localhost:3005 adam@minipc`
-  - `cd code/Abbott`
-  - `git pull`
-    - Without this, you may not be working with the latest code.
-  - `docker run --net=host -v .:/abbott --entrypoint /bin/bash -it node:18.17.0-slim`
-    - (`--net=host` is needed to be able to contact the database since it's running in a separate container)
-    - (no need to do `-p 3000:3000` thanks to `--net=host`)
-  - `apt update && apt install -y wget`
-  - `wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -`
-  - `source /root/.bashrc`
-  - `cd /abbott`
-  - `NODE_ENV=development pnpx tsx packages/bots/src/get-tokens.ts`
-    - Follow the instructions from `get-tokens` on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
-    - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
+    - Port 3000 is what `get-tokens` uses for its redirect, and 3005 is what `get-youtube-tokens` uses.
+  - From the mini PC:
+    - Switch to a directory that has an `.env` file with database and YouTube creds: `cd code/Abbott/packages/bots`
+    - `docker run --net=host -v .:/envfile --entrypoint /bin/bash -it ghcr.io/adamlearns/abbott-bots:latest`
+      - (`--net=host` is needed to be able to contact the database since it's running in a separate container)
+      - (no need to do `-p 3000:3000` thanks to `--net=host`)
+    - `cd app/deploy/dist`
+    - `cp /envfile/.env.production.local ./`
+    - `apt install -y vim`
+    - `vim .env.production.local`
+      - Change `@db` in the database connection string to `@127.0.0.1`
+    - `NODE_ENV=produc'tion node get-tokens`
+      - Follow the instructions on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
+      - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
+    - `NODE_ENV=production node get-youtube-tokens`
 - Migrate the database (I only did this once):
   - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
 
