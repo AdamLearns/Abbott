@@ -10,6 +10,7 @@ import { CommandContext } from "../commands/CommandContext.js"
 import { getCommandAndParams } from "../commands/CommandData.js"
 import { GenericBot, type GenericMessage } from "../commands/GenericBot.js"
 import type { InMemoryCommands } from "../commands/InMemoryCommands.js"
+import { MAX_YOUTUBE_CHAT_MESSAGE_LENGTH } from "../constants.js"
 import { emitter } from "../events/emitter.js"
 
 /**
@@ -41,6 +42,17 @@ export class YouTubeBot extends GenericBot {
     emitter.onYouTubeMessagesReceived(this.receivedYouTubeMessages)
   }
 
+  sayTextCommandResponse = async (commandName: string, text: string) => {
+    if (text.length > MAX_YOUTUBE_CHAT_MESSAGE_LENGTH) {
+      // Note: at the time of writing, I'm not including the prefix here because
+      // it'll cause the bot to trigger itself with the command.
+      const firstPart = `${commandName} too long for YouTube; view full response here https://a.bot.land/?query=${commandName} `
+      const remainingChars = MAX_YOUTUBE_CHAT_MESSAGE_LENGTH - firstPart.length
+      text = firstPart + text.slice(0, remainingChars - 1) + "…"
+    }
+    return this.say(text)
+  }
+
   say = async (text: string): Promise<void> => {
     if (this.#liveChatId === undefined) {
       console.error(
@@ -55,7 +67,11 @@ export class YouTubeBot extends GenericBot {
     replyToMessage: GenericMessage,
   ): Promise<void> => {
     const message = replyToMessage as YouTubeMessage
-    return this.say("@" + message.authorDisplayName + ": " + text)
+    const nameAndColon = "@" + message.authorDisplayName + ": "
+    text =
+      text.slice(0, MAX_YOUTUBE_CHAT_MESSAGE_LENGTH - nameAndColon.length - 1) +
+      "…"
+    return this.say(nameAndColon + text)
   }
 
   youTubeStreamWentLive = async (liveChatId: string) => {
@@ -75,18 +91,14 @@ export class YouTubeBot extends GenericBot {
       ) {
         continue
       }
-      await this.processPotentialCommand(
-        message.messageText,
-        message.isPrivileged,
-      )
+      await this.processPotentialCommand(message)
     }
   }
 
-  private processPotentialCommand = async (
-    text: string,
-    isUserPrivileged: boolean,
-  ) => {
-    const commandData = getCommandAndParams(text)
+  private processPotentialCommand = async (message: YouTubeMessage) => {
+    const { messageText, isPrivileged } = message
+
+    const commandData = getCommandAndParams(messageText)
 
     if (commandData === null) {
       return
@@ -98,19 +110,16 @@ export class YouTubeBot extends GenericBot {
     }
 
     // Allow privileged users to bypass the cooldown
-    if (!this.isCommandReady(command) && !isUserPrivileged) {
+    if (!this.isCommandReady(command) && !isPrivileged) {
       return
     }
 
-    // TODO: the empty object is a horrible hack; we need a special type for this that I just haven't made yet
-    const context = new CommandContext(this, {})
+    const context = new CommandContext(this, message as GenericMessage)
 
-    if (!this.canUserExecuteCommand(isUserPrivileged, command)) {
+    if (!this.canUserExecuteCommand(isPrivileged, command)) {
       return this.reply(
         "You don't have permission to do that!",
-
-        // TODO: fill this in with something real
-        {},
+        message as GenericMessage,
       )
     }
 

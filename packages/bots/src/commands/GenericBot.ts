@@ -10,6 +10,17 @@ export abstract class GenericBot {
   ) {}
 
   abstract say: (text: string) => Promise<void>
+
+  /**
+   * Wrapper around "say" specifically for text command responses. This is
+   * because YouTube only allows 200 characters in a single message, but text
+   * commands all have their own URLs, so when we know we've exceeded 200
+   * characters, we can just link to the URL.
+   */
+  abstract sayTextCommandResponse: (
+    commandName: string,
+    text: string,
+  ) => Promise<void>
   abstract reply: (
     text: string,
     replyToMessage: GenericMessage,
@@ -32,7 +43,7 @@ export abstract class GenericBot {
       await this.say(
         `Adam suggested that you check out the !${name} command. I'll run that for you now. MrDestructoid`,
       )
-      await this.say(response)
+      await this.sayTextCommandResponse(name, response)
     }
   }
 }

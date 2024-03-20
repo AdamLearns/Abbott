@@ -300,6 +300,10 @@ get-tokens.ts.`,
     }
   }
 
+  sayTextCommandResponse = async (_commandName: string, text: string) => {
+    await this.say(text)
+  }
+
   say = async (message: string) => {
     await this.chat.say(this.twitchChannelName, message)
   }

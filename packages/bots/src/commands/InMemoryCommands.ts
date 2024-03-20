@@ -11,7 +11,7 @@ import {
 import { formatISO } from "date-fns"
 
 import { commandPrefix } from "../constants.js"
-import { Bot } from "../twitch/Bot.js"
+import { Bot as TwitchBot } from "../twitch/Bot.js"
 
 import { type CommandHandler } from "./Command.js"
 import { Command } from "./Command.js"
@@ -81,7 +81,7 @@ export class InMemoryCommands {
   }
 
   userGiftPoints = async (params: string[], context: CommandContext) => {
-    await (context.bot instanceof Bot
+    await (context.bot instanceof TwitchBot
       ? context.bot.userGiftPoints(params, context)
       : context.bot.say("This command is only available in Twitch chat."))
   }
@@ -178,7 +178,7 @@ export class InMemoryCommands {
       const isPrivileged = row.is_privileged
       const canBeDeleted = row.can_be_deleted
       const textResponse = row.response
-      const handler = this.makeTextCommandHandler(textResponse)
+      const handler = this.makeTextCommandHandler(name, textResponse)
 
       const commandWithId = this.getByUuid(id)
 
@@ -209,14 +209,17 @@ export class InMemoryCommands {
     })
   }
 
-  private makeTextCommandHandler(response: string): CommandHandler {
+  private makeTextCommandHandler(
+    commandName: string,
+    response: string,
+  ): CommandHandler {
     return async (params: string[], context: CommandContext) => {
       let nameTag = ""
       if (params[0]?.startsWith("@")) {
         nameTag = `${params[0]} `
       }
 
-      await context.bot.say(nameTag + response)
+      await context.bot.sayTextCommandResponse(commandName, nameTag + response)
     }
   }
 
@@ -273,7 +276,7 @@ export class InMemoryCommands {
       if (textResponse === undefined) {
         throw new Error("Must provide either a handler or a text response")
       }
-      handler = this.makeTextCommandHandler(textResponse)
+      handler = this.makeTextCommandHandler(name, textResponse)
     }
 
     let id: string | undefined
@@ -493,7 +496,7 @@ export class InMemoryCommands {
       return context.reply("There was a database error editing that command.")
     }
 
-    const handler = this.makeTextCommandHandler(response)
+    const handler = this.makeTextCommandHandler(commandName, response)
 
     command.handler = handler
 
