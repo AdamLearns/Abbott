@@ -9,6 +9,7 @@ import {
   type YouTubeMessage,
   type LiveChatMessageListResponse,
   StreamNoLongerLiveError,
+  QuotaExceededError,
 } from "youtube-api"
 
 import type { InMemoryCommands } from "../commands/InMemoryCommands.js"
@@ -205,7 +206,11 @@ async function pollForChatMessages() {
         'Got "chat is no longer live" when reading messages. The YouTube stream is now offline.',
       )
       emitter.sendYouTubeStreamOffline()
-      return
+    } else if (error instanceof QuotaExceededError) {
+      console.log(
+        "YouTube quota exceeded. Acting like the stream is offline so that we don't keep polling for messages.",
+      )
+      emitter.sendYouTubeStreamOffline()
     }
   }
 }
@@ -221,11 +226,17 @@ async function checkIfLive() {
     return
   }
 
-  liveChatId = await getLivestreamVideoLiveChatId(oauth2Client)
-  if (liveChatId === undefined) {
-    livestreamStatus = LivestreamStatus.OFFLINE
-  } else {
-    console.log("🔴 The stream is live on YouTube! Chat ID: " + liveChatId)
-    emitter.sendYouTubeStreamLive(liveChatId)
+  try {
+    liveChatId = await getLivestreamVideoLiveChatId(oauth2Client)
+    if (liveChatId === undefined) {
+      livestreamStatus = LivestreamStatus.OFFLINE
+    } else {
+      console.log("🔴 The stream is live on YouTube! Chat ID: " + liveChatId)
+      emitter.sendYouTubeStreamLive(liveChatId)
+    }
+  } catch (error) {
+    if (error instanceof QuotaExceededError) {
+      console.log("YouTube quota exceeded.")
+    }
   }
 }

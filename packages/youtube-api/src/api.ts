@@ -1,5 +1,6 @@
-import { Auth, Common, google, youtube_v3 } from "googleapis"
+import { Auth, google, youtube_v3 } from "googleapis"
 
+import { QuotaExceededError } from "./QuotaExceededError.js"
 import { StreamNoLongerLiveError } from "./StreamNoLongerLiveError.js"
 
 export type OAuth2Client = Auth.OAuth2Client
@@ -75,6 +76,9 @@ export async function getLivestreamVideoLiveChatId(
     })
     return results.data.items?.[0]?.snippet?.liveChatId ?? undefined
   } catch (error) {
+    if (QuotaExceededError.isQuotaExceededError(error)) {
+      throw new QuotaExceededError()
+    }
     console.error("Error fetching live chat ID", error)
     return undefined
   }
@@ -102,17 +106,11 @@ export async function readChatMessages(
     const results = await google.youtube("v3").liveChatMessages.list(params)
     return results.data
   } catch (error) {
-    if (error instanceof Common.GaxiosError) {
-      const { message } = error
-      if (
-        // When the stream goes offline (happens 5 minutes after the end of the
-        // broadcast)
-        message.includes("The live chat is no longer live") ||
-        // When the stream is deleted forever from the YouTube dashboard
-        message.includes("Live chat is not enabled for the specified broadcast")
-      ) {
-        throw new StreamNoLongerLiveError()
-      }
+    if (StreamNoLongerLiveError.isStreamNoLongerLiveError(error)) {
+      throw new StreamNoLongerLiveError()
+    }
+    if (QuotaExceededError.isQuotaExceededError(error)) {
+      throw new QuotaExceededError()
     }
 
     console.error("Error fetching chat messages", error)
