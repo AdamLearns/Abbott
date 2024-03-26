@@ -48,12 +48,11 @@ let nextPageToken: string | undefined
 
 /**
  * The number of milliseconds that we MUST wait before polling for chat
- * messages. This is because the quota is quite restrictive at 10k requests per
- * day, so 1 request per second would use it all up in 2.7 hours, and I stream
- * for ~6 hours per day right now. Also, I'm pretty sure reading chat messages
- * costs more than one quota point per request.
+ * messages. If this is set to 15000 and I stream for about 7 hours in a given
+ * day (with no real command usage), then I'll be almost exactly at 10k quota
+ * usage by the end of the calendar day.
  */
-const MIN_CHAT_POLLING_TIME = 15_000
+const MIN_CHAT_POLLING_TIME = 5000
 
 export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
   const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI
