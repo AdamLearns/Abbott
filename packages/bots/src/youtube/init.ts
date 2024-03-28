@@ -52,7 +52,7 @@ let nextPageToken: string | undefined
  * day (with no real command usage), then I'll be almost exactly at 10k quota
  * usage by the end of the calendar day.
  */
-const MIN_CHAT_POLLING_TIME = 5000
+const MIN_CHAT_POLLING_TIME = 4000
 
 export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
   const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI
