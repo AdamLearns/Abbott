@@ -137,7 +137,7 @@ bot account is the same as the streamer account.\n`)
     }
   }
   rl.close()
-  return choice as string
+  return (choice as string).toLowerCase()
 }
 
 async function saveToDatabase(accessToken: AccessToken) {
@@ -156,7 +156,9 @@ async function saveToDatabase(accessToken: AccessToken) {
   const botDatabase = new BotDatabase()
   await botDatabase.saveTwitchToken(accessToken, userId, userName, isBotUser)
 
-  console.log(`Saved token for ${userId} (${userName}) to database.`)
+  console.log(
+    `Saved token for ${userId} (${userName}) to database. isBotUser==${isBotUser}`,
+  )
 
   const botTwitchId = await botDatabase.getPrimaryBotTwitchId()
   if (botTwitchId === null) {
