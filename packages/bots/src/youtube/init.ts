@@ -111,11 +111,12 @@ export async function init(commands: InMemoryCommands): Promise<YouTubeBot> {
   emitter.onYouTubeStreamLive(youTubeStreamWentLive)
   emitter.onYouTubeStreamOffline(youTubeStreamWentOffline)
 
-  await checkIfLive()
+  // No need for YouTube for this, so just never check if we're live
+  // await checkIfLive()
 
-  if (livestreamStatus !== LivestreamStatus.LIVE) {
-    console.log("The YouTube stream is offline.")
-  }
+  // if (livestreamStatus !== LivestreamStatus.LIVE) {
+  //   console.log("The YouTube stream is offline.")
+  // }
 
   return youTubeBot
 }

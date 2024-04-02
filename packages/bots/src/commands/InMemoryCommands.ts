@@ -48,6 +48,9 @@ export class InMemoryCommands {
     await this.addDelQuoteCommand()
     await this.addNumQuotesCommand()
     await this.addGiftPointsCommand()
+    await this.addJoinGameCommand()
+    await this.addStartGameCommand()
+    await this.addGiveGameCommand()
     await this.addAlias("acom", "addcom")
     await this.addAlias("dcom", "delcom")
     await this.addAlias("ecom", "editcom")
@@ -78,6 +81,51 @@ export class InMemoryCommands {
       isPrivileged: true,
       canBeDeleted: false,
     })
+  }
+
+  async addJoinGameCommand() {
+    return this.addCommand({
+      name: "join",
+      handler: this.joinGame,
+      isPrivileged: false,
+      canBeDeleted: false,
+    })
+  }
+
+  async addStartGameCommand() {
+    return this.addCommand({
+      name: "startgame",
+      handler: this.startGame,
+      isPrivileged: true,
+      canBeDeleted: false,
+    })
+  }
+
+  async addGiveGameCommand() {
+    return this.addCommand({
+      name: "give",
+      handler: this.giveGame,
+      isPrivileged: false,
+      canBeDeleted: false,
+    })
+  }
+
+  giveGame = async (params: string[], context: CommandContext) => {
+    await (context.bot instanceof TwitchBot
+      ? context.bot.userGiveGame(params, context)
+      : context.bot.say("This command is only available in Twitch chat."))
+  }
+
+  startGame = async (params: string[], context: CommandContext) => {
+    await (context.bot instanceof TwitchBot
+      ? context.bot.userStartGame(params, context)
+      : context.bot.say("This command is only available in Twitch chat."))
+  }
+
+  joinGame = async (params: string[], context: CommandContext) => {
+    await (context.bot instanceof TwitchBot
+      ? context.bot.userJoinGame(params, context)
+      : context.bot.say("This command is only available in Twitch chat."))
   }
 
   userGiftPoints = async (params: string[], context: CommandContext) => {

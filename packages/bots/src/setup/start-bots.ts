@@ -9,7 +9,7 @@ export async function startBots() {
   await commands.init()
   const twitchBot = await initTwitch(commands)
   const youTubeBot = await initYouTube(commands)
-  await initDiscord()
+  // await initDiscord()
 
   initServer(twitchBot, youTubeBot)
 }

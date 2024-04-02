@@ -1,0 +1,214 @@
+---
+import HtmlLayout from "../layouts/main.astro"
+---
+
+<HtmlLayout pageTitle={"April Fool's Game"}>
+  <div id="waiting">
+    Adam needs to type <span class="text-yellow-400">!startgame</span> for the game
+    to begin.
+  </div>
+  <div id="lobby">
+    <div class="m-2">
+      <div>
+        <span class="text-xl"
+          >Game starts in: <span class="font-bold" id="lobbyTime"></span></span
+        >
+        <div class="ml-4 text-sm text-gray-400" id="lobbyNumPlayers"></div>
+      </div>
+    </div>
+    <div class="my-2 border-2 p-4">
+      <div>Instructions:</div>
+      <ul class="m-2 list-disc">
+        <li>
+          Type <span class="text-yellow-400">!join</span> to join the game. You must
+          do this before the game starts.
+        </li>
+        <li>
+          The person with the most points at the end gets $5
+          (PayPal|Venmo|Amazon gift card), but <em>only</em> if there's a single
+          winner—a tie means that everyone loses. 😈
+        </li>
+        <li>
+          This game only works through Twitch (<span class="text-blue-400"
+            >https://twitch.tv/AdamLearnsLive</span
+          >)
+        </li>
+      </ul>
+    </div>
+    <div>Players:</div>
+    <div id="lobbyPlayers"></div>
+  </div>
+  <div id="game">
+    <div id="gameHasEnded">The game has ended!</div>
+    <div id="gameTimeParent" class="text-xl">
+      Game ends in: <span class="font-bold" id="gameTime"></span>
+    </div>
+    <div id="gameInstructions" class="my-2 border-2 p-4">
+      <div>Instructions:</div>
+      <ul class="m-2 list-disc">
+        <li>
+          Give someone points with <span class="text-yellow-400"
+            >!give NAME AMOUNT</span
+          >
+          <span class="text-gray-400"
+            >(check your current points with just <span class="text-yellow-600"
+              >!give</span
+            ></span
+          >)
+        </li>
+        <li>
+          The person with the most points at the end gets $5
+          (PayPal|Venmo|Amazon gift card), but <em>only</em> if there's a single
+          winner—a tie means that everyone loses. 😈
+        </li>
+      </ul>
+    </div>
+    <div>
+      Players <span class="text-gray-400"
+        >(<span id="gameNumPlayers"></span>)</span
+      >:
+    </div>
+    <div id="gamePlayers"></div>
+  </div>
+</HtmlLayout>
+<style>
+  body {
+    background-color: rgb(15, 23, 42);
+    color: white;
+    margin: 1rem;
+  }
+</style>
+<script>
+  const waitingDiv = document.getElementById("waiting") as HTMLElement
+  const lobbyDiv = document.getElementById("lobby") as HTMLElement
+  const gameDiv = document.getElementById("game") as HTMLElement
+  waitingDiv.hidden = false
+  lobbyDiv.hidden = true
+  gameDiv.hidden = true
+
+  updateGame()
+  setInterval(() => {
+    updateGame()
+  }, 500)
+  async function updateGame() {
+    var opts = {
+      headers: {
+        mode: "no-cors",
+      },
+    }
+    try {
+      const response = await fetch("http://localhost:3001/game", opts)
+      const json = await response.json()
+      processJson(json)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  function processJson(json: any) {
+    if (json.gameLobbyTime === null && json.gameStartTime === null) {
+      waitingDiv.hidden = false
+      lobbyDiv.hidden = true
+      gameDiv.hidden = true
+    } else if (json.gameStartTime !== null) {
+      waitingDiv.hidden = true
+      lobbyDiv.hidden = true
+      gameDiv.hidden = false
+      processJsonForGame(json)
+    } else {
+      waitingDiv.hidden = true
+      lobbyDiv.hidden = false
+      gameDiv.hidden = true
+      processJsonForLobby(json)
+    }
+  }
+  function msToTimerString(ms: number) {
+    ms = Math.max(0, ms)
+    ms /= 1000
+    const min = Math.floor(ms / 60)
+    const sec = Math.floor(ms % 60)
+    return `${min}:${String(sec).padStart(2, "0")}`
+  }
+
+  function processJsonForGame(json: any) {
+    const gameInstructionsDiv = document.getElementById(
+      "gameInstructions"
+    ) as HTMLElement
+    gameInstructionsDiv.hidden = json.hasGameEnded
+    const gameTimeParentDiv = document.getElementById(
+      "gameTimeParent"
+    ) as HTMLElement
+    gameTimeParentDiv.hidden = json.hasGameEnded
+    const gameStatusDiv = document.getElementById("gameHasEnded") as HTMLElement
+    gameStatusDiv.hidden = !json.hasGameEnded
+
+    // Note: I don't clean up the contents of divs after the game ends, so just refresh the page to avoid strange issues.
+    if (!json.hasGameEnded) {
+      const gameTimeDiv = document.getElementById("gameTime") as HTMLElement
+
+      const now = new Date()
+      const diff = now.getTime() - new Date(json.gameStartTime).getTime()
+      const timeRemaining = json.gameTimeInMinutes * 60 * 1000 - diff
+      gameTimeDiv.innerText = `${msToTimerString(timeRemaining)}`
+    }
+
+    const gameNumPlayersDiv = document.getElementById(
+      "gameNumPlayers"
+    ) as HTMLElement
+    const gamePlayersDiv = document.getElementById("gamePlayers") as HTMLElement
+
+    const numPlayers = Object.keys(json.idToName).length
+    gameNumPlayersDiv.innerText = `${numPlayers}`
+
+    // Sort gameScores by descending points
+    const sortedScores = Object.entries(json.gameScores).sort(
+      (a, b) => b[1] - a[1]
+    )
+    const topScore = sortedScores?.[0][1] ?? 0
+    let hasUniqueTopScore = true
+    if (sortedScores.length > 1 && sortedScores[1][1] === topScore) {
+      hasUniqueTopScore = false
+    }
+
+    const players = sortedScores
+      .map(([id, score]: [id: string, score: number]) => {
+        const name = json.idToName[id]
+        let className = ""
+        if (score === topScore && hasUniqueTopScore) {
+          className = "text-green-400"
+        }
+        return `<span class="${className}">${name} <span class="text-gray-400">(${score})</span></span>`
+      })
+      .join(", ")
+    gamePlayersDiv.innerHTML = players
+  }
+  function processJsonForLobby(json: any) {
+    const lobbyTimeDiv = document.getElementById("lobbyTime") as HTMLElement
+    const lobbyNumPlayersDiv = document.getElementById(
+      "lobbyNumPlayers"
+    ) as HTMLElement
+    const lobbyPlayersDiv = document.getElementById(
+      "lobbyPlayers"
+    ) as HTMLElement
+
+    console.log()
+    const now = new Date()
+    const diff = now.getTime() - new Date(json.gameLobbyTime).getTime()
+    const timeRemaining = json.lobbyTimeInMinutes * 60 * 1000 - diff
+    lobbyTimeDiv.innerText = `${msToTimerString(timeRemaining)}`
+    const numPlayers = Object.keys(json.idToName).length
+    const pluralized =
+      numPlayers === 1
+        ? "1 player has joined"
+        : `${numPlayers} players have joined`
+    lobbyNumPlayersDiv.innerText = pluralized
+
+    const players = Object.values(json.idToName)
+      .sort()
+      .map((name: string) => {
+        return `${name}`
+      })
+      .join(", ")
+    lobbyPlayersDiv.innerText = players
+  }
+</script>

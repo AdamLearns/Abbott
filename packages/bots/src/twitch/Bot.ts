@@ -34,6 +34,19 @@ export class Bot extends GenericBot {
   private readonly eventSubListener: EventSubWsListener
   private name = "unset" // the Twitch user name of the bot
   private twitchId = "unset"
+  public gameLobbyTime: Date | null = null
+  public gameStartTime: Date | null = null
+  public hasGameEnded: boolean = false
+  public lobbyTimeInMinutes = 5
+  public gameTimeInMinutes = 5
+  public hasGivenLobbyOneMinWarning = false
+  public hasGivenGameOneMinWarning = false
+
+  // Twitch IDs → scores
+  public gameScores: Map<string, number> = new Map()
+
+  // Twitch IDs → names
+  public idToName: Map<string, string> = new Map()
 
   constructor({
     twitchChannelName,
@@ -298,6 +311,174 @@ get-tokens.ts.`,
     } catch {
       return context.reply("There was a database error modifying points")
     }
+  }
+
+  getRemainingLobbyTime = () => {
+    if (this.gameLobbyTime === null) {
+      return 99_999_999
+    }
+    const now = new Date()
+    const diff = now.getTime() - this.gameLobbyTime.getTime()
+    return this.lobbyTimeInMinutes * 60 * 1000 - diff
+  }
+
+  userStartGame = async (params: string[], context: CommandContext) => {
+    const chatMessage: ChatMessage = context.chatMessage as ChatMessage
+    // Only I can start the game
+    if (chatMessage.userInfo.userId !== "47098493") {
+      return
+    }
+    if (this.gameLobbyTime !== null) {
+      return context.reply(`The game was already started!`)
+    }
+    this.gameLobbyTime = new Date()
+    setInterval(this.updateGame, 500)
+    return context.reply(
+      `The game will start in ${this.lobbyTimeInMinutes} minutes! 🎉 Type !join to join.`,
+    )
+  }
+
+  updateGame = async () => {
+    if (this.hasGameEnded) {
+      return
+    }
+    if (this.gameStartTime !== null) {
+      const now = new Date()
+      const diff = now.getTime() - this.gameStartTime.getTime()
+
+      if (diff >= this.gameTimeInMinutes * 60 * 1000) {
+        this.hasGameEnded = true
+        await this.say("The game has ended! 🎉")
+      }
+      if (
+        diff >= (this.gameTimeInMinutes - 1) * 60 * 1000 &&
+        !this.hasGivenGameOneMinWarning
+      ) {
+        this.hasGivenGameOneMinWarning = true
+        await this.say("There's only one minute left! GET THOSE POINTS!")
+      }
+      return
+    }
+
+    if (this.gameLobbyTime !== null) {
+      const now = new Date()
+      const diff = now.getTime() - this.gameLobbyTime.getTime()
+      if (diff >= this.lobbyTimeInMinutes * 60 * 1000) {
+        this.gameStartTime = new Date()
+        await this.say("The game has BEGUN! 🎉")
+      }
+
+      if (
+        diff >= (this.lobbyTimeInMinutes - 1) * 60 * 1000 &&
+        !this.hasGivenLobbyOneMinWarning
+      ) {
+        this.hasGivenLobbyOneMinWarning = true
+        await this.say(
+          "There's only one minute left until the game begins! Make sure to type !join",
+        )
+      }
+    }
+  }
+
+  userGiveGame = async (params: string[], context: CommandContext) => {
+    const chatMessage: ChatMessage = context.chatMessage as ChatMessage
+    const userId = chatMessage.userInfo.userId
+    const displayName = chatMessage.userInfo.displayName
+
+    // Make sure the game has started
+    if (this.gameStartTime === null) {
+      return
+    }
+
+    // Make sure the game hasn't ended
+    if (this.hasGameEnded) {
+      return context.reply(`The game has already ended.`)
+    }
+
+    // Make sure the user has joined the game
+    if (!this.gameScores.has(userId)) {
+      return context.reply(
+        `${displayName} never joined the game and can't give points.`,
+      )
+    }
+
+    // Make sure the user has the right amount of arguments
+    if (params.length !== 2) {
+      return context.reply(
+        `Usage: ${commandPrefix}give USER_NAME NUM_POINTS. ${displayName} has ${this.gameScores.get(
+          userId,
+        )} point(s) to give.`,
+      )
+    }
+
+    const userName = params[0] as string
+
+    // Look up userName in idToName
+    const targetUserId = [...this.idToName.entries()].find(
+      ([, name]) => name.toLowerCase() === userName.toLowerCase(),
+    )?.[0]
+    if (targetUserId === undefined || !this.gameScores.has(targetUserId)) {
+      return context.reply(
+        `Could not find a user by the name "${userName}". Either they're not in the game or that user doesn't exist.`,
+      )
+    }
+
+    if (userId === targetUserId) {
+      return context.reply(`You can't give points to yourself! 😡`)
+    }
+
+    const targetDisplayName = this.idToName.get(targetUserId) as string
+
+    const pointsString = params[1] as string
+    const numPoints = Number.parseInt(pointsString, 10)
+    if (Number.isNaN(numPoints)) {
+      return context.reply(
+        `"${pointsString}" is not a valid number of points! 😡`,
+      )
+    }
+    if (numPoints <= 0) {
+      return context.reply(`You must specify a positive number of points! 😡`)
+    }
+    const sourcePoints = this.gameScores.get(userId) as number
+    if (numPoints > sourcePoints) {
+      return context.reply(`You only have ${sourcePoints} point(s) to give! 😡`)
+    }
+
+    const targetPoints = this.gameScores.get(targetUserId) as number
+
+    const newSourcePoints = sourcePoints - numPoints
+    const newTargetPoints = targetPoints + numPoints
+
+    this.gameScores.set(userId, newSourcePoints)
+    this.gameScores.set(targetUserId, newTargetPoints)
+    return context.reply(
+      `${displayName} gave ${numPoints} point(s) to ${targetDisplayName}. ${displayName} has ${newSourcePoints} point(s) left and ${targetDisplayName} has ${newTargetPoints} point(s).`,
+    )
+  }
+
+  userJoinGame = async (params: string[], context: CommandContext) => {
+    if (this.gameLobbyTime === null) {
+      return
+    }
+    const chatMessage: ChatMessage = context.chatMessage as ChatMessage
+    this.idToName.set(
+      chatMessage.userInfo.userId,
+      chatMessage.userInfo.displayName,
+    )
+    if (this.gameScores.has(chatMessage.userInfo.userId)) {
+      return context.reply(
+        `${chatMessage.userInfo.displayName} already joined the game. Sit tight!`,
+      )
+    }
+    if (this.gameStartTime !== null) {
+      return context.reply(`You can no longer join. BibleThump`)
+    }
+
+    this.gameScores.set(chatMessage.userInfo.userId, 5)
+
+    return context.reply(
+      `${chatMessage.userInfo.displayName} has joined the game!`,
+    )
   }
 
   sayTextCommandResponse = async (_commandName: string, text: string) => {
