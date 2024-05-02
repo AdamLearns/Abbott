@@ -16,6 +16,7 @@ export abstract class GenericBot {
    * because YouTube only allows 200 characters in a single message, but text
    * commands all have their own URLs, so when we know we've exceeded 200
    * characters, we can just link to the URL.
+   * @param commandName The particular alias that the user typed.
    */
   abstract sayTextCommandResponse: (
     commandName: string,

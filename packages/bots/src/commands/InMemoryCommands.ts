@@ -16,6 +16,7 @@ import { Bot as TwitchBot } from "../twitch/Bot.js"
 import { type CommandHandler } from "./Command.js"
 import { Command } from "./Command.js"
 import { type CommandContext } from "./CommandContext.js"
+import type { CommandData } from "./CommandData.js"
 
 export class InMemoryCommands {
   // Keys: any known command name, including an alias. This means that "lang" and
@@ -80,7 +81,11 @@ export class InMemoryCommands {
     })
   }
 
-  userGiftPoints = async (params: string[], context: CommandContext) => {
+  userGiftPoints = async (
+    commandData: CommandData,
+    context: CommandContext,
+  ) => {
+    const { params } = commandData
     await (context.bot instanceof TwitchBot
       ? context.bot.userGiftPoints(params, context)
       : context.bot.say("This command is only available in Twitch chat."))
@@ -107,7 +112,11 @@ export class InMemoryCommands {
     return this.addBuiltInCommand("unaliascom", this.userUnaliasCommand)
   }
 
-  userAliasCommand = async (params: string[], context: CommandContext) => {
+  userAliasCommand = async (
+    commandData: CommandData,
+    context: CommandContext,
+  ) => {
+    const { params } = commandData
     if (params.length < 2) {
       await context.reply(
         `Usage: ${commandPrefix}aliascom COMMAND_ALIAS COMMAND_TARGET (e.g. "${commandPrefix}aliascom lang language", "lang" will point to the "language" command)`,
@@ -178,7 +187,7 @@ export class InMemoryCommands {
       const isPrivileged = row.is_privileged
       const canBeDeleted = row.can_be_deleted
       const textResponse = row.response
-      const handler = this.makeTextCommandHandler(name, textResponse)
+      const handler = this.makeTextCommandHandler(textResponse)
 
       const commandWithId = this.getByUuid(id)
 
@@ -209,24 +218,23 @@ export class InMemoryCommands {
     })
   }
 
-  private makeTextCommandHandler(
-    commandName: string,
-    response: string,
-  ): CommandHandler {
-    return async (params: string[], context: CommandContext) => {
+  private makeTextCommandHandler(response: string): CommandHandler {
+    return async (commandData: CommandData, context: CommandContext) => {
+      const { params, name } = commandData
       let nameTag = ""
       if (params[0]?.startsWith("@")) {
         nameTag = `${params[0]} `
       }
 
-      await context.bot.sayTextCommandResponse(commandName, nameTag + response)
+      await context.bot.sayTextCommandResponse(name, nameTag + response)
     }
   }
 
   userAddCommand = async (
-    params: string[],
+    commandData: CommandData,
     context: CommandContext,
   ): Promise<void> => {
+    const { params } = commandData
     if (params.length < 2) {
       await context.reply(`Usage: ${commandPrefix}addcom COMMAND_NAME RESPONSE`)
       return
@@ -276,7 +284,7 @@ export class InMemoryCommands {
       if (textResponse === undefined) {
         throw new Error("Must provide either a handler or a text response")
       }
-      handler = this.makeTextCommandHandler(name, textResponse)
+      handler = this.makeTextCommandHandler(textResponse)
     }
 
     let id: string | undefined
@@ -315,7 +323,11 @@ export class InMemoryCommands {
   async addDelComCommand() {
     return this.addBuiltInCommand("delcom", this.userDeleteCommand)
   }
-  userDeleteCommand = async (params: string[], context: CommandContext) => {
+  userDeleteCommand = async (
+    commandData: CommandData,
+    context: CommandContext,
+  ) => {
+    const { params } = commandData
     if (params.length === 0) {
       await context.reply(`Usage: ${commandPrefix}delcom COMMAND_NAME`)
       return
@@ -364,7 +376,8 @@ export class InMemoryCommands {
     return this.addBuiltInCommand("addquote", this.userAddQuote)
   }
 
-  userAddQuote = async (params: string[], context: CommandContext) => {
+  userAddQuote = async (commandData: CommandData, context: CommandContext) => {
+    const { params } = commandData
     if (params.length < 2) {
       await context.reply(
         `Usage: ${commandPrefix}addquote AUTHOR QUOTE - the author cannot have spaces and the quote does not need quotation marks`,
@@ -383,7 +396,10 @@ export class InMemoryCommands {
     }
   }
 
-  userGetNumQuotes = async (_params: string[], context: CommandContext) => {
+  userGetNumQuotes = async (
+    _commandData: CommandData,
+    context: CommandContext,
+  ) => {
     try {
       const numQuotes = await this.storageLayer.getNumQuotes()
       return context.reply(
@@ -396,7 +412,8 @@ export class InMemoryCommands {
     }
   }
 
-  userDelQuote = async (params: string[], context: CommandContext) => {
+  userDelQuote = async (commandData: CommandData, context: CommandContext) => {
+    const { params } = commandData
     if (params.length === 0) {
       await context.reply(`Usage: ${commandPrefix}delquote ID`)
       return
@@ -427,7 +444,8 @@ export class InMemoryCommands {
     return this.addBuiltInCommand("delquote", this.userDelQuote)
   }
 
-  userGetQuote = async (params: string[], context: CommandContext) => {
+  userGetQuote = async (commandData: CommandData, context: CommandContext) => {
+    const { params } = commandData
     const id = params.length > 0 ? (params[0] as string) : undefined
 
     let quote: GetQuote | undefined
@@ -466,7 +484,11 @@ export class InMemoryCommands {
     })
   }
 
-  userEditCommand = async (params: string[], context: CommandContext) => {
+  userEditCommand = async (
+    commandData: CommandData,
+    context: CommandContext,
+  ) => {
+    const { params } = commandData
     if (params.length < 2) {
       await context.reply(
         `Usage: ${commandPrefix}editcom COMMAND_NAME RESPONSE`,
@@ -496,7 +518,7 @@ export class InMemoryCommands {
       return context.reply("There was a database error editing that command.")
     }
 
-    const handler = this.makeTextCommandHandler(commandName, response)
+    const handler = this.makeTextCommandHandler(response)
 
     command.handler = handler
 
@@ -507,7 +529,11 @@ export class InMemoryCommands {
     return this.addBuiltInCommand("editcom", this.userEditCommand)
   }
 
-  userUnaliasCommand = async (params: string[], context: CommandContext) => {
+  userUnaliasCommand = async (
+    commandData: CommandData,
+    context: CommandContext,
+  ) => {
+    const { params } = commandData
     if (params.length === 0) {
       await context.reply(
         `Usage: ${commandPrefix}unaliascom COMMAND_ALIAS. Note that this can only remove a NAME of a command, not the command itself.`,

@@ -1,9 +1,10 @@
 import { UUID } from "abbott-database"
 
 import { CommandContext } from "./CommandContext.js"
+import type { CommandData } from "./CommandData.js"
 
 export type CommandHandler = (
-  params: string[],
+  commandData: CommandData,
   context: CommandContext,
 ) => void | Promise<void>
 
@@ -58,7 +59,10 @@ export class Command {
     return this.#id
   }
 
-  execute(params: string[], context: CommandContext): void | Promise<void> {
-    return this.#handler(params, context)
+  execute(
+    commandData: CommandData,
+    context: CommandContext,
+  ): void | Promise<void> {
+    return this.#handler(commandData, context)
   }
 }

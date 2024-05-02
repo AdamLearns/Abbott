@@ -125,7 +125,7 @@ export class YouTubeBot extends GenericBot {
 
     // TODO: make sure to set this again
     // command.lastExecutionTimeOnTwitch = Date.now()
-    await command.execute(commandData.params, context)
+    await command.execute(commandData, context)
   }
 
   private isCommandReady(command: Command): boolean {

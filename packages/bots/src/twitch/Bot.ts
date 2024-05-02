@@ -357,7 +357,7 @@ get-tokens.ts.`,
 
     // TODO: make sure to set this again
     // command.lastExecutionTimeOnTwitch = Date.now()
-    await command.execute(commandData.params, context)
+    await command.execute(commandData, context)
   }
 
   private canUserExecuteCommand(user: ChatUser, command: Command): boolean {
