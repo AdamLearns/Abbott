@@ -1,14 +1,22 @@
 import { BotDatabase } from "abbott-database"
 import {
-  SlashCommandBuilder,
   type ChatInputCommandInteraction,
   inlineCode,
   blockQuote,
   escapeMarkdown,
   hyperlink,
+  SlashCommandBuilder,
 } from "discord.js"
 
-export const data = new SlashCommandBuilder()
+// Without this "any", I get this error:
+//
+// The inferred type of 'data' cannot be named without a reference to
+// '.pnpm/@discordjs+builders@1.8.2/node_modules/@discordjs/builders'. This is
+// likely not portable. A type annotation is necessary.
+//
+// I don't feel like figuring this out; I just wanted to update Discord.js to
+// fix a bug with links being interpreted as markdown. 😢
+export const data: any = new SlashCommandBuilder()
   .setName("twitchcommand")
   .setDescription(
     "Returns the response of a command that you would normally use on Twitch.",
