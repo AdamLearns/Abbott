@@ -17,11 +17,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
 - Get a Twitch access token: `NODE_ENV=development pnpm tsx packages/bots/src/get-tokens.ts`
   - Follow the instructions that it outputs
 
-### Running Docker images locally
-
-Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:web`.
-
-## Typical development flow
+### Typical development flow
 
 - Start everything up:
   - Go to root
@@ -37,6 +33,10 @@ Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:w
   - `cd packages/youtube-api`
   - `pnpm run watch`
 - Go to the web interface or the test channel to try things out
+
+### Running Docker images locally
+
+Just run the `pnpm` script from the root `package.json`, e.g. `pnpm run docker:web`.
 
 ## Linting/correctness
 
