@@ -524,15 +524,20 @@ export class BotDatabase implements BotStorageLayer {
     const response = await dbOrTrx
       .selectFrom("points")
       .innerJoin("users", "points.user_id", "users.id")
-      .select([
+      .select(({ selectFrom }) => [
         "users.id",
-        sql<number>`DENSE_RANK() OVER (ORDER BY num_points DESC)`.as("rank"),
+        selectFrom("points")
+          .select(
+            sql<number>`DENSE_RANK() OVER (ORDER BY num_points DESC)`.as(
+              "rank",
+            ),
+          )
+          .as("rank"),
       ])
-      .orderBy("rank", "asc")
-      .where("points.num_points", ">", 0)
-      .execute()
+      .where("users.id", "=", uuid)
+      .executeTakeFirst()
 
-    return response.find(({ id }) => id === uuid)?.rank ?? -1
+    return response?.rank ?? -1
   }
 
   async modifyPoints(
