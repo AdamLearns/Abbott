@@ -151,7 +151,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Make any changes
 - Push to GitHub to get it to build new Docker images
 - Make sure the build actually works through GitHub actions
-- Run `ansible-playbook` from my main computer
+- Watchtower on the mini PC should automatically detect and pull the new images. If it doesn't, run `ansible-playbook` from my main computer
 
 ## Back-ups
 
