@@ -25,7 +25,10 @@ function ensureEnvVars() {
 export async function init() {
   ensureEnvVars()
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds],
+    enforceNonce: true,
+  })
   const clientWithCommands = client as ClientWithCommands
 
   clientWithCommands.Commands = await readAllCommands()
