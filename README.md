@@ -116,6 +116,10 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Migrate the database (I only did this once):
   - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
 
+## Back-ups
+
+They're taken automatically at start-up if there was a migration. If there isn't a migration, you can take one manually with `pg_dump -d postgres://postgres:bar@localhost/foo > ./backup.sql`.
+
 ### How to run `get-tokens` with a test database from my Mac
 
 - Note: at the time I'm writing these instructions, it's possible that there'll be a collision on port 3000. If that's the case, then update `get-tokens` and probably this README.
