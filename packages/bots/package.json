@@ -14,26 +14,26 @@
 	},
 	"dependencies": {
 		"@d-fischer/typed-event-emitter": "^3.3.3",
-		"@hono/node-server": "^1.7.0",
-		"@twurple/api": "^7.1.0",
-		"@twurple/auth": "^7.1.0",
-		"@twurple/chat": "^7.1.0",
-		"@twurple/eventsub-ws": "^7.1.0",
+		"@hono/node-server": "^1.13.7",
+		"@twurple/api": "^7.2.1",
+		"@twurple/auth": "^7.2.1",
+		"@twurple/chat": "^7.2.1",
+		"@twurple/eventsub-ws": "^7.2.1",
 		"abbott-database": "workspace:*",
-		"date-fns": "^3.0.6",
-		"discord.js": "^14.15.3",
-		"dotenv-flow": "^4.0.1",
+		"date-fns": "^3.6.0",
+		"discord.js": "^14.17.3",
+		"dotenv-flow": "^4.1.0",
 		"fuse.js": "^7.0.0",
-		"hono": "^4.0.0",
-		"tsx": "^4.6.2",
-		"typescript": "^5.3.2",
+		"hono": "^4.6.16",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.3",
 		"youtube-api": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/node": "^18.19.2",
-		"@vitest/coverage-v8": "^1.0.4",
-		"@vitest/runner": "^1.2.1",
+		"@types/node": "^18.19.70",
+		"@vitest/coverage-v8": "^1.6.0",
+		"@vitest/runner": "^1.6.0",
 		"ircv3": "^0.32.4",
-		"vitest": "^1.0.4"
+		"vitest": "^1.6.0"
 	}
 }
