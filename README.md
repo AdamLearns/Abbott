@@ -113,12 +113,8 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
       - Follow the instructions on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
       - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
     - `NODE_ENV=production node get-youtube-tokens`
-- Migrate the database (I only did this once):
+- Migrate the database from my main computer (I only did this once):
   - Just run `pg_dump` on my main computer and then `psql -h MINI_PC_IP` to restore it directly to the mini PC.
-
-## Back-ups
-
-They're taken automatically at start-up if there was a migration. If there isn't a migration, you can take one manually with `pg_dump -d postgres://postgres:bar@localhost/foo > ./backup.sql`.
 
 ### How to run `get-tokens` with a test database from my Mac
 
@@ -149,6 +145,17 @@ They're taken automatically at start-up if there was a migration. If there isn't
     - "Embed Links"
     - "Mention everyone, here, and All Roles"
   - Note that opting in to the notification role is something that I handle through Discord's onboarding.
+
+## Deploying
+
+- Make any changes
+- Push to GitHub to get it to build new Docker images
+- Make sure the build actually works through GitHub actions
+- Run `ansible-playbook` from my main computer
+
+## Back-ups
+
+They're taken automatically at start-up if there was a migration. If there isn't a migration, you can take one manually with `pg_dump -d postgres://postgres:bar@localhost/foo > ./backup.sql`.
 
 ## Troubleshooting
 
