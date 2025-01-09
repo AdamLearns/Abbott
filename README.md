@@ -109,7 +109,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
     - `apt install -y vim`
     - `vim .env.production.local`
       - Change `@db` in the database connection string to `@127.0.0.1`
-    - `NODE_ENV=produc'tion node get-tokens`
+    - `NODE_ENV=production node get-tokens`
       - Follow the instructions on the main computer. When you get redirected to `localhost:3000`, it'll go through the SSH tunnel onto the mini PC.
       - Make sure to run `get-tokens` twice: once to save the bot's token, and once to save the streamer's token.
     - `NODE_ENV=production node get-youtube-tokens`
