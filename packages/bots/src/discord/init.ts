@@ -3,6 +3,7 @@ import {
   Events,
   GatewayIntentBits,
   roleMention,
+  TextChannel,
   type Interaction,
 } from "discord.js"
 
@@ -97,7 +98,7 @@ function onStreamOnline(
       if (title !== null) {
         message += `\n\nTitle: ${title}`
       }
-      await channel.send(message)
+      await (channel as TextChannel).send(message)
     }
   }
 }
