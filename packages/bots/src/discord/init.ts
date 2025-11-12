@@ -31,13 +31,13 @@ export async function init() {
     intents: [
       GatewayIntentBits.Guilds,
 
-      // GuildMessages is to be able to receive messages. Without
+      // GuildMessages is to be able to receive/delete messages. Without
       // MessageContent, we can't read the contents though.
       GatewayIntentBits.GuildMessages,
 
-      // For banning users and deleting messages. This intent also requires you
-      // to manifest the "Server Members Intent" on
-      // https://discord.com/developers/applications
+      // For banning users. This intent also requires you to manifest the
+      // "Server Members Intent" on https://discord.com/developers/applications.
+      // Your bot also needs a role that lets them ban users.
       GatewayIntentBits.GuildMembers,
     ],
     enforceNonce: true,
@@ -67,14 +67,6 @@ export async function init() {
 
 function onMessageCreate() {
   return async (message: Message) => {
-    if (message.channel.isTextBased()) {
-      console.log(
-        `Message received in #${(message.channel as TextChannel).name} from ${
-          message.author.tag
-        }`,
-      )
-    }
-
     if (
       message.channel.isTextBased() &&
       (message.channel as TextChannel).name ==
@@ -89,6 +81,8 @@ function onMessageCreate() {
         reason: "Posted in #posting-here-will-get-you-banned",
         deleteMessageSeconds: 604_800, // 7 days
       })
+
+      console.log(`Successfully banned user ${message.author.tag}`)
     }
   }
 }
