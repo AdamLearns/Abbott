@@ -8,5 +8,10 @@
       "abbott-database": ["../database"]
     }
   },
+  "exclude": [
+    "**/astro.config.mjs",
+    "**/prettier.config.js",
+    "**/tailwind.config.cjs"
+  ],
   "references": [{ "path": "../database" }]
 }
