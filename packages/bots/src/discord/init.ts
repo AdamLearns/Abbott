@@ -28,7 +28,12 @@ export async function init() {
   ensureEnvVars()
 
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+      GatewayIntentBits.Guilds,
+      // GuildMessages is to be able to receive messages. Without
+      // MessageContent, we can't read the contents though.
+      GatewayIntentBits.GuildMessages,
+    ],
     enforceNonce: true,
   })
   const clientWithCommands = client as ClientWithCommands
@@ -60,7 +65,7 @@ function onMessageCreate() {
       console.log(
         `Message received in #${(message.channel as TextChannel).name} from ${
           message.author.tag
-        }: ${message.content}`,
+        }`,
       )
     }
 
