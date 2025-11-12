@@ -14,8 +14,12 @@ WORKDIR /app/packages/web
 RUN pnpm build
 
 WORKDIR /app
-RUN pnpm --filter "abbott-web" deploy deploy/web
-RUN pnpm --filter "abbott-database" deploy deploy/database
+
+# This is apparently needed by pnpm for a dependency of @astrojs/check
+RUN apt-get update && apt-get install -y git
+
+RUN pnpm --legacy --filter "abbott-web" deploy deploy/web
+RUN pnpm --legacy --filter "abbott-database" deploy deploy/database
 
 FROM base AS build
 COPY --from=install-deps /app/deploy/ /app/deploy
