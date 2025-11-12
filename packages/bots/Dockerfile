@@ -14,9 +14,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 WORKDIR /app/packages/bots
 RUN pnpm build
 WORKDIR /app
-RUN pnpm --filter "abbott-bots" deploy deploy/bots
-RUN pnpm --filter "abbott-database" deploy deploy/database
-RUN pnpm --filter "youtube-api" deploy deploy/youtube-api
+
+# This is apparently needed by pnpm for a dependency of @astrojs/check
+RUN apt-get update && apt-get install -y git
+
+RUN pnpm --legacy --filter "abbott-bots" deploy deploy/bots
+RUN pnpm --legacy --filter "abbott-database" deploy deploy/database
+RUN pnpm --legacy --filter "youtube-api" deploy deploy/youtube-api
 
 FROM base AS build
 COPY --from=install-deps /app/deploy/ /app/deploy
