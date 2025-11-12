@@ -1,4 +1,5 @@
-import baseConfig from "../../prettier.config.js"
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import baseConfig from "../../../prettier.config.js"
 
 /** @type {import("prettier").Config} */
 const config = {
