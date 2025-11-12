@@ -56,11 +56,22 @@ export async function init() {
 
 function onMessageCreate() {
   return async (message: Message) => {
+    if (message.channel.isTextBased()) {
+      console.log(
+        `Message received in #${(message.channel as TextChannel).name} from ${
+          message.author.tag
+        }: ${message.content}`,
+      )
+    }
+
     if (
       message.channel.isTextBased() &&
       (message.channel as TextChannel).name ==
         "posting-here-will-get-you-banned"
     ) {
+      console.log(
+        `Banning user ${message.author.tag} for posting in #posting-here-will-get-you-banned`,
+      )
       await message.delete()
 
       await message.member?.ban({
