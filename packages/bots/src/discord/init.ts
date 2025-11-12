@@ -2,6 +2,7 @@ import {
   Client,
   Events,
   GatewayIntentBits,
+  Message,
   roleMention,
   TextChannel,
   type Interaction,
@@ -43,12 +44,31 @@ export async function init() {
     onStreamOnline(announcementsChannelId, client, streamAnnouncementsRoleId),
   )
 
+  clientWithCommands.on(Events.MessageCreate, onMessageCreate())
+
   clientWithCommands.on(
     Events.InteractionCreate,
     onInteraction(clientWithCommands),
   )
 
   await clientWithCommands.login(process.env.DISCORD_TOKEN)
+}
+
+function onMessageCreate() {
+  return async (message: Message) => {
+    if (
+      message.channel.isTextBased() &&
+      (message.channel as TextChannel).name ==
+        "posting-here-will-get-you-banned"
+    ) {
+      await message.delete()
+
+      await message.member?.ban({
+        reason: "Posted in #posting-here-will-get-you-banned",
+        deleteMessageSeconds: 604_800, // 7 days
+      })
+    }
+  }
 }
 
 function onInteraction(clientWithCommands: ClientWithCommands) {
