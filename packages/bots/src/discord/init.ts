@@ -30,9 +30,15 @@ export async function init() {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
+
       // GuildMessages is to be able to receive messages. Without
       // MessageContent, we can't read the contents though.
       GatewayIntentBits.GuildMessages,
+
+      // For banning users and deleting messages. This intent also requires you
+      // to manifest the "Server Members Intent" on
+      // https://discord.com/developers/applications
+      GatewayIntentBits.GuildMembers,
     ],
     enforceNonce: true,
   })
