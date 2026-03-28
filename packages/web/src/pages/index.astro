@@ -299,7 +299,7 @@ const commands: TextCommand[] = dbCommands.map((command) => {
         this.makeDefaultResults()
         return
       }
-      history.replaceState({}, "", "?query=" + query)
+      history.replaceState({}, "", "?query=" + encodeURIComponent(query))
 
       const fuse = new Fuse(this.commands, {
         keys: ["name", "response"],

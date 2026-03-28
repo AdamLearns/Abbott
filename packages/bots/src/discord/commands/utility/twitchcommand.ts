@@ -44,7 +44,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         trimmedValue,
       )} not found. Check ${hyperlink(
         "the command site",
-        `https://a.bot.land/?query=${trimmedValue}`,
+        `https://a.bot.land/?query=${encodeURIComponent(trimmedValue)}`,
       )} to see if there are similar commands.`,
       ephemeral: true,
     })
