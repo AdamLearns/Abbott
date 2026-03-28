@@ -151,7 +151,10 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Make any changes
 - Push to GitHub to get it to build new Docker images
 - Make sure the build actually works through GitHub actions
-- Watchtower on the mini PC should automatically detect and pull the new images. If it doesn't, run `ansible-playbook` from my main computer
+- Restart Docker images on the mini PC now that I'm no longer using Watchtower
+  - `docker pull ghcr.io/adamlearns/abbott-bots:latest`
+  - `docker pull ghcr.io/adamlearns/abbott-web:latest`
+  - Restart the running containers or just run Ansible (see the "Ansible" section in this file)
 
 ## Back-ups
 
