@@ -32,7 +32,7 @@ This code is publicly viewable, but it isn't exactly "open-source":
   - Go to root
   - `cd packages/youtube-api`
   - `pnpm run watch`
-- Go to the web interface or the test channel to try things out
+- Go to the web interface or the test Twitch channel to try things out
 
 ### Running Docker images locally
 
