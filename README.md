@@ -94,6 +94,7 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 ## Post-Ansible steps
 
 - Set up the `.env` file. It may help to start with a local one: `scp .env.development.local adam@minipc:code/Abbott/`
+  - Note: there are .env files in both the "web" and "bots" packages, and they end up on the mini PC as something like `./packages/bots/.env.production.local`.
   - Set `DATABASE_BACKUP_LOCATION=/database_backups` in the `.env` file since that's what Docker expects.
   - Make sure `~/database_backups` exists on the host.
 - Set up tokens. At the time of writing, the mini PC doesn't have Node installed directly, so we use the Docker images we build, which have Node AND the requirements to connect to the database:
