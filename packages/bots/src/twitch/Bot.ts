@@ -101,8 +101,6 @@ export class Bot extends GenericBot {
       `User ID of ${this.twitchChannelName}: ${user.id}. Setting up a listener.`,
     )
 
-    this.eventSubListener.start()
-
     this.eventSubListener.onStreamOnline(user.id, async (event) => {
       const stream = await event.getStream()
       const title = stream?.title ?? null
@@ -130,6 +128,8 @@ export class Bot extends GenericBot {
         this.eventSubListener.start()
       },
     )
+
+    this.eventSubListener.start()
   }
 
   destroy() {
