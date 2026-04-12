@@ -20,6 +20,9 @@ import { emitter } from "../events/emitter.js"
 
 // (in milliseconds)
 const GLOBAL_COMMAND_COOLDOWN = 4000
+const INITIAL_RECONNECT_DELAY = 1000
+const MAX_RECONNECT_DELAY = 60_000
+const MAX_RECONNECT_ATTEMPTS = 10
 
 type MakeApiClient = (authProvider: RefreshingAuthProvider) => ApiClient
 type MakeChatClient = (authProvider: RefreshingAuthProvider) => ChatClient
@@ -34,6 +37,8 @@ export class Bot extends GenericBot {
   private readonly eventSubListener: EventSubWsListener
   private name = "unset" // the Twitch user name of the bot
   private twitchId = "unset"
+  private reconnectAttempts = 0
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor({
     twitchChannelName,
@@ -113,6 +118,7 @@ export class Bot extends GenericBot {
         // This happens every so often without an explicit disconnect being
         // called. It just indicates that the disconnect happened cleanly.
         if (error === undefined) {
+          this.reconnectAttempts = 0
           return
         }
 
@@ -122,10 +128,33 @@ export class Bot extends GenericBot {
           )}. Error:`,
           error,
         )
-        console.log(
-          `Attempting to reconnect the web-socket listener for ${userId}`,
+
+        if (this.reconnectTimer !== null) {
+          console.log("Reconnect already scheduled, skipping duplicate attempt")
+          return
+        }
+
+        this.reconnectAttempts++
+
+        if (this.reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+          console.error(
+            `Exceeded ${MAX_RECONNECT_ATTEMPTS} reconnect attempts. Exiting so the container can restart.`,
+          )
+          process.exit(1)
+        }
+
+        const delay = Math.min(
+          INITIAL_RECONNECT_DELAY * 2 ** (this.reconnectAttempts - 1),
+          MAX_RECONNECT_DELAY,
         )
-        this.eventSubListener.start()
+        console.log(
+          `Reconnect attempt ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} for ${userId} in ${delay}ms`,
+        )
+
+        this.reconnectTimer = setTimeout(() => {
+          this.reconnectTimer = null
+          this.eventSubListener.start()
+        }, delay)
       },
     )
 
@@ -134,6 +163,10 @@ export class Bot extends GenericBot {
 
   destroy() {
     console.log("Stopping the web-socket listener")
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
     this.eventSubListener.stop()
   }
 
