@@ -1,4 +1,4 @@
-FROM node:18.17.0-slim AS base
+FROM node:20-slim AS base
 
 WORKDIR /app
 ENV PNPM_HOME="/pnpm"
@@ -27,7 +27,7 @@ COPY --from=install-deps /app/deploy/ /app/deploy
 WORKDIR /app/deploy/web
 RUN pnpm run build
 
-FROM node:18.17.0-slim AS runtime
+FROM node:20-slim AS runtime
 COPY --from=install-deps /app/deploy/web/package.json /app/deploy/package.json
 COPY --from=install-deps /app/deploy/web/node_modules /app/deploy/node_modules
 COPY --from=build /app/deploy/web/dist /app/deploy/

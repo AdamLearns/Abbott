@@ -88,7 +88,8 @@ I had to install the `ircv3` package specifically for one issue: `ChatMessage` h
 - Run the playbook:
   - Modify `inventory.ini` to contain the IP address of the target (e.g. a mini PC).
   - Change to the right directory: `cd ansible`
-  - Run: `ansible-playbook -i inventory.ini playbook.yaml -K`
+  - Run: `
+`
     - It will prompt you for the "BECOME" password. This is the password of the user that you're SSHing as.
 
 ## Post-Ansible steps

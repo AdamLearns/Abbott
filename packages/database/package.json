@@ -27,7 +27,7 @@
     "uuidv7": "^0.6.3"
   },
   "devDependencies": {
-    "@twurple/auth": "^7.0.7",
+    "@twurple/auth": "^8.0.0",
     "@types/lodash": "^4.14.202",
     "@types/pg": "^8.10.9",
     "@vitest/coverage-v8": "^1.0.4",

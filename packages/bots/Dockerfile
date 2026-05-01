@@ -1,4 +1,4 @@
-FROM node:18.17.0-slim AS base
+FROM node:20-slim AS base
 
 WORKDIR /app
 ENV PNPM_HOME="/pnpm"
@@ -25,7 +25,7 @@ RUN pnpm --legacy --filter "youtube-api" deploy deploy/youtube-api
 FROM base AS build
 COPY --from=install-deps /app/deploy/ /app/deploy
 
-FROM node:18.17.0-slim
+FROM node:20-slim
 COPY --from=install-deps /app/deploy/bots/package.json /app/deploy/package.json
 COPY --from=install-deps /app/deploy/bots/node_modules /app/deploy/node_modules
 COPY --from=build /app/deploy/bots/dist /app/deploy/dist
